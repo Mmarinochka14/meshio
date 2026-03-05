@@ -1,0 +1,148 @@
+.categories-section {
+  width: 100%;
+  margin-top: -2.0833vw; /* -40px, блок немного заходит на hero */
+  position: relative;
+  z-index: 2;
+}
+
+.categories-section__container {
+  width: 75vw; /* 1440px */
+  margin: 0 auto;
+  padding: 2.0833vw; /* 40px */
+  border-radius: 1.6667vw; /* 32px */
+  background: var(--color-grey-dark);
+}
+
+.categories-section__title {
+  color: var(--color-white);
+  margin-bottom: 1.6667vw; /* 32px */
+}
+
+.categories-section__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.8333vw; /* 16px */
+}
+
+.categories-section__card {
+  position: relative;
+  display: block;
+  min-height: 12.7083vw;
+  border-radius: 0.8333vw;
+  overflow: hidden;
+  background: var(--color-purple-dark);
+  transition:
+    transform 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.categories-section__card:hover {
+  transform: translateY(-0.1563vw); /* 3px */
+}
+
+.categories-section__card--large {
+  grid-column: span 3;
+  min-height: 19.4792vw; /* 374px */
+}
+
+.categories-section__card:not(.categories-section__card--large) {
+  grid-column: span 2;
+}
+
+.categories-section__card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+.categories-section__card-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 1.875vw 1.6667vw; /* 36px 32px */
+}
+
+.categories-section__card-title {
+  color: var(--color-white);
+  position: relative;
+  z-index: 2;
+}
+
+.categories-section__card-image {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  max-width: 72%;
+  max-height: 92%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ===== Индивидуальная настройка фоновых линий ===== */
+
+.categories-section__card--all .categories-section__card-bg {
+  background-size: 50% 100%;
+  background-position: 0vw 0vw;
+}
+
+.categories-section__card--characters .categories-section__card-bg {
+  background-size: 70% 100%;
+  background-position: 13vw 0vw;
+}
+
+.categories-section__card--animals .categories-section__card-bg {
+  background-size: 100% 100%;
+  background-position: 0.7vw 0vw;
+}
+
+.categories-section__card--tech .categories-section__card-bg {
+  background-size: 100% 100%;
+  background-position: 1.5vw 5.5vw;
+}
+
+.categories-section__card--environment .categories-section__card-bg {
+  background-size: 100% 100%;
+  background-position: 2vw 0vw;
+}
+
+/* ===== Индивидуальная настройка изображений категорий ===== */
+
+.categories-section__card--all .categories-section__card-image {
+  max-width: 76%;
+  max-height: 90%;
+  right: 0.2083vw; /* 4px */
+  bottom: 0;
+}
+
+.categories-section__card--characters .categories-section__card-image {
+  max-width: 70%;
+  max-height: 92%;
+  right: 0.4167vw; /* 8px */
+  bottom: 0;
+}
+
+.categories-section__card--animals .categories-section__card-image {
+  max-width: 66%;
+  max-height: 84%;
+  right: 0;
+  bottom: 0;
+}
+
+.categories-section__card--tech .categories-section__card-image {
+  max-width: 68%;
+  max-height: 86%;
+  right: 0;
+  bottom: 0;
+}
+
+.categories-section__card--environment .categories-section__card-image {
+  max-width: 70%;
+  max-height: 86%;
+  right: 0;
+  bottom: 0;
+}

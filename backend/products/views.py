@@ -1,0 +1,989 @@
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from users.permissions import IsAdminRole, IsApprovedSeller, IsBuyer
+from core.supabase_storage import (
+    create_signed_file_url,
+    delete_file_from_supabase,
+    upload_file_to_supabase,
+)
+from .models import Category, Comment, Favorite, Order, OrderItem, Product, ProductFile, Review
+from .permissions import CanModifyProductByStatus, IsOwnerOrReadOnly
+from .serializers import (
+    AdminProductSerializer,
+    CommentCreateSerializer,
+    CommentSerializer,
+    FavoriteActionSerializer,
+    FavoriteSerializer,
+    OrderItemSerializer,
+    ProductCreateUpdateSerializer,
+    ProductDetailSerializer,
+    ProductFileUploadSerializer,
+    ProductPreviewUploadSerializer,
+    ProductFiltersSerializer,
+    ProductListSerializer,
+    ProductModerationSerializer,
+    PurchaseSerializer,
+    ReviewCreateUpdateSerializer,
+    ReviewSerializer,
+)
+
+def update_product_rating(product):
+    reviews = product.reviews.all()
+    reviews_count = reviews.count()
+
+    if reviews_count == 0:
+        product.average_rating = 0
+        product.reviews_count = 0
+    else:
+        total = sum(review.rating for review in reviews)
+        product.average_rating = round(total / reviews_count, 2)
+        product.reviews_count = reviews_count
+
+    product.save(update_fields=['average_rating', 'reviews_count'])
+
+class ProductListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(status='published').select_related(
+            'seller',
+            'category',
+            'license',
+        )
+
+        q = self.request.query_params.get('q')
+        category = self.request.query_params.get('category')
+        model_format = self.request.query_params.get('model_format')
+        geometry_type = self.request.query_params.get('geometry_type')
+        poly_style = self.request.query_params.get('poly_style')
+        topology_type = self.request.query_params.get('topology_type')
+        has_uv = self.request.query_params.get('has_uv')
+        has_textures = self.request.query_params.get('has_textures')
+        texture_type = self.request.query_params.get('texture_type')
+        is_free = self.request.query_params.get('is_free')
+        min_polygons = self.request.query_params.get('min_polygons')
+        max_polygons = self.request.query_params.get('max_polygons')
+        ordering = self.request.query_params.get('ordering')
+
+        if q:
+            queryset = queryset.filter(title__icontains=q)
+
+        if category:
+            queryset = queryset.filter(category__slug=category)
+
+        if model_format:
+            queryset = queryset.filter(model_format=model_format)
+
+        if geometry_type:
+            queryset = queryset.filter(geometry_type=geometry_type)
+
+        if poly_style:
+            queryset = queryset.filter(poly_style=poly_style)
+
+        if topology_type:
+            queryset = queryset.filter(topology_type=topology_type)
+
+        if has_uv is not None:
+            if has_uv.lower() == 'true':
+                queryset = queryset.filter(has_uv=True)
+            elif has_uv.lower() == 'false':
+                queryset = queryset.filter(has_uv=False)
+
+        if has_textures is not None:
+            if has_textures.lower() == 'true':
+                queryset = queryset.filter(has_textures=True)
+            elif has_textures.lower() == 'false':
+                queryset = queryset.filter(has_textures=False)
+
+        if texture_type:
+            queryset = queryset.filter(texture_type__iexact=texture_type)
+
+        if is_free is not None:
+            if is_free.lower() == 'true':
+                queryset = queryset.filter(price=0)
+            elif is_free.lower() == 'false':
+                queryset = queryset.filter(price__gt=0)
+
+        if min_polygons:
+            try:
+                queryset = queryset.filter(polygon_count__gte=int(min_polygons))
+            except ValueError:
+                pass
+
+        if max_polygons:
+            try:
+                queryset = queryset.filter(polygon_count__lte=int(max_polygons))
+            except ValueError:
+                pass
+
+        if ordering == 'price_asc':
+            queryset = queryset.order_by('price')
+        elif ordering == 'price_desc':
+            queryset = queryset.order_by('-price')
+        elif ordering == 'rating_asc':
+            queryset = queryset.order_by('average_rating')
+        elif ordering == 'rating_desc':
+            queryset = queryset.order_by('-average_rating')
+        elif ordering == 'newest':
+            queryset = queryset.order_by('-created_at')
+        else:
+            queryset = queryset.order_by('-created_at')
+        return queryset
+
+class ProductFiltersView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        categories = Category.objects.all().order_by('name')
+
+        formats = [
+            {'value': value, 'label': label}
+            for value, label in Product.FORMAT_CHOICES
+        ]
+
+        poly_styles = [
+            {'value': value, 'label': label}
+            for value, label in Product.POLY_STYLE_CHOICES
+        ]
+
+        geometry_types = [
+            {'value': value, 'label': label}
+            for value, label in Product.GEOMETRY_CHOICES
+        ]
+
+        topology_types = [
+            {'value': value, 'label': label}
+            for value, label in Product.TOPOLOGY_CHOICES
+        ]
+
+        sort_options = [
+            {'value': 'price_asc', 'label': 'Цена по возрастанию'},
+            {'value': 'price_desc', 'label': 'Цена по убыванию'},
+            {'value': 'rating_asc', 'label': 'Рейтинг по возрастанию'},
+            {'value': 'rating_desc', 'label': 'Рейтинг по убыванию'},
+            {'value': 'newest', 'label': 'Сначала новые'},
+        ]
+
+        boolean_filters = [
+            {'value': 'has_uv', 'label': 'UV-развертка'},
+            {'value': 'has_textures', 'label': 'Текстуры'},
+            {'value': 'is_free', 'label': 'Бесплатные'},
+        ]
+
+        data = {
+            'categories': categories,
+            'formats': formats,
+            'poly_styles': poly_styles,
+            'geometry_types': geometry_types,
+            'topology_types': topology_types,
+            'sort_options': sort_options,
+            'boolean_filters': boolean_filters,
+        }
+
+        serializer = ProductFiltersSerializer(data)
+        return Response(serializer.data)
+
+class MyProductListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    permission_classes = [IsApprovedSeller]
+
+    def get_queryset(self):
+        return Product.objects.filter(seller=self.request.user).select_related(
+            'seller',
+            'category',
+            'license',
+        )
+
+
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.filter(status='published').select_related(
+        'seller',
+        'category',
+        'license',
+    ).prefetch_related('files')
+    serializer_class = ProductDetailSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class ProductCreateView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductCreateUpdateSerializer
+    permission_classes = [IsApprovedSeller]
+
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user, status='draft')
+
+
+class ProductUpdateView(generics.UpdateAPIView):
+    queryset = Product.objects.all().select_related('seller', 'category', 'license')
+    serializer_class = ProductCreateUpdateSerializer
+    permission_classes = [IsApprovedSeller, IsOwnerOrReadOnly, CanModifyProductByStatus]
+
+
+class ProductDeleteView(generics.DestroyAPIView):
+    queryset = Product.objects.all().select_related('seller')
+    serializer_class = ProductCreateUpdateSerializer
+    permission_classes = [IsApprovedSeller, IsOwnerOrReadOnly, CanModifyProductByStatus]
+
+    def destroy(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # Удаляем превью товара из Supabase
+        try:
+            if product.main_preview_storage_path:
+                delete_file_from_supabase(product.main_preview_storage_path)
+        except Exception:
+            pass
+
+        # Удаляем локальное превью, если было
+        if product.main_preview:
+            product.main_preview.delete(save=False)
+
+        # Удаляем все связанные файлы товара
+        product_files = ProductFile.objects.filter(product=product)
+        for product_file in product_files:
+            try:
+                if product_file.storage_path:
+                    delete_file_from_supabase(product_file.storage_path)
+            except Exception:
+                pass
+
+            if product_file.file:
+                product_file.file.delete(save=False)
+
+        # После этого удаляем сам товар
+        product.delete()
+
+        return Response(
+            {'detail': 'Товар и все связанные файлы удалены.'},
+            status=status.HTTP_200_OK
+        )
+
+class ArchiveProductView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.status not in ['published', 'draft', 'rejected']:
+            return Response(
+                {'detail': 'Этот товар нельзя перевести в архив из текущего статуса.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        product.status = 'archived'
+        product.save(update_fields=['status'])
+
+        return Response(
+            {'detail': 'Товар переведён в архив.', 'status': product.status},
+            status=status.HTTP_200_OK
+        )
+
+
+class SendProductToReviewView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.status not in ['draft', 'rejected', 'archived']:
+            return Response(
+                {'detail': 'Этот товар нельзя отправить на модерацию из текущего статуса.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        has_model_file = ProductFile.objects.filter(
+            product=product,
+            file_type='model'
+        ).exists()
+
+        if not has_model_file:
+            return Response(
+                {'detail': 'Нельзя отправить товар на модерацию без файла модели.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not product.title:
+            return Response(
+                {'detail': 'У товара должно быть название.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        product.status = 'pending_review'
+        product.moderation_comment = None
+        product.save(update_fields=['status', 'moderation_comment'])
+
+        return Response(
+            {'detail': 'Товар отправлен на модерацию.', 'status': product.status},
+            status=status.HTTP_200_OK
+        )
+
+
+
+class UploadProductFileView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ProductFileUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        uploaded_file = serializer.validated_data['file']
+        file_type = serializer.validated_data['file_type']
+        is_primary = serializer.validated_data['is_primary']
+        replace_existing = serializer.validated_data['replace_existing']
+
+        existing_primary = None
+        if is_primary:
+            existing_primary = ProductFile.objects.filter(
+                product=product,
+                file_type=file_type,
+                is_primary=True
+            ).first()
+
+        try:
+            upload_result = upload_file_to_supabase(
+                uploaded_file,
+                folder=f'products/{product.id}/{file_type}'
+            )
+        except Exception as e:
+            return Response(
+                {'detail': f'Ошибка загрузки в Supabase: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        if is_primary and existing_primary:
+            if replace_existing:
+                try:
+                    if existing_primary.storage_path:
+                        delete_file_from_supabase(existing_primary.storage_path)
+                except Exception:
+                    pass
+
+                if existing_primary.file:
+                    existing_primary.file.delete(save=False)
+
+                existing_primary.delete()
+            else:
+                existing_primary.is_primary = False
+                existing_primary.save(update_fields=['is_primary'])
+
+        product_file = ProductFile.objects.create(
+            product=product,
+            file_type=file_type,
+            storage_path=upload_result['storage_path'],
+            original_name=upload_result['original_name'],
+            mime_type=upload_result['content_type'],
+            size=upload_result['size'],
+            is_primary=is_primary,
+        )
+
+        return Response(
+            {
+                'detail': 'Файл загружен в Supabase.',
+                'file_id': product_file.id,
+                'storage_path': product_file.storage_path,
+                'file_type': product_file.file_type,
+                'is_primary': product_file.is_primary,
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+class DeleteProductFileView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def delete(self, request, pk):
+        try:
+            product_file = ProductFile.objects.select_related('product').get(
+                id=pk,
+                product__seller=request.user
+            )
+        except ProductFile.DoesNotExist:
+            return Response(
+                {'detail': 'Файл товара не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            if product_file.storage_path:
+                delete_file_from_supabase(product_file.storage_path)
+        except Exception:
+            pass
+
+        if product_file.file:
+            product_file.file.delete(save=False)
+
+        product_file.delete()
+
+        return Response(
+            {'detail': 'Файл товара удалён.'},
+            status=status.HTTP_200_OK
+        )
+
+class UploadProductPreviewView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ProductPreviewUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        uploaded_file = serializer.validated_data['file']
+
+        old_storage_path = product.main_preview_storage_path
+
+        try:
+            upload_result = upload_file_to_supabase(
+                uploaded_file,
+                folder=f'products/{product.id}/preview'
+            )
+        except Exception as e:
+            return Response(
+                {'detail': f'Ошибка загрузки превью в Supabase: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        product.main_preview_storage_path = upload_result['storage_path']
+        product.save(update_fields=['main_preview_storage_path'])
+
+        try:
+            if old_storage_path:
+                delete_file_from_supabase(old_storage_path)
+        except Exception:
+            pass
+
+        if product.main_preview:
+            product.main_preview.delete(save=False)
+
+        preview_url = create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
+
+        return Response(
+            {
+                'detail': 'Превью загружено в Supabase.',
+                'main_preview_storage_path': product.main_preview_storage_path,
+                'preview_url': preview_url,
+            },
+            status=status.HTTP_200_OK
+        )
+
+class DeleteProductPreviewView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def delete(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        old_storage_path = product.main_preview_storage_path
+
+        try:
+            if old_storage_path:
+                delete_file_from_supabase(old_storage_path)
+        except Exception:
+            pass
+
+        if product.main_preview:
+            product.main_preview.delete(save=False)
+
+        product.main_preview_storage_path = None
+        product.save(update_fields=['main_preview_storage_path'])
+
+        return Response(
+            {'detail': 'Превью удалено.'},
+            status=status.HTTP_200_OK
+        )
+
+class ProductModerationView(generics.UpdateAPIView):
+    queryset = Product.objects.all().select_related('seller', 'category', 'license')
+    serializer_class = ProductModerationSerializer
+    permission_classes = [IsAdminRole]
+
+class ModerationQueueView(generics.ListAPIView):
+    serializer_class = AdminProductSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        return Product.objects.filter(status='pending_review').select_related(
+            'seller',
+            'category',
+            'license',
+        ).order_by('created_at')
+
+
+class AdminAllProductsView(generics.ListAPIView):
+    serializer_class = AdminProductSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        return Product.objects.all().select_related(
+            'seller',
+            'category',
+            'license',
+        ).order_by('-created_at')
+
+
+class PurchaseProductView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = PurchaseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_id = serializer.validated_data['product_id']
+
+        try:
+            product = Product.objects.get(id=product_id, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.price <= 0:
+            return Response(
+                {'detail': 'Бесплатный товар не нужно покупать.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        already_purchased = OrderItem.objects.filter(
+            order__buyer=request.user,
+            product=product,
+            order__status='paid'
+        ).exists()
+
+        if already_purchased:
+            return Response(
+                {'detail': 'Этот товар уже куплен.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order = Order.objects.create(
+            buyer=request.user,
+            total_price=product.price,
+            status='paid'
+        )
+
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            price_at_purchase=product.price
+        )
+
+        product.sales_count += 1
+        product.save(update_fields=['sales_count'])
+
+        return Response(
+            {'detail': 'Покупка успешно совершена.', 'order_id': order.id},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class MyPurchasedProductsView(generics.ListAPIView):
+    serializer_class = OrderItemSerializer
+    permission_classes = [IsBuyer]
+
+    def get_queryset(self):
+        return OrderItem.objects.filter(
+            order__buyer=self.request.user,
+            order__status='paid'
+        ).select_related(
+            'product',
+            'product__seller',
+            'product__category',
+            'product__license',
+            'order',
+        )
+
+class MyFavoritesView(generics.ListAPIView):
+    serializer_class = FavoriteSerializer
+    permission_classes = [IsBuyer]
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user).select_related(
+            'product',
+            'product__seller',
+            'product__category',
+            'product__license',
+        )
+
+
+class AddFavoriteView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = FavoriteActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_id = serializer.validated_data['product_id']
+
+        try:
+            product = Product.objects.get(id=product_id, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        favorite, created = Favorite.objects.get_or_create(
+            user=request.user,
+            product=product
+        )
+
+        if created:
+            product.favorites_count += 1
+            product.save(update_fields=['favorites_count'])
+            return Response(
+                {'detail': 'Товар добавлен в избранное.'},
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            {'detail': 'Товар уже в избранном.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class RemoveFavoriteView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = FavoriteActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_id = serializer.validated_data['product_id']
+
+        try:
+            favorite = Favorite.objects.get(
+                user=request.user,
+                product_id=product_id
+            )
+        except Favorite.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден в избранном.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        product = favorite.product
+        favorite.delete()
+
+        if product.favorites_count > 0:
+            product.favorites_count -= 1
+            product.save(update_fields=['favorites_count'])
+
+        return Response(
+            {'detail': 'Товар удалён из избранного.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class ProductReviewsView(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return Review.objects.filter(
+            product_id=self.kwargs['pk'],
+            product__status='published'
+        ).select_related('user', 'product')
+
+
+class AddOrUpdateReviewView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        has_purchase = OrderItem.objects.filter(
+            order__buyer=request.user,
+            order__status='paid',
+            product=product
+        ).exists()
+
+        if not has_purchase:
+            return Response(
+                {'detail': 'Оставить отзыв можно только после покупки.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        review = Review.objects.filter(user=request.user, product=product).first()
+
+        if review:
+            serializer = ReviewCreateUpdateSerializer(review, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            update_product_rating(product)
+
+            return Response(
+                {
+                    'detail': 'Отзыв обновлён.',
+                    'review': ReviewSerializer(review).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        serializer = ReviewCreateUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review = serializer.save(user=request.user, product=product)
+        update_product_rating(product)
+
+        return Response(
+            {
+                'detail': 'Отзыв добавлен.',
+                'review': ReviewSerializer(review).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ProductCommentsView(generics.ListAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return Comment.objects.filter(
+            product_id=self.kwargs['pk'],
+            product__status='published'
+        ).select_related('user', 'product')
+
+
+class AddCommentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = CommentCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        comment = serializer.save(user=request.user, product=product)
+
+        return Response(
+            {
+                'detail': 'Комментарий добавлен.',
+                'comment': CommentSerializer(comment).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DeleteCommentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            comment = Comment.objects.get(id=pk, user=request.user)
+        except Comment.DoesNotExist:
+            return Response(
+                {'detail': 'Комментарий не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        comment.delete()
+        return Response(
+            {'detail': 'Комментарий удалён.'},
+            status=status.HTTP_200_OK,
+        )
+
+class ProductDownloadView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def _get_download_url(self, request, product_file):
+        if product_file.storage_path:
+            return create_signed_file_url(product_file.storage_path, expires_in=3600)
+
+        if product_file.file:
+            return request.build_absolute_uri(product_file.file.url)
+
+        return None
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        product_file = ProductFile.objects.filter(
+            product=product,
+            file_type='model',
+            is_primary=True
+        ).first()
+
+        if not product_file:
+            product_file = ProductFile.objects.filter(
+                product=product,
+                file_type='model'
+            ).first()
+
+        if not product_file or (not product_file.storage_path and not product_file.file):
+            return Response(
+                {'detail': 'Файл для скачивания не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Бесплатный товар можно скачать всем
+        if product.price <= 0:
+            download_url = self._get_download_url(request, product_file)
+
+            if not download_url:
+                return Response(
+                    {'detail': 'Ссылка для скачивания не может быть создана.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            return Response(
+                {
+                    'detail': 'Скачивание доступно.',
+                    'download_url': download_url,
+                    'product_id': product.id,
+                    'product_title': product.title,
+                    'is_free': True,
+                },
+                status=status.HTTP_200_OK
+            )
+
+        # Платный товар: только buyer, который купил
+        if not request.user.is_authenticated:
+            return Response(
+                {'detail': 'Для скачивания платного товара нужно войти в аккаунт.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if request.user.role != 'buyer':
+            return Response(
+                {'detail': 'Скачивание платного товара доступно только покупателю.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        has_purchase = OrderItem.objects.filter(
+            order__buyer=request.user,
+            order__status='paid',
+            product=product
+        ).exists()
+
+        if not has_purchase:
+            return Response(
+                {'detail': 'Сначала нужно купить этот товар.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        download_url = self._get_download_url(request, product_file)
+
+        if not download_url:
+            return Response(
+                {'detail': 'Ссылка для скачивания не может быть создана.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                'detail': 'Скачивание доступно.',
+                'download_url': download_url,
+                'product_id': product.id,
+                'product_title': product.title,
+                'is_free': False,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class ProductViewerUrlView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        product_file = ProductFile.objects.filter(
+            product=product,
+            file_type='model',
+            is_primary=True
+        ).first()
+
+        if not product_file:
+            product_file = ProductFile.objects.filter(
+                product=product,
+                file_type='model'
+            ).first()
+
+        if not product_file or (not product_file.storage_path and not product_file.file):
+            return Response(
+                {'detail': 'Файл 3D-модели не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product_file.storage_path:
+            viewer_url = create_signed_file_url(product_file.storage_path, expires_in=3600)
+        elif product_file.file:
+            viewer_url = request.build_absolute_uri(product_file.file.url)
+        else:
+            viewer_url = None
+
+        if not viewer_url:
+            return Response(
+                {'detail': 'Ссылка для просмотра не может быть создана.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                'product_id': product.id,
+                'product_title': product.title,
+                'viewer_url': viewer_url,
+                'file_type': product_file.file_type,
+                'original_name': product_file.original_name,
+                'mime_type': product_file.mime_type,
+            },
+            status=status.HTTP_200_OK
+        )

@@ -1,0 +1,114 @@
+.footer {
+  width: 100%;
+  background: var(--color-grey);
+  border-top: 0.0521vw solid var(--color-grey-light); /* 1px */
+}
+
+.footer__container {
+  width: 75vw; /* 1440px */
+  margin: 0 auto;
+  padding-top: 2.5vw; /* 48px */
+  display: grid;
+  grid-template-columns: 4.6875vw 1fr 12.5vw; /* logo / nav / contacts */
+  column-gap: 4.1667vw; /* 80px */
+  align-items: start;
+}
+
+.footer__brand {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.footer__logo {
+  display: inline-flex;
+  width: fit-content;
+}
+
+.footer__logo-image {
+  width: 4.6875vw; /* 90px */
+  height: 3.3333vw; /* 64px */
+  object-fit: contain;
+}
+
+.footer__nav {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  column-gap: 5vw; /* 80px */
+}
+
+.footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8333vw; /* 16px */
+}
+
+.footer__title {
+  color: var(--color-white);
+}
+
+.footer__link {
+  color: var(--color-white);
+  opacity: 0.9;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.footer__link:hover {
+  color: var(--color-purple-light);
+  opacity: 1;
+}
+
+.footer__contacts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8333vw; /* 16px */
+}
+
+.footer__socials {
+  display: flex;
+  align-items: center;
+  gap: 0.625vw; /* 12px */
+}
+
+.footer__social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer__social-icon {
+  width: 1.25vw; /* 24px */
+  height: 1.25vw; /* 24px */
+  object-fit: contain;
+  opacity: 0.9;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
+  filter: brightness(0) saturate(100%) invert(22%) sepia(7%) saturate(541%)
+    hue-rotate(191deg) brightness(91%) contrast(87%);
+}
+
+.footer__social:hover .footer__social-icon {
+  transform: translateY(-0.1042vw); /* 2px */
+  opacity: 1;
+}
+
+.footer__email {
+  color: var(--color-white);
+  opacity: 0.9;
+}
+
+.footer__bottom {
+  width: 75vw; /* 1440px */
+  margin: 0 auto;
+  padding-top: 2.5vw; /* 48px */
+  padding-bottom: 2.5vw; /* 48px */
+}
+
+.footer__copyright {
+  color: var(--color-white);
+}

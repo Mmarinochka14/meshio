@@ -1,0 +1,68 @@
+from django.urls import path
+
+from .views import (
+    AddCommentView,
+    AddFavoriteView,
+    AddOrUpdateReviewView,
+    AdminAllProductsView,
+    ArchiveProductView,
+    DeleteCommentView,
+    DeleteProductFileView,
+    DeleteProductPreviewView,
+    ModerationQueueView,
+    MyFavoritesView,
+    MyProductListView,
+    MyPurchasedProductsView,
+    ProductCommentsView,
+    ProductCreateView,
+    ProductDeleteView,
+    ProductDetailView,
+    ProductDownloadView,
+    ProductFiltersView,
+    ProductListView,
+    ProductModerationView,
+    ProductReviewsView,
+    ProductUpdateView,
+    ProductViewerUrlView,
+    PurchaseProductView,
+    RemoveFavoriteView,
+    SendProductToReviewView,
+    UploadProductFileView,
+    UploadProductPreviewView,
+)
+
+urlpatterns = [
+    path('', ProductListView.as_view(), name='product-list'),
+    path('filters/', ProductFiltersView.as_view(), name='product-filters'),
+    path('my/', MyProductListView.as_view(), name='my-product-list'),
+    path('my-models/', MyPurchasedProductsView.as_view(), name='my-purchased-products'),
+    path('favorites/', MyFavoritesView.as_view(), name='my-favorites'),
+    path('favorites/add/', AddFavoriteView.as_view(), name='add-favorite'),
+    path('favorites/remove/', RemoveFavoriteView.as_view(), name='remove-favorite'),
+    path('create/', ProductCreateView.as_view(), name='product-create'),
+    path('purchase/', PurchaseProductView.as_view(), name='product-purchase'),
+    path('moderation-queue/', ModerationQueueView.as_view(), name='moderation-queue'),
+    path('admin/all/', AdminAllProductsView.as_view(), name='admin-all-products'),
+
+    path('<int:pk>/review/', AddOrUpdateReviewView.as_view(), name='add-or-update-review'),
+    path('<int:pk>/reviews/', ProductReviewsView.as_view(), name='product-reviews'),
+
+    path('<int:pk>/comments/', ProductCommentsView.as_view(), name='product-comments'),
+    path('<int:pk>/comment/', AddCommentView.as_view(), name='add-comment'),
+
+    path('<int:pk>/archive/', ArchiveProductView.as_view(), name='product-archive'),
+    path('<int:pk>/send-to-review/', SendProductToReviewView.as_view(), name='product-send-to-review'),
+    path('<int:pk>/upload-file/', UploadProductFileView.as_view(), name='product-upload-file'),
+    path('<int:pk>/upload-preview/', UploadProductPreviewView.as_view(), name='product-upload-preview'),
+    path('<int:pk>/delete-preview/', DeleteProductPreviewView.as_view(), name='product-delete-preview'),
+
+    path('<int:pk>/viewer-url/', ProductViewerUrlView.as_view(), name='product-viewer-url'),
+    path('<int:pk>/download/', ProductDownloadView.as_view(), name='product-download'),
+    path('<int:pk>/moderate/', ProductModerationView.as_view(), name='product-moderate'),
+    path('<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
+    path('<int:pk>/update/', ProductUpdateView.as_view(), name='product-update'),
+    path('<int:pk>/delete/', ProductDeleteView.as_view(), name='product-delete'),
+
+    path('files/<int:pk>/delete/', DeleteProductFileView.as_view(), name='product-file-delete'),
+    path('comments/<int:pk>/delete/', DeleteCommentView.as_view(), name='delete-comment'),
+]
