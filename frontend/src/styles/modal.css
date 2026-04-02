@@ -1,0 +1,38 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 10, 12, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5vw;
+}
+
+.modal__panel {
+  width: 34.375vw; /* ~660px (под твой макет можно подвинуть) */
+  border-radius: 1.25vw; /* 24px */
+  background: var(--color-grey);
+  box-shadow: 0 1.25vw 3.125vw rgba(0, 0, 0, 0.45);
+  position: relative;
+  padding: 2.5vw; /* 48px */
+}
+
+.modal__close {
+  position: absolute;
+  top: 1.25vw;
+  right: 1.25vw;
+  width: 2.0833vw; /* 40px */
+  height: 2.0833vw;
+  border: none;
+  background: transparent;
+  color: var(--color-white);
+  font-size: 1.6667vw; /* 32px */
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.modal__close:hover {
+  opacity: 1;
+}

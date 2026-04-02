@@ -64,8 +64,8 @@ img {
 h1,
 .text-h1 {
   font-size: var(--font-h1);
-  font-weight: 900;
-  line-height: 1.2;
+  font-weight: 850;
+  line-height: 1.3;
 }
 
 h2,
@@ -79,7 +79,7 @@ h3,
 .text-h3 {
   font-size: var(--font-h3);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 h4,
@@ -208,6 +208,9 @@ h4,
   line-height: 1;
   white-space: nowrap;
   transition: background 0.2s ease;
+  border: none; /* важно */
+  outline: none;
+  cursor: pointer;
 }
 
 .header__auth-btn:hover {
@@ -223,7 +226,7 @@ h4,
 
 .header__catalog-btn {
   height: 2.5521vw; /* 49px */
-  padding: 0 1.0417vw; /* 20px */
+  padding: 0.625vw 1.5vw; /* 20px */
   border: none;
   border-radius: 0.625vw; /* 12px */
   background: var(--color-purple);
@@ -329,35 +332,4 @@ h4,
   line-height: 1;
   color: var(--color-white);
   text-align: center;
-}
-
-/* ===== Каталог ===== */
-
-.catalog-page {
-  width: 100%;
-  padding: 1.6667vw var(--content-side-padding) 3.125vw;
-}
-
-.catalog-page__header {
-  margin-bottom: 1.25vw;
-}
-
-.catalog-page__title {
-  font-size: var(--font-h2);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.0417vw; /* 20px */
-}
-
-.page-state {
-  min-height: 40vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-p1);
 }

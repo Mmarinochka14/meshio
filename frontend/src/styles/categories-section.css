@@ -8,14 +8,15 @@
 .categories-section__container {
   width: 75vw; /* 1440px */
   margin: 0 auto;
-  padding: 2.0833vw; /* 40px */
-  border-radius: 1.6667vw; /* 32px */
+  padding: 1.6667vw 2.0833vw; /* 40px */
+  border-radius: 1.25vw;
   background: var(--color-grey-dark);
+  /* border: 0.01vw solid var(--color-grey-light); */
 }
 
 .categories-section__title {
   color: var(--color-white);
-  margin-bottom: 1.6667vw; /* 32px */
+  margin-bottom: 1.25vw;
 }
 
 .categories-section__grid {

@@ -26,7 +26,7 @@ export default function ProductCard({ product }) {
   } = product;
 
   const rawPreview =
-    product.main_preview || product.preview_url || product.preview || "";
+    product.main_preview_url || product.preview_url || product.preview || "";
 
   const previewSrc = rawPreview
     ? rawPreview.startsWith("http")

@@ -1,0 +1,29 @@
+.weekly-models-section {
+  width: 100%;
+  padding-top: 3.3333vw; /* 64px */
+}
+
+.weekly-models-section__container {
+  width: 75vw; /* 1440px */
+  margin: 0 auto;
+}
+
+.weekly-models-section__title {
+  color: var(--color-white);
+  margin-bottom: 1.6667vw; /* 32px */
+}
+
+.weekly-models-section__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25vw; /* 24px */
+}
+
+.weekly-models-section__state {
+  min-height: 12vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  opacity: 0.8;
+}

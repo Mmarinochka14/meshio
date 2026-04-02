@@ -16,6 +16,7 @@ from .views import (
     SellerProductsView,
     UploadSellerAvatarView,
     UploadUserAvatarView,
+ChangePasswordView
 )
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
     path('admin/seller-requests/', AdminSellerRequestsView.as_view(), name='admin-seller-requests'),
     path('<int:pk>/approve-seller/', ApproveSellerView.as_view(), name='approve-seller'),
     path('<int:pk>/reject-seller/', RejectSellerView.as_view(), name='reject-seller'),
+path("me/change-password/", ChangePasswordView.as_view(), name="change-password"),
 ]

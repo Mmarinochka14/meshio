@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import Category, Comment, Favorite, License, Order, OrderItem, Product, ProductFile, Review
+from .models import (
+    Category,
+    Comment,
+    Favorite,
+    GeneratedTexture,
+    License,
+    MaterialPreset,
+    Order,
+    OrderItem,
+    Product,
+    ProductFile,
+    Review,
+)
 
 
 @admin.register(Category)
@@ -25,7 +37,7 @@ class LicenseAdmin(admin.ModelAdmin):
 
 class ProductFileInline(admin.TabularInline):
     model = ProductFile
-    extra = 1
+    extra = 0
 
 
 @admin.register(Product)
@@ -38,18 +50,49 @@ class ProductAdmin(admin.ModelAdmin):
         'price',
         'status',
         'model_format',
-        'poly_style',
+        'viewer_format',
+        'viewer_status',
+        'has_uv',
+        'has_textures',
+        'has_animation',
         'created_at',
     )
-    list_filter = ('status', 'model_format', 'poly_style', 'has_uv', 'has_textures', 'has_rigging', 'category')
-    search_fields = ('title', 'description')
+    list_filter = (
+        'status',
+        'model_format',
+        'viewer_format',
+        'viewer_status',
+        'poly_style',
+        'has_uv',
+        'has_textures',
+        'has_rigging',
+        'has_animation',
+        'category',
+    )
+    search_fields = ('title', 'description', 'seller__username')
     inlines = [ProductFileInline]
 
 
 @admin.register(ProductFile)
 class ProductFileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'file_type', 'is_primary', 'created_at')
+    list_display = ('id', 'product', 'file_type', 'is_primary', 'original_name', 'created_at')
     list_filter = ('file_type', 'is_primary')
+    search_fields = ('product__title', 'original_name', 'preset_slug')
+
+
+@admin.register(MaterialPreset)
+class MaterialPresetAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'slug', 'category', 'is_active', 'created_at')
+    list_filter = ('category', 'is_active')
+    search_fields = ('name', 'slug', 'description')
+    prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(GeneratedTexture)
+class GeneratedTextureAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'user', 'preset', 'status', 'created_at')
+    list_filter = ('status', 'preset')
+    search_fields = ('product__title', 'user__username', 'prompt')
 
 
 @admin.register(Order)

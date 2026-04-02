@@ -1,0 +1,25 @@
+.catalog-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.8333vw; /* 16px */
+  color: var(--color-white);
+}
+
+.catalog-sort__label {
+  opacity: 0.85;
+}
+
+.catalog-sort__select {
+  height: 2.3438vw; /* 45px */
+  padding: 0 0.8333vw; /* 16px */
+  border-radius: 0.625vw; /* 12px */
+  border: 0.0521vw solid var(--color-grey-super-light);
+  background: transparent;
+  color: var(--color-white);
+  outline: none;
+}
+
+.catalog-sort__select option {
+  background: var(--color-grey);
+  color: var(--color-white);
+}

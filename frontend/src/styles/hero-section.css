@@ -1,6 +1,10 @@
 .hero {
   width: 100%;
-  background: radial-gradient(circle at 30% 40%, #7f2aff 0%, #220047 100%);
+  background: radial-gradient(
+    68.33% 76.01% at 67.14% 52.8%,
+    #7f2aff 0%,
+    #220047 100%
+  );
   border-radius: 0 0 2.5vw 2.5vw;
   overflow: hidden;
 }
@@ -16,7 +20,7 @@
 }
 
 .hero__content {
-  width: 31.25vw;
+  width: 36vw;
   flex-shrink: 0;
 }
 
@@ -28,7 +32,7 @@
 .hero__subtitle {
   margin-bottom: 2.0833vw;
   color: var(--color-white);
-  max-width: 27.0833vw;
+  max-width: 32vw;
 }
 
 .hero__actions {
@@ -40,7 +44,7 @@
 
 .hero__button {
   min-height: 2.6042vw;
-  padding: 0.8333vw 3.3333vw;
+  padding: 1.25vw 3.3333vw;
   border-radius: 0.625vw;
   display: inline-flex;
   align-items: center;

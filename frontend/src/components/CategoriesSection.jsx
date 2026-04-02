@@ -62,9 +62,9 @@ export default function CategoriesSection() {
   return (
     <section className="categories-section">
       <div className="categories-section__container">
-        <h2 className="categories-section__title text-h2">
+        <h3 className="categories-section__title text-h3">
           Популярные категории
-        </h2>
+        </h3>
 
         <div className="categories-section__grid">
           {categories.map((category) => (
@@ -79,9 +79,9 @@ export default function CategoriesSection() {
               />
 
               <div className="categories-section__card-content">
-                <h3 className="categories-section__card-title text-h3">
+                <h4 className="categories-section__card-title text-h4">
                   {category.title}
-                </h3>
+                </h4>
 
                 <img
                   src={category.image}

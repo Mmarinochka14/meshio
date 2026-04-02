@@ -14,7 +14,7 @@
 }
 
 .how-it-works-section__title-accent {
-  color: var(--color-purple);
+  color: var(--color-purple-light);
 }
 
 .how-it-works-section__grid {
@@ -53,8 +53,8 @@
 }
 
 .how-it-works-section__icon {
-  width: 4vw; /* 48px */
-  height: 4vw; /* 48px */
+  width: 3.5vw; /* 48px */
+  height: 3.5vw; /* 48px */
   object-fit: contain;
 }
 

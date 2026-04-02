@@ -13,10 +13,12 @@ from .serializers import (
     SellerProfileCreateUpdateSerializer,
     SellerProfileSerializer,
     SellerAvatarUploadSerializer,
+    UserProfileUpdateSerializer,
     UserAvatarUploadSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     UserRegisterSerializer,
+ChangePasswordSerializer,
 )
 
 
@@ -65,6 +67,21 @@ class ProfileView(APIView):
     def get(self, request):
         serializer = UserProfileSerializer(request.user, context={'request': request})
         return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = UserProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            UserProfileSerializer(request.user, context={'request': request}).data,
+            status=status.HTTP_200_OK
+        )
 
 class UploadUserAvatarView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -437,4 +454,22 @@ class RejectSellerView(APIView):
                 'user': AdminUserSerializer(user).data,
             },
             status=status.HTTP_200_OK,
+        )
+
+class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        request.user.set_password(serializer.validated_data["new_password"])
+        request.user.save()
+
+        return Response(
+            {"detail": "Пароль обновлён."},
+            status=status.HTTP_200_OK
         )

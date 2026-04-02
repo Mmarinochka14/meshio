@@ -36,10 +36,10 @@ export default function HowItWorksSection() {
   return (
     <section className="how-it-works-section">
       <div className="how-it-works-section__container">
-        <h2 className="how-it-works-section__title text-h2">
+        <h3 className="how-it-works-section__title text-h3">
           Как работает{" "}
           <span className="how-it-works-section__title-accent">Meshio</span>
-        </h2>
+        </h3>
 
         <div className="how-it-works-section__grid">
           {steps.map((step) => (

@@ -9,6 +9,7 @@ from .views import (
     DeleteCommentView,
     DeleteProductFileView,
     DeleteProductPreviewView,
+    MaterialPresetListView,
     ModerationQueueView,
     MyFavoritesView,
     MyProductListView,
@@ -23,6 +24,7 @@ from .views import (
     ProductModerationView,
     ProductReviewsView,
     ProductUpdateView,
+    ProductUVPreviewUrlView,
     ProductViewerUrlView,
     PurchaseProductView,
     RemoveFavoriteView,
@@ -34,13 +36,17 @@ from .views import (
 urlpatterns = [
     path('', ProductListView.as_view(), name='product-list'),
     path('filters/', ProductFiltersView.as_view(), name='product-filters'),
+    path('presets/', MaterialPresetListView.as_view(), name='material-preset-list'),
+
     path('my/', MyProductListView.as_view(), name='my-product-list'),
     path('my-models/', MyPurchasedProductsView.as_view(), name='my-purchased-products'),
     path('favorites/', MyFavoritesView.as_view(), name='my-favorites'),
     path('favorites/add/', AddFavoriteView.as_view(), name='add-favorite'),
     path('favorites/remove/', RemoveFavoriteView.as_view(), name='remove-favorite'),
+
     path('create/', ProductCreateView.as_view(), name='product-create'),
     path('purchase/', PurchaseProductView.as_view(), name='product-purchase'),
+
     path('moderation-queue/', ModerationQueueView.as_view(), name='moderation-queue'),
     path('admin/all/', AdminAllProductsView.as_view(), name='admin-all-products'),
 
@@ -57,7 +63,9 @@ urlpatterns = [
     path('<int:pk>/delete-preview/', DeleteProductPreviewView.as_view(), name='product-delete-preview'),
 
     path('<int:pk>/viewer-url/', ProductViewerUrlView.as_view(), name='product-viewer-url'),
+    path('<int:pk>/uv-preview-url/', ProductUVPreviewUrlView.as_view(), name='product-uv-preview-url'),
     path('<int:pk>/download/', ProductDownloadView.as_view(), name='product-download'),
+
     path('<int:pk>/moderate/', ProductModerationView.as_view(), name='product-moderate'),
     path('<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
     path('<int:pk>/update/', ProductUpdateView.as_view(), name='product-update'),

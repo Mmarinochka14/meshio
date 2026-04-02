@@ -37,7 +37,7 @@ class User(AbstractUser):
 
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name='Аватар')
     avatar_storage_path = models.CharField(max_length=500, blank=True, null=True,
-                                           verbose_name='Путь аватара в Supabase')
+                                           verbose_name='Путь аватара в Object Storage')
 
     def save(self, *args, **kwargs):
         if self.role == 'seller' and self.seller_status == 'not_requested':
@@ -66,7 +66,7 @@ class SellerProfile(models.Model):
     store_description = models.TextField(blank=True, null=True, verbose_name='Описание магазина')
     store_avatar = models.ImageField(upload_to='stores/avatars/', blank=True, null=True, verbose_name='Аватар магазина')
     store_avatar_storage_path = models.CharField(max_length=500, blank=True, null=True,
-                                                 verbose_name='Путь аватара магазина в Supabase')
+                                                 verbose_name='Путь аватара магазина в Object Storage')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
 

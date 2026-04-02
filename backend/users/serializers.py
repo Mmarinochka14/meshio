@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 from .models import SellerProfile, User
-from core.supabase_storage import create_signed_file_url
+from core.object_storage import create_signed_file_url
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -168,3 +168,39 @@ class UserAvatarUploadSerializer(serializers.Serializer):
 
 class SellerAvatarUploadSerializer(serializers.Serializer):
     file = serializers.ImageField()
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "middle_name",
+            "phone",
+        ]
+
+    def validate_username(self, value):
+        user = self.context["request"].user
+        if User.objects.exclude(id=user.id).filter(username=value).exists():
+            raise serializers.ValidationError("Этот никнейм уже занят.")
+        return value
+
+    def validate_email(self, value):
+        user = self.context["request"].user
+        if User.objects.exclude(id=user.id).filter(email=value).exists():
+            raise serializers.ValidationError("Этот email уже занят.")
+        return value
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_old_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Старый пароль неверный.")
+        return value

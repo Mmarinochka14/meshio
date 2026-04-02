@@ -1,14 +1,27 @@
+from pathlib import Path
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .services.viewer_preprocessing import prepare_product_viewer
 
-from users.permissions import IsAdminRole, IsApprovedSeller, IsBuyer
-from core.supabase_storage import (
+from core.object_storage import (
     create_signed_file_url,
-    delete_file_from_supabase,
-    upload_file_to_supabase,
+    delete_file_from_storage,
+    upload_file_to_storage,
 )
-from .models import Category, Comment, Favorite, Order, OrderItem, Product, ProductFile, Review
+from users.permissions import IsAdminRole, IsApprovedSeller, IsBuyer
+from .models import (
+    Category,
+    Comment,
+    Favorite,
+    MaterialPreset,
+    Order,
+    OrderItem,
+    Product,
+    ProductFile,
+    Review,
+)
 from .permissions import CanModifyProductByStatus, IsOwnerOrReadOnly
 from .serializers import (
     AdminProductSerializer,
@@ -16,18 +29,47 @@ from .serializers import (
     CommentSerializer,
     FavoriteActionSerializer,
     FavoriteSerializer,
+    MaterialPresetSerializer,
     OrderItemSerializer,
     ProductCreateUpdateSerializer,
     ProductDetailSerializer,
     ProductFileUploadSerializer,
-    ProductPreviewUploadSerializer,
     ProductFiltersSerializer,
     ProductListSerializer,
     ProductModerationSerializer,
+    ProductPreviewUploadSerializer,
     PurchaseSerializer,
     ReviewCreateUpdateSerializer,
     ReviewSerializer,
 )
+
+
+def build_product_file_url(request, product_file):
+    if product_file.storage_path:
+        return create_signed_file_url(product_file.storage_path, expires_in=3600)
+
+    if product_file.file:
+        return request.build_absolute_uri(product_file.file.url)
+
+    return None
+
+
+def get_product_file(product, file_types, primary_first=True):
+    qs = ProductFile.objects.filter(product=product, file_type__in=file_types)
+
+    if primary_first:
+        primary = qs.filter(is_primary=True).order_by('sort_order', '-created_at').first()
+        if primary:
+            return primary
+
+    return qs.order_by('sort_order', '-created_at').first()
+
+
+def infer_model_format(filename: str) -> str:
+    ext = Path(filename).suffix.lower().lstrip('.')
+    allowed = {'glb', 'gltf', 'obj', 'fbx', 'blend'}
+    return ext if ext in allowed else 'other'
+
 
 def update_product_rating(product):
     reviews = product.reviews.all()
@@ -42,6 +84,7 @@ def update_product_rating(product):
         product.reviews_count = reviews_count
 
     product.save(update_fields=['average_rating', 'reviews_count'])
+
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
@@ -131,7 +174,9 @@ class ProductListView(generics.ListAPIView):
             queryset = queryset.order_by('-created_at')
         else:
             queryset = queryset.order_by('-created_at')
+
         return queryset
+
 
 class ProductFiltersView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -139,25 +184,10 @@ class ProductFiltersView(APIView):
     def get(self, request):
         categories = Category.objects.all().order_by('name')
 
-        formats = [
-            {'value': value, 'label': label}
-            for value, label in Product.FORMAT_CHOICES
-        ]
-
-        poly_styles = [
-            {'value': value, 'label': label}
-            for value, label in Product.POLY_STYLE_CHOICES
-        ]
-
-        geometry_types = [
-            {'value': value, 'label': label}
-            for value, label in Product.GEOMETRY_CHOICES
-        ]
-
-        topology_types = [
-            {'value': value, 'label': label}
-            for value, label in Product.TOPOLOGY_CHOICES
-        ]
+        formats = [{'value': value, 'label': label} for value, label in Product.FORMAT_CHOICES]
+        poly_styles = [{'value': value, 'label': label} for value, label in Product.POLY_STYLE_CHOICES]
+        geometry_types = [{'value': value, 'label': label} for value, label in Product.GEOMETRY_CHOICES]
+        topology_types = [{'value': value, 'label': label} for value, label in Product.TOPOLOGY_CHOICES]
 
         sort_options = [
             {'value': 'price_asc', 'label': 'Цена по возрастанию'},
@@ -186,6 +216,13 @@ class ProductFiltersView(APIView):
         serializer = ProductFiltersSerializer(data)
         return Response(serializer.data)
 
+
+class MaterialPresetListView(generics.ListAPIView):
+    queryset = MaterialPreset.objects.filter(is_active=True).order_by('category', 'name')
+    serializer_class = MaterialPresetSerializer
+    permission_classes = [permissions.AllowAny]
+
+
 class MyProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
     permission_classes = [IsApprovedSeller]
@@ -207,6 +244,12 @@ class ProductDetailView(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_object(self):
+        obj = super().get_object()
+        Product.objects.filter(pk=obj.pk).update(views_count=obj.views_count + 1)
+        obj.refresh_from_db()
+        return obj
+
 
 class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
@@ -214,7 +257,7 @@ class ProductCreateView(generics.CreateAPIView):
     permission_classes = [IsApprovedSeller]
 
     def perform_create(self, serializer):
-        serializer.save(seller=self.request.user, status='draft')
+        serializer.save(seller=self.request.user, status='draft', viewer_status='pending')
 
 
 class ProductUpdateView(generics.UpdateAPIView):
@@ -231,36 +274,33 @@ class ProductDeleteView(generics.DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
 
-        # Удаляем превью товара из Supabase
         try:
             if product.main_preview_storage_path:
-                delete_file_from_supabase(product.main_preview_storage_path)
+                delete_file_from_storage(product.main_preview_storage_path)
         except Exception:
             pass
 
-        # Удаляем локальное превью, если было
         if product.main_preview:
             product.main_preview.delete(save=False)
 
-        # Удаляем все связанные файлы товара
         product_files = ProductFile.objects.filter(product=product)
         for product_file in product_files:
             try:
                 if product_file.storage_path:
-                    delete_file_from_supabase(product_file.storage_path)
+                    delete_file_from_storage(product_file.storage_path)
             except Exception:
                 pass
 
             if product_file.file:
                 product_file.file.delete(save=False)
 
-        # После этого удаляем сам товар
         product.delete()
 
         return Response(
             {'detail': 'Товар и все связанные файлы удалены.'},
             status=status.HTTP_200_OK
         )
+
 
 class ArchiveProductView(APIView):
     permission_classes = [IsApprovedSeller]
@@ -269,10 +309,7 @@ class ArchiveProductView(APIView):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
-            return Response(
-                {'detail': 'Товар не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         if product.status not in ['published', 'draft', 'rejected']:
             return Response(
@@ -296,10 +333,7 @@ class SendProductToReviewView(APIView):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
-            return Response(
-                {'detail': 'Товар не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         if product.status not in ['draft', 'rejected', 'archived']:
             return Response(
@@ -309,7 +343,7 @@ class SendProductToReviewView(APIView):
 
         has_model_file = ProductFile.objects.filter(
             product=product,
-            file_type='model'
+            file_type__in=['model_source', 'model']
         ).exists()
 
         if not has_model_file:
@@ -334,7 +368,6 @@ class SendProductToReviewView(APIView):
         )
 
 
-
 class UploadProductFileView(APIView):
     permission_classes = [IsApprovedSeller]
 
@@ -342,10 +375,7 @@ class UploadProductFileView(APIView):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
-            return Response(
-                {'detail': 'Товар не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProductFileUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -354,6 +384,7 @@ class UploadProductFileView(APIView):
         file_type = serializer.validated_data['file_type']
         is_primary = serializer.validated_data['is_primary']
         replace_existing = serializer.validated_data['replace_existing']
+        sort_order = serializer.validated_data.get('sort_order', 0)
 
         existing_primary = None
         if is_primary:
@@ -364,13 +395,13 @@ class UploadProductFileView(APIView):
             ).first()
 
         try:
-            upload_result = upload_file_to_supabase(
+            upload_result = upload_file_to_storage(
                 uploaded_file,
                 folder=f'products/{product.id}/{file_type}'
             )
         except Exception as e:
             return Response(
-                {'detail': f'Ошибка загрузки в Supabase: {str(e)}'},
+                {'detail': f'Ошибка загрузки в storage: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -378,7 +409,7 @@ class UploadProductFileView(APIView):
             if replace_existing:
                 try:
                     if existing_primary.storage_path:
-                        delete_file_from_supabase(existing_primary.storage_path)
+                        delete_file_from_storage(existing_primary.storage_path)
                 except Exception:
                     pass
 
@@ -398,11 +429,48 @@ class UploadProductFileView(APIView):
             mime_type=upload_result['content_type'],
             size=upload_result['size'],
             is_primary=is_primary,
+            sort_order=sort_order,
         )
+
+        update_fields = []
+
+        if file_type == 'model_source':
+            detected_format = infer_model_format(upload_result['original_name'])
+            product.model_format = detected_format
+            product.viewer_status = 'pending'
+            product.viewer_error = None
+            update_fields.extend(['model_format', 'viewer_status', 'viewer_error'])
+
+        if file_type == 'viewer_model':
+            detected_format = infer_model_format(upload_result['original_name'])
+            product.viewer_format = detected_format
+            product.viewer_status = 'ready'
+            product.viewer_error = None
+            update_fields.extend(['viewer_format', 'viewer_status', 'viewer_error'])
+
+        if file_type == 'uv_preview' and not product.has_uv:
+            product.has_uv = True
+            update_fields.append('has_uv')
+
+        if file_type.startswith('texture_') and not product.has_textures:
+            product.has_textures = True
+            update_fields.append('has_textures')
+
+        if update_fields:
+            product.save(update_fields=update_fields)
+
+        # запускаем preprocessing после загрузки исходной модели
+        if file_type == 'model_source':
+            try:
+                prepare_product_viewer(product.id)
+            except Exception as e:
+                product.viewer_status = 'failed'
+                product.viewer_error = str(e)
+                product.save(update_fields=['viewer_status', 'viewer_error'])
 
         return Response(
             {
-                'detail': 'Файл загружен в Supabase.',
+                'detail': 'Файл загружен в storage.',
                 'file_id': product_file.id,
                 'storage_path': product_file.storage_path,
                 'file_type': product_file.file_type,
@@ -421,14 +489,11 @@ class DeleteProductFileView(APIView):
                 product__seller=request.user
             )
         except ProductFile.DoesNotExist:
-            return Response(
-                {'detail': 'Файл товара не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Файл товара не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             if product_file.storage_path:
-                delete_file_from_supabase(product_file.storage_path)
+                delete_file_from_storage(product_file.storage_path)
         except Exception:
             pass
 
@@ -437,10 +502,8 @@ class DeleteProductFileView(APIView):
 
         product_file.delete()
 
-        return Response(
-            {'detail': 'Файл товара удалён.'},
-            status=status.HTTP_200_OK
-        )
+        return Response({'detail': 'Файл товара удалён.'}, status=status.HTTP_200_OK)
+
 
 class UploadProductPreviewView(APIView):
     permission_classes = [IsApprovedSeller]
@@ -449,10 +512,7 @@ class UploadProductPreviewView(APIView):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
-            return Response(
-                {'detail': 'Товар не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProductPreviewUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -462,13 +522,13 @@ class UploadProductPreviewView(APIView):
         old_storage_path = product.main_preview_storage_path
 
         try:
-            upload_result = upload_file_to_supabase(
+            upload_result = upload_file_to_storage(
                 uploaded_file,
                 folder=f'products/{product.id}/preview'
             )
         except Exception as e:
             return Response(
-                {'detail': f'Ошибка загрузки превью в Supabase: {str(e)}'},
+                {'detail': f'Ошибка загрузки превью в storage: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -477,7 +537,7 @@ class UploadProductPreviewView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 
@@ -488,12 +548,13 @@ class UploadProductPreviewView(APIView):
 
         return Response(
             {
-                'detail': 'Превью загружено в Supabase.',
+                'detail': 'Превью загружено в storage.',
                 'main_preview_storage_path': product.main_preview_storage_path,
                 'preview_url': preview_url,
             },
             status=status.HTTP_200_OK
         )
+
 
 class DeleteProductPreviewView(APIView):
     permission_classes = [IsApprovedSeller]
@@ -502,16 +563,13 @@ class DeleteProductPreviewView(APIView):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
-            return Response(
-                {'detail': 'Товар не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         old_storage_path = product.main_preview_storage_path
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 
@@ -521,15 +579,14 @@ class DeleteProductPreviewView(APIView):
         product.main_preview_storage_path = None
         product.save(update_fields=['main_preview_storage_path'])
 
-        return Response(
-            {'detail': 'Превью удалено.'},
-            status=status.HTTP_200_OK
-        )
+        return Response({'detail': 'Превью удалено.'}, status=status.HTTP_200_OK)
+
 
 class ProductModerationView(generics.UpdateAPIView):
     queryset = Product.objects.all().select_related('seller', 'category', 'license')
     serializer_class = ProductModerationSerializer
     permission_classes = [IsAdminRole]
+
 
 class ModerationQueueView(generics.ListAPIView):
     serializer_class = AdminProductSerializer
@@ -626,6 +683,7 @@ class MyPurchasedProductsView(generics.ListAPIView):
             'product__license',
             'order',
         )
+
 
 class MyFavoritesView(generics.ListAPIView):
     serializer_class = FavoriteSerializer
@@ -817,28 +875,14 @@ class DeleteCommentView(APIView):
         try:
             comment = Comment.objects.get(id=pk, user=request.user)
         except Comment.DoesNotExist:
-            return Response(
-                {'detail': 'Комментарий не найден.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Комментарий не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         comment.delete()
-        return Response(
-            {'detail': 'Комментарий удалён.'},
-            status=status.HTTP_200_OK,
-        )
+        return Response({'detail': 'Комментарий удалён.'}, status=status.HTTP_200_OK)
+
 
 class ProductDownloadView(APIView):
     permission_classes = [permissions.AllowAny]
-
-    def _get_download_url(self, request, product_file):
-        if product_file.storage_path:
-            return create_signed_file_url(product_file.storage_path, expires_in=3600)
-
-        if product_file.file:
-            return request.build_absolute_uri(product_file.file.url)
-
-        return None
 
     def get(self, request, pk):
         try:
@@ -849,27 +893,16 @@ class ProductDownloadView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        product_file = ProductFile.objects.filter(
-            product=product,
-            file_type='model',
-            is_primary=True
-        ).first()
+        product_file = get_product_file(product, ['model_source', 'model'], primary_first=True)
 
         if not product_file:
-            product_file = ProductFile.objects.filter(
-                product=product,
-                file_type='model'
-            ).first()
-
-        if not product_file or (not product_file.storage_path and not product_file.file):
             return Response(
                 {'detail': 'Файл для скачивания не найден.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Бесплатный товар можно скачать всем
         if product.price <= 0:
-            download_url = self._get_download_url(request, product_file)
+            download_url = build_product_file_url(request, product_file)
 
             if not download_url:
                 return Response(
@@ -888,7 +921,6 @@ class ProductDownloadView(APIView):
                 status=status.HTTP_200_OK
             )
 
-        # Платный товар: только buyer, который купил
         if not request.user.is_authenticated:
             return Response(
                 {'detail': 'Для скачивания платного товара нужно войти в аккаунт.'},
@@ -913,7 +945,7 @@ class ProductDownloadView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        download_url = self._get_download_url(request, product_file)
+        download_url = build_product_file_url(request, product_file)
 
         if not download_url:
             return Response(
@@ -945,30 +977,15 @@ class ProductViewerUrlView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        product_file = ProductFile.objects.filter(
-            product=product,
-            file_type='model',
-            is_primary=True
-        ).first()
+        product_file = get_product_file(product, ['viewer_model'], primary_first=True)
 
         if not product_file:
-            product_file = ProductFile.objects.filter(
-                product=product,
-                file_type='model'
-            ).first()
-
-        if not product_file or (not product_file.storage_path and not product_file.file):
             return Response(
-                {'detail': 'Файл 3D-модели не найден.'},
+                {'detail': 'Viewer-модель ещё не подготовлена.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if product_file.storage_path:
-            viewer_url = create_signed_file_url(product_file.storage_path, expires_in=3600)
-        elif product_file.file:
-            viewer_url = request.build_absolute_uri(product_file.file.url)
-        else:
-            viewer_url = None
+        viewer_url = build_product_file_url(request, product_file)
 
         if not viewer_url:
             return Response(
@@ -984,6 +1001,48 @@ class ProductViewerUrlView(APIView):
                 'file_type': product_file.file_type,
                 'original_name': product_file.original_name,
                 'mime_type': product_file.mime_type,
+                'viewer_status': product.viewer_status,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class ProductUVPreviewUrlView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        uv_file = get_product_file(product, ['uv_preview'], primary_first=True)
+
+        if not uv_file:
+            return Response(
+                {'detail': 'UV-развёртка не найдена.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        uv_url = build_product_file_url(request, uv_file)
+
+        if not uv_url:
+            return Response(
+                {'detail': 'Ссылка на UV-развёртку не может быть создана.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                'product_id': product.id,
+                'product_title': product.title,
+                'uv_preview_url': uv_url,
+                'file_type': uv_file.file_type,
+                'original_name': uv_file.original_name,
+                'mime_type': uv_file.mime_type,
             },
             status=status.HTTP_200_OK
         )

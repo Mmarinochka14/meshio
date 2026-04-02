@@ -8,13 +8,13 @@ export default function HeroSection() {
       <div className="hero__container">
         <div className="hero__content">
           <h1 className="hero__title text-h1">
-            Маркетплейс 3D-моделей для дизайнеров и разработчиков
+            Маркетплейс 3D-моделей <br /> для дизайнеров и разработчиков
           </h1>
 
-          <p className="hero__subtitle text-h3">
+          <h3 className="hero__subtitle text-h3">
             Просматривайте, настраивайте и покупайте 3D-модели с генерацией
             текстур
-          </p>
+          </h3>
 
           <div className="hero__actions">
             <Link

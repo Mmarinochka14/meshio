@@ -1,0 +1,26 @@
+.products-section {
+  width: 100%;
+  padding: 2.5vw 0; /* 48px */
+}
+
+.products-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25vw; /* 24px */
+}
+
+.products-section__title {
+  color: var(--color-grey-light);
+}
+
+.products-section__loading {
+  color: var(--color-grey-light);
+  opacity: 0.7;
+}
+
+.products-section__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25vw; /* 24px */
+}

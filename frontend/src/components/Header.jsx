@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getUser, isAuthenticated, subscribe } from "./auth/authStore";
 
 import logoIcon from "../assets/icons/logo.svg";
 import catalogIcon from "../assets/icons/catalog.svg";
@@ -9,9 +11,18 @@ import cartIcon from "../assets/icons/cart.svg";
 import loginIcon from "../assets/icons/login.svg";
 import userIcon from "../assets/icons/user.svg";
 
-export default function Header() {
-  const isAuthenticated = false;
-  const userName = "Матвей";
+export default function Header({ onLoginClick }) {
+  // подписка на изменения authStore, чтобы хедер обновлялся сразу после логина
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const unsub = subscribe(() => forceUpdate((x) => x + 1));
+    return unsub;
+  }, []);
+
+  const authed = isAuthenticated();
+  const user = getUser();
+  const userName = user?.username || "Профиль";
 
   return (
     <header className="header">
@@ -39,24 +50,28 @@ export default function Header() {
               </Link>
             </nav>
 
-            {isAuthenticated ? (
+            {authed ? (
               <Link to="/buyer/profile" className="header__auth-btn">
                 <img src={userIcon} alt="" className="header__auth-icon" />
                 <span>{userName}</span>
               </Link>
             ) : (
-              <Link to="/login" className="header__auth-btn">
+              <button
+                type="button"
+                className="header__auth-btn"
+                onClick={onLoginClick}
+              >
                 <img src={loginIcon} alt="" className="header__auth-icon" />
                 <span>Войти</span>
-              </Link>
+              </button>
             )}
           </div>
 
           <div className="header__bottom-row">
-            <button type="button" className="header__catalog-btn">
+            <Link to="/catalog" className="header__catalog-btn">
               <img src={catalogIcon} alt="" className="header__catalog-icon" />
               <span>Каталог</span>
-            </button>
+            </Link>
 
             <div className="header__search">
               <img src={searchIcon} alt="" className="header__search-icon" />

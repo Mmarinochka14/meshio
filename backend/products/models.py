@@ -69,6 +69,12 @@ class Product(models.Model):
         ('archived', 'Archived'),
     ]
 
+    VIEWER_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('ready', 'Ready'),
+        ('failed', 'Failed'),
+    ]
+
     seller = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -96,14 +102,20 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Цена')
 
-    model_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='glb', verbose_name='Формат')
+    # Исходный формат товара, который загрузил продавец
+    model_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='fbx', verbose_name='Формат')
+
+    # Формат browser-view версии
+    viewer_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='glb', verbose_name='Формат viewer')
+
     geometry_type = models.CharField(max_length=20, choices=GEOMETRY_CHOICES, default='polygonal', verbose_name='Геометрия')
-    model_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='glb', verbose_name='Формат')
-    geometry_type = models.CharField(max_length=20, choices=GEOMETRY_CHOICES, default='polygonal',
-                                     verbose_name='Геометрия')
-    poly_style = models.CharField(max_length=20, choices=POLY_STYLE_CHOICES, blank=True, null=True,
-                                  verbose_name='Стиль полигональности')
-    topology_type = models.CharField(max_length=20, choices=TOPOLOGY_CHOICES, default='quad', verbose_name='Топология')
+    poly_style = models.CharField(
+        max_length=20,
+        choices=POLY_STYLE_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name='Стиль полигональности'
+    )
     topology_type = models.CharField(max_length=20, choices=TOPOLOGY_CHOICES, default='quad', verbose_name='Топология')
 
     polygon_count = models.PositiveIntegerField(default=0, verbose_name='Количество полигонов')
@@ -112,12 +124,33 @@ class Product(models.Model):
     texture_type = models.CharField(max_length=100, blank=True, null=True, verbose_name='Тип текстур')
     has_rigging = models.BooleanField(default=False, verbose_name='Есть риг')
 
+    has_animation = models.BooleanField(default=False, verbose_name='Есть анимация')
+    animation_clips_count = models.PositiveIntegerField(default=0, verbose_name='Количество клипов анимации')
+
+    viewer_status = models.CharField(
+        max_length=20,
+        choices=VIEWER_STATUS_CHOICES,
+        default='pending',
+        verbose_name='Статус viewer-модели'
+    )
+    viewer_error = models.TextField(blank=True, null=True, verbose_name='Ошибка подготовки viewer')
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name='Статус')
     moderation_comment = models.TextField(blank=True, null=True, verbose_name='Комментарий модератора')
-    main_preview = models.ImageField(upload_to='products/previews/', blank=True, null=True,
-                                     verbose_name='Главное превью')
-    main_preview_storage_path = models.CharField(max_length=500, blank=True, null=True,
-                                                 verbose_name='Путь превью в Supabase')
+
+    # Оставляем для совместимости/переходного периода
+    main_preview = models.ImageField(
+        upload_to='products/previews/',
+        blank=True,
+        null=True,
+        verbose_name='Главное превью'
+    )
+    main_preview_storage_path = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Путь превью в Object Storage'
+    )
 
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, verbose_name='Средний рейтинг')
     reviews_count = models.PositiveIntegerField(default=0, verbose_name='Количество отзывов')
@@ -139,11 +172,26 @@ class Product(models.Model):
 
 class ProductFile(models.Model):
     FILE_TYPE_CHOICES = [
-        ('model', '3D Model'),
-        ('texture', 'Texture'),
+        ('model_source', 'Source 3D Model'),
+        ('viewer_model', 'Viewer 3D Model'),
+
         ('preview', 'Preview'),
         ('uv_preview', 'UV Preview'),
         ('wireframe_preview', 'Wireframe Preview'),
+
+        ('texture_basecolor', 'Base Color Texture'),
+        ('texture_normal', 'Normal Texture'),
+        ('texture_roughness', 'Roughness Texture'),
+        ('texture_metallic', 'Metallic Texture'),
+        ('texture_opacity', 'Opacity Texture'),
+        ('texture_emissive', 'Emissive Texture'),
+
+        ('generated_texture', 'Generated Texture'),
+        ('download_bundle', 'Download Bundle'),
+
+        # legacy fallback
+        ('model', 'Legacy 3D Model'),
+        ('texture', 'Legacy Texture'),
         ('other', 'Other'),
     ]
 
@@ -153,24 +201,125 @@ class ProductFile(models.Model):
         related_name='files',
         verbose_name='Товар'
     )
-    file_type = models.CharField(max_length=30, choices=FILE_TYPE_CHOICES, default='model', verbose_name='Тип файла')
-    file = models.FileField(upload_to='products/files/', verbose_name='Файл')
+    file_type = models.CharField(max_length=30, choices=FILE_TYPE_CHOICES, default='model_source', verbose_name='Тип файла')
+    file = models.FileField(upload_to='products/files/', blank=True, null=True, verbose_name='Файл')
 
-    storage_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Путь в Supabase')
+    storage_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Путь в Object Storage')
     original_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='Исходное имя')
     mime_type = models.CharField(max_length=100, blank=True, null=True, verbose_name='MIME-тип')
     size = models.PositiveIntegerField(default=0, verbose_name='Размер файла в байтах')
     is_primary = models.BooleanField(default=False, verbose_name='Основной файл')
+
+    preset_slug = models.CharField(max_length=100, blank=True, null=True, verbose_name='Slug пресета')
+    generated_from_prompt = models.TextField(blank=True, null=True, verbose_name='Промпт генерации')
+    sort_order = models.PositiveIntegerField(default=0, verbose_name='Порядок')
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
 
     class Meta:
         verbose_name = 'Файл товара'
         verbose_name_plural = 'Файлы товара'
-        ordering = ['-created_at']
+        ordering = ['sort_order', '-created_at']
 
     def __str__(self):
         return f'{self.product.title} - {self.file_type}'
+
+
+class MaterialPreset(models.Model):
+    CATEGORY_CHOICES = [
+        ('wood', 'Wood'),
+        ('glass', 'Glass'),
+        ('metal', 'Metal'),
+        ('plastic', 'Plastic'),
+        ('stone', 'Stone'),
+        ('fabric', 'Fabric'),
+        ('leather', 'Leather'),
+        ('ceramic', 'Ceramic'),
+        ('sci_fi', 'Sci-Fi'),
+        ('other', 'Other'),
+    ]
+
+    name = models.CharField(max_length=100, verbose_name='Название')
+    slug = models.SlugField(unique=True, verbose_name='Слаг')
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, verbose_name='Категория')
+
+    description = models.TextField(blank=True, null=True, verbose_name='Описание')
+    preview_image_storage_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Путь превью пресета')
+
+    base_color = models.CharField(max_length=20, blank=True, null=True, verbose_name='Базовый цвет')
+    roughness = models.FloatField(default=0.5, verbose_name='Roughness')
+    metalness = models.FloatField(default=0.0, verbose_name='Metalness')
+    transmission = models.FloatField(default=0.0, verbose_name='Transmission')
+    opacity = models.FloatField(default=1.0, verbose_name='Opacity')
+    emissive_color = models.CharField(max_length=20, blank=True, null=True, verbose_name='Emissive color')
+
+    basecolor_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Base color texture')
+    normal_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Normal texture')
+    roughness_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Roughness texture')
+    metallic_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Metallic texture')
+    opacity_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Opacity texture')
+    emissive_texture_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Emissive texture')
+
+    is_active = models.BooleanField(default=True, verbose_name='Активен')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+
+    class Meta:
+        verbose_name = 'Пресет материала'
+        verbose_name_plural = 'Пресеты материалов'
+        ordering = ['category', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class GeneratedTexture(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('ready', 'Ready'),
+        ('failed', 'Failed'),
+    ]
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='generated_textures',
+        verbose_name='Товар'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='generated_textures',
+        verbose_name='Пользователь'
+    )
+    preset = models.ForeignKey(
+        MaterialPreset,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='generated_textures',
+        verbose_name='Пресет'
+    )
+
+    prompt = models.TextField(blank=True, null=True, verbose_name='Промпт')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Статус')
+
+    image_storage_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Путь итоговой текстуры')
+    preview_storage_path = models.CharField(max_length=500, blank=True, null=True, verbose_name='Путь превью текстуры')
+
+    width = models.PositiveIntegerField(default=0, verbose_name='Ширина')
+    height = models.PositiveIntegerField(default=0, verbose_name='Высота')
+
+    error_message = models.TextField(blank=True, null=True, verbose_name='Ошибка')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+
+    class Meta:
+        verbose_name = 'Сгенерированная текстура'
+        verbose_name_plural = 'Сгенерированные текстуры'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.product.title} - {self.user.username} - {self.created_at:%Y-%m-%d %H:%M}'
+
 
 class Order(models.Model):
     STATUS_CHOICES = [
