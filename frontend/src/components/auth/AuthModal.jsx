@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../modals/Modal";
 import "../../styles/auth-modal.css";
 
 import { loginRequest, registerRequest } from "../../api/auth";
 
-export default function AuthModal({ isOpen, onClose }) {
+export default function AuthModal({
+  isOpen,
+  onClose,
+  initialStep = "login",
+  initialRole = "",
+}) {
   const [step, setStep] = useState("login");
   // login | registerRole | registerForm
 
-  const [role, setRole] = useState(""); // buyer | seller
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
 
   const [loginForm, setLoginForm] = useState({
@@ -23,6 +28,27 @@ export default function AuthModal({ isOpen, onClose }) {
     password_confirm: "",
     agree: false,
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setError("");
+
+    if (initialStep === "registerForm" && initialRole) {
+      setStep("registerForm");
+      setRole(initialRole);
+      return;
+    }
+
+    if (initialStep === "registerRole") {
+      setStep("registerRole");
+      setRole(initialRole || "");
+      return;
+    }
+
+    setStep("login");
+    setRole("");
+  }, [isOpen, initialStep, initialRole]);
 
   function closeAndReset() {
     setStep("login");
@@ -45,8 +71,8 @@ export default function AuthModal({ isOpen, onClose }) {
 
     try {
       await loginRequest(loginForm.username, loginForm.password);
-      closeAndReset(); // хедер обновится сам
-    } catch (err) {
+      closeAndReset();
+    } catch {
       setError("Неверный логин или пароль.");
     }
   }
@@ -59,6 +85,11 @@ export default function AuthModal({ isOpen, onClose }) {
   async function handleRegisterSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (!role) {
+      setError("Сначала выберите роль.");
+      return;
+    }
 
     if (!registerForm.agree) {
       setError("Нужно согласиться с правилами.");
@@ -74,9 +105,8 @@ export default function AuthModal({ isOpen, onClose }) {
         role,
       });
 
-      closeAndReset(); // пользователь уже авторизован (token+user пришли)
-    } catch (err) {
-      // часто тут: username/email уже заняты, или пароли не совпадают, или пароль короткий
+      closeAndReset();
+    } catch {
       setError("Ошибка регистрации. Проверь данные (username/email/пароли).");
     }
   }
@@ -95,7 +125,10 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Введите никнейм"
                 value={loginForm.username}
                 onChange={(e) =>
-                  setLoginForm((p) => ({ ...p, username: e.target.value }))
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    username: e.target.value,
+                  }))
                 }
               />
             </label>
@@ -108,12 +141,17 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Введите пароль"
                 value={loginForm.password}
                 onChange={(e) =>
-                  setLoginForm((p) => ({ ...p, password: e.target.value }))
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
                 }
               />
             </label>
 
-            {error && <div className="auth-modal__error text-p2">{error}</div>}
+            {error ? (
+              <div className="auth-modal__error text-p2">{error}</div>
+            ) : null}
 
             <div className="auth-modal__row">
               <button type="button" className="auth-modal__link text-p2">
@@ -130,7 +168,11 @@ export default function AuthModal({ isOpen, onClose }) {
               <button
                 type="button"
                 className="auth-modal__link"
-                onClick={() => setStep("registerRole")}
+                onClick={() => {
+                  setError("");
+                  setRole("");
+                  setStep("registerRole");
+                }}
               >
                 Зарегистрироваться
               </button>
@@ -191,7 +233,10 @@ export default function AuthModal({ isOpen, onClose }) {
             <button
               type="button"
               className="auth-modal__link"
-              onClick={() => setStep("login")}
+              onClick={() => {
+                setError("");
+                setStep("login");
+              }}
             >
               Войти
             </button>
@@ -203,6 +248,12 @@ export default function AuthModal({ isOpen, onClose }) {
         <div className="auth-modal">
           <h2 className="auth-modal__title text-h2">Регистрация</h2>
 
+          {role === "seller" ? (
+            <div className="auth-modal__role-badge text-p2"></div>
+          ) : role === "buyer" ? (
+            <div className="auth-modal__role-badge text-p2"></div>
+          ) : null}
+
           <form onSubmit={handleRegisterSubmit} className="auth-modal__form">
             <label className="auth-modal__field">
               <span className="auth-modal__label text-p2">Никнейм</span>
@@ -211,7 +262,10 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Введите никнейм"
                 value={registerForm.username}
                 onChange={(e) =>
-                  setRegisterForm((p) => ({ ...p, username: e.target.value }))
+                  setRegisterForm((prev) => ({
+                    ...prev,
+                    username: e.target.value,
+                  }))
                 }
               />
             </label>
@@ -225,7 +279,10 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Введите электронную почту"
                 value={registerForm.email}
                 onChange={(e) =>
-                  setRegisterForm((p) => ({ ...p, email: e.target.value }))
+                  setRegisterForm((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
                 }
               />
             </label>
@@ -238,7 +295,10 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Введите пароль"
                 value={registerForm.password}
                 onChange={(e) =>
-                  setRegisterForm((p) => ({ ...p, password: e.target.value }))
+                  setRegisterForm((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
                 }
               />
             </label>
@@ -253,8 +313,8 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="Подтвердите пароль"
                 value={registerForm.password_confirm}
                 onChange={(e) =>
-                  setRegisterForm((p) => ({
-                    ...p,
+                  setRegisterForm((prev) => ({
+                    ...prev,
                     password_confirm: e.target.value,
                   }))
                 }
@@ -266,7 +326,10 @@ export default function AuthModal({ isOpen, onClose }) {
                 type="checkbox"
                 checked={registerForm.agree}
                 onChange={(e) =>
-                  setRegisterForm((p) => ({ ...p, agree: e.target.checked }))
+                  setRegisterForm((prev) => ({
+                    ...prev,
+                    agree: e.target.checked,
+                  }))
                 }
               />
               <span className="text-p2">
@@ -274,7 +337,9 @@ export default function AuthModal({ isOpen, onClose }) {
               </span>
             </label>
 
-            {error && <div className="auth-modal__error text-p2">{error}</div>}
+            {error ? (
+              <div className="auth-modal__error text-p2">{error}</div>
+            ) : null}
 
             <button
               type="submit"
@@ -289,7 +354,10 @@ export default function AuthModal({ isOpen, onClose }) {
               <button
                 type="button"
                 className="auth-modal__link"
-                onClick={() => setStep("login")}
+                onClick={() => {
+                  setError("");
+                  setStep("login");
+                }}
               >
                 Войти
               </button>

@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import "../../styles/modal.css";
 
-export default function Modal({ isOpen, onClose, children }) {
+export default function Modal({
+  isOpen,
+  onClose,
+  children,
+  panelClassName = "",
+}) {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -22,7 +27,10 @@ export default function Modal({ isOpen, onClose, children }) {
 
   return (
     <div className="modal" onMouseDown={onClose}>
-      <div className="modal__panel" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className={`modal__panel ${panelClassName}`.trim()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           className="modal__close"

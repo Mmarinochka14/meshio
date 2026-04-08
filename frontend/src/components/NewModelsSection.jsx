@@ -32,7 +32,7 @@ export default function NewModelsSection() {
   return (
     <section className="new-models-section">
       <div className="new-models-section__container">
-        <h2 className="new-models-section__title text-h2">Новинки</h2>
+        <h3 className="new-models-section__title text-h3">Новинки</h3>
 
         {isLoading ? (
           <div className="new-models-section__state text-p2">Загрузка…</div>

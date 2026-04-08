@@ -1,16 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/product-card.css";
 
 import heartIcon from "../assets/icons/favorite.svg";
 import cartIcon from "../assets/icons/cart.svg";
+import trashIcon from "../assets/icons/delete.svg";
 import eyeIcon from "../assets/icons/eye.svg";
 import commentIcon from "../assets/icons/comment.svg";
 import starIcon from "../assets/icons/star.svg";
 import starEmptyIcon from "../assets/icons/star-empty.svg";
 
-export default function ProductCard({ product }) {
-  const [isFavorite, setIsFavorite] = useState(false);
+import { getToken, getUser } from "./auth/authStore";
+import { openAuthModal } from "./auth/openAuthModal";
+import { addToFavorites, removeFromFavorites } from "../api/products";
+import { addToCartRequest } from "../api/cart";
+import {
+  addToGuestCart,
+  isBuyerAuthenticated,
+  isInGuestCart,
+  removeFromGuestCart,
+  subscribeCart,
+} from "./cart/cartStore";
+import {
+  addFavoriteId,
+  isFavoriteStored,
+  removeFavoriteId,
+  subscribeFavorites,
+} from "./favorites/favoritesStore";
+
+export default function ProductCard({ product, forceFavoriteActive = false }) {
+  const [isFavorite, setIsFavorite] = useState(
+    forceFavoriteActive || Boolean(product?.is_favorite),
+  );
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
+  const [isInCart, setIsInCart] = useState(false);
+  const [isCartLoading, setIsCartLoading] = useState(false);
 
   const {
     id,
@@ -24,6 +49,11 @@ export default function ProductCard({ product }) {
     views_count,
     comments_count,
   } = product;
+
+  const token = getToken();
+  const user = getUser();
+  const isAuthenticated = Boolean(token);
+  const isBuyer = user?.role === "buyer";
 
   const rawPreview =
     product.main_preview_url || product.preview_url || product.preview || "";
@@ -59,21 +89,109 @@ export default function ProductCard({ product }) {
       : null,
   ].filter(Boolean);
 
-  const handleFavoriteClick = (event) => {
+  const isFree = displayPrice <= 0;
+  const backendCartAvailable = isBuyerAuthenticated();
+
+  useEffect(() => {
+    setIsFavorite(
+      forceFavoriteActive ||
+        Boolean(product?.is_favorite) ||
+        isFavoriteStored(id),
+    );
+  }, [forceFavoriteActive, product?.is_favorite, id]);
+
+  useEffect(() => {
+    const unsub = subscribeFavorites(() => {
+      setIsFavorite(
+        forceFavoriteActive ||
+          Boolean(product?.is_favorite) ||
+          isFavoriteStored(id),
+      );
+    });
+
+    return unsub;
+  }, [forceFavoriteActive, product?.is_favorite, id]);
+
+  useEffect(() => {
+    if (!backendCartAvailable) {
+      setIsInCart(isInGuestCart(id));
+    }
+  }, [id, backendCartAvailable]);
+
+  useEffect(() => {
+    const unsub = subscribeCart(() => {
+      if (!backendCartAvailable) {
+        setIsInCart(isInGuestCart(id));
+      }
+    });
+
+    return unsub;
+  }, [id, backendCartAvailable]);
+
+  const handleFavoriteClick = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsFavorite((prev) => !prev);
 
-    // Потом сюда можно добавить запрос на backend:
-    // POST / DELETE favorite
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+
+    if (!isBuyer) {
+      return;
+    }
+
+    try {
+      setIsFavoriteLoading(true);
+
+      if (isFavorite) {
+        await removeFromFavorites(id);
+        removeFavoriteId(id);
+        setIsFavorite(false);
+      } else {
+        await addToFavorites(id);
+        addFavoriteId(id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Не удалось обновить избранное", error);
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
-  const handleCartClick = (event) => {
+  const handleCartClick = async (event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // Потом сюда можно добавить запрос на backend:
-    // POST cart item
+    if (isFree) return;
+
+    try {
+      setIsCartLoading(true);
+
+      if (backendCartAvailable && user?.role === "buyer") {
+        if (isInCart) {
+          return;
+        }
+
+        await addToCartRequest(id);
+        setIsInCart(true);
+        return;
+      }
+
+      if (isInCart) {
+        removeFromGuestCart(id);
+        setIsInCart(false);
+        return;
+      }
+
+      addToGuestCart(id);
+      setIsInCart(true);
+    } catch (error) {
+      console.error("Не удалось обновить корзину", error);
+    } finally {
+      setIsCartLoading(false);
+    }
   };
 
   return (
@@ -86,6 +204,7 @@ export default function ProductCard({ product }) {
           }`}
           aria-label="Добавить в избранное"
           onClick={handleFavoriteClick}
+          disabled={isFavoriteLoading}
         >
           <img src={heartIcon} alt="" className="product-card__favorite-icon" />
         </button>
@@ -155,7 +274,9 @@ export default function ProductCard({ product }) {
 
         <h3 className="product-card__title text-p1">{displayTitle}</h3>
 
-        <div className="product-card__price text-h3">{displayPrice} ₽</div>
+        <div className="product-card__price text-h3">
+          {isFree ? "Бесплатно" : `${displayPrice} ₽`}
+        </div>
 
         {tags.length > 0 && (
           <div className="product-card__tags">
@@ -169,11 +290,26 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className="product-card__cart-btn text-p2"
+          className={`product-card__cart-btn text-p2 ${
+            isInCart ? "product-card__cart-btn--active" : ""
+          }`}
           onClick={handleCartClick}
+          disabled={isCartLoading}
         >
-          <img src={cartIcon} alt="" className="product-card__cart-icon" />
-          <span>В корзину</span>
+          <img
+            src={isInCart ? trashIcon : cartIcon}
+            alt=""
+            className="product-card__cart-icon"
+          />
+          <span>
+            {isFree
+              ? "Скачать"
+              : isCartLoading
+                ? "Обработка..."
+                : isInCart
+                  ? "Убрать из корзины"
+                  : "В корзину"}
+          </span>
         </button>
       </div>
     </Link>

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import Http404
 
-from core.supabase_storage import delete_file_from_supabase, upload_file_to_supabase
+from core.object_storage import delete_file_from_storage, upload_file_to_storage
 from .models import SellerProfile, User
 from .permissions import IsAdminRole, IsApprovedSeller
 from .serializers import (
@@ -94,7 +94,7 @@ class UploadUserAvatarView(APIView):
         old_storage_path = request.user.avatar_storage_path
 
         try:
-            upload_result = upload_file_to_supabase(
+            upload_result = upload_file_to_storage(
                 uploaded_file,
                 folder=f'users/{request.user.id}/avatar'
             )
@@ -109,7 +109,8 @@ class UploadUserAvatarView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                (delete_file_from_storage
+                 (old_storage_path))
         except Exception:
             pass
 
@@ -133,7 +134,7 @@ class DeleteUserAvatarView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 
@@ -169,7 +170,7 @@ class UploadSellerAvatarView(APIView):
         old_storage_path = profile.store_avatar_storage_path
 
         try:
-            upload_result = upload_file_to_supabase(
+            upload_result = upload_file_to_storage(
                 uploaded_file,
                 folder=f'stores/{request.user.id}/avatar'
             )
@@ -184,7 +185,7 @@ class UploadSellerAvatarView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 
@@ -215,7 +216,7 @@ class DeleteSellerAvatarView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 
@@ -248,7 +249,7 @@ class DeleteSellerProfileView(APIView):
 
         try:
             if old_storage_path:
-                delete_file_from_supabase(old_storage_path)
+                delete_file_from_storage(old_storage_path)
         except Exception:
             pass
 

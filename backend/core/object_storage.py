@@ -6,8 +6,24 @@ import boto3
 from botocore.client import Config
 from django.conf import settings
 
+import mimetypes
+import uuid
+from pathlib import Path
+
+import boto3
+from botocore.client import Config
+from django.conf import settings
+
+
+_S3_CLIENT = None
+
 
 def get_s3_client():
+    global _S3_CLIENT
+
+    if _S3_CLIENT is not None:
+        return _S3_CLIENT
+
     access_key = settings.CLOUDRU_ACCESS_KEY_ID
     secret_key = settings.CLOUDRU_SECRET_ACCESS_KEY
     endpoint_url = settings.CLOUDRU_STORAGE_ENDPOINT
@@ -16,7 +32,7 @@ def get_s3_client():
     if not access_key or not secret_key or not endpoint_url or not region_name:
         raise ValueError("Cloud.ru Object Storage credentials are not configured.")
 
-    return boto3.client(
+    _S3_CLIENT = boto3.client(
         "s3",
         endpoint_url=endpoint_url,
         region_name=region_name,
@@ -24,7 +40,7 @@ def get_s3_client():
         aws_secret_access_key=secret_key,
         config=Config(signature_version="s3v4"),
     )
-
+    return _S3_CLIENT
 
 def get_bucket_name():
     bucket = settings.CLOUDRU_STORAGE_BUCKET

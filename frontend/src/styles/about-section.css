@@ -1,0 +1,81 @@
+.about-section {
+  width: 100%;
+  padding-top: 2.5vw;
+  padding-bottom: 1.6667vw;
+  background: var(--color-grey-dark);
+}
+
+.about-section__container {
+  width: 75vw;
+  margin: 0 auto;
+}
+
+.about-section__title {
+  color: var(--color-white);
+  margin-bottom: 2.0833vw;
+}
+
+.about-section__divider {
+  width: 100%;
+  height: 0.0521vw;
+  background: #2b2d35;
+  margin-bottom: 1.4583vw;
+}
+
+.about-section__grid {
+  display: grid;
+  grid-template-columns: 1fr 0.48fr;
+  gap: 1.0417vw;
+  align-items: stretch;
+}
+
+.about-section__main-card,
+.about-section__stat-card {
+  border-radius: 0.8333vw;
+  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
+  border: 0.0521vw solid #22242d;
+}
+
+.about-section__main-card {
+  padding: 2.5vw;
+  min-height: 15.625vw;
+}
+
+.about-section__brand {
+  color: var(--color-white);
+  margin-bottom: 1.0417vw;
+}
+
+.about-section__subtitle {
+  color: var(--color-white);
+  margin-bottom: 1.0417vw;
+  max-width: 30vw;
+}
+
+.about-section__text {
+  color: #d2d4dc;
+  max-width: 31.5vw;
+}
+
+.about-section__stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.0417vw;
+}
+
+.about-section__stat-card {
+  padding: 1.6667vw 1.25vw;
+  min-height: 7.2917vw;
+}
+
+.about-section__stat-value {
+  color: var(--color-white);
+  margin-bottom: 0.625vw;
+}
+
+.about-section__stat-label {
+  color: #d2d4dc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1042vw;
+}

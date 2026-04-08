@@ -33,7 +33,7 @@ export default function WeeklyModelsSection() {
   return (
     <section className="weekly-models-section">
       <div className="weekly-models-section__container">
-        <h2 className="weekly-models-section__title text-h2">Модели недели</h2>
+        <h3 className="weekly-models-section__title text-h3">Модели недели</h3>
 
         {isLoading ? (
           <div className="weekly-models-section__state text-p2">Загрузка…</div>

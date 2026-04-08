@@ -7,6 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: 2.5vw;
+  border: 0.1vw solid #22242d;
 }
 
 .modal__panel {
@@ -35,4 +36,12 @@
 
 .modal__close:hover {
   opacity: 1;
+}
+
+.modal__panel--seller-start {
+  width: 65vw;
+  height: 40vw;
+  padding: 2.5vw;
+  border-radius: 1.6667vw;
+  border: 0.1vw solid #22242d;
 }

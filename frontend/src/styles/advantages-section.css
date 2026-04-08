@@ -1,6 +1,7 @@
 .advantages-section {
   width: 100%;
-  padding-top: 3.3333vw; /* 64px */
+  padding-top: 3.3333vw; 
+  padding-bottom: 3.3333vw; 
 }
 
 .advantages-section__container {
@@ -23,7 +24,8 @@
   min-height: 15.2083vw; /* 292px */
   padding: 1.6667vw; /* 32px */
   border-radius: 0.8333vw; /* 16px */
-  background: var(--color-grey);
+  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
+  border: 0.0521vw solid #22242d;
 }
 
 .advantages-section__top {
@@ -42,7 +44,7 @@
   width: 4.1667vw; /* 80px */
   height: 4.1667vw; /* 80px */
   border-radius: 50%;
-  background: var(--color-purple);
+  background: linear-gradient(180deg, #936dfb 0%, #7222ea 100%);
   display: flex;
   align-items: center;
   justify-content: center;

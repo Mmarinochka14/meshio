@@ -7,27 +7,28 @@ export default function FAQSection() {
   const items = [
     {
       id: "q1",
-      question: "Нужно ли устанавливать дополнительное ПО?",
+      question:
+        "Нужно ли устанавливать дополнительное программное обеспечение?",
       answer:
-        "Нет. Просмотр моделей доступен в браузере. Для работы с файлами после скачивания может понадобиться 3D-редактор (например, Blender).",
+        "Нет. Просмотр 3D-моделей и базовая настройка материалов доступны прямо в браузере. Для дальнейшей работы со скачанными файлами может понадобиться 3D-редактор, например Blender.",
     },
     {
       id: "q2",
       question: "В каких форматах доступны 3D-модели?",
       answer:
-        "Формат указан в карточке товара. В каталоге также можно отфильтровать модели по формату (GLB/GLTF/FBX/OBJ и др.).",
+        "Формат зависит от конкретного товара и указывается в карточке модели. На платформе поддерживаются популярные форматы, включая GLB, GLTF, FBX, OBJ и другие.",
     },
     {
       id: "q3",
       question: "Как происходит скачивание модели после покупки?",
       answer:
-        "После покупки модель станет доступна для скачивания в личном кабинете. Бесплатные модели можно скачать сразу.",
+        "После успешной покупки модель становится доступной для скачивания в личном кабинете пользователя. Бесплатные модели можно скачать сразу.",
     },
     {
       id: "q4",
       question: "Кто может стать продавцом на платформе?",
       answer:
-        "Любой пользователь. Для публикации товаров продавец проходит подтверждение и модерацию моделей.",
+        "Подать заявку на размещение моделей может любой пользователь. Перед публикацией товары проходят модерацию, а аккаунт продавца — подтверждение.",
     },
   ];
 
@@ -35,6 +36,8 @@ export default function FAQSection() {
     <section className="faq-section">
       <div className="faq-section__container">
         <h3 className="faq-section__title text-h3">Часто задаваемые вопросы</h3>
+
+        <div className="faq-section__divider" />
 
         <div className="faq-section__list">
           {items.map((item) => {
@@ -50,11 +53,12 @@ export default function FAQSection() {
                   className="faq-section__button"
                   onClick={() => setOpenId(isOpen ? "" : item.id)}
                 >
-                  <span className="faq-section__question text-p2">
+                  <span className="faq-section__question text-p1">
                     {item.question}
                   </span>
-                  <span className="faq-section__toggle text-p2">
-                    {isOpen ? "—" : "+"}
+
+                  <span className="faq-section__toggle text-p1">
+                    {isOpen ? "−" : "+"}
                   </span>
                 </button>
 

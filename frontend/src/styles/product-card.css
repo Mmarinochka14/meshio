@@ -184,3 +184,15 @@
   height: 1.0417vw; /* 20px */
   object-fit: contain;
 }
+
+
+.product-card__cart-btn--active {
+  background: transparent;
+  border: 0.0521vw solid var(--color-grey-super-light);
+  color: var(--color-white);
+}
+
+.product-card__cart-btn--active:hover {
+  background: var(--color-grey-hover);
+  border-color: var(--color-grey-light);
+}

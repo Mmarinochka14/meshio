@@ -1,0 +1,52 @@
+.audience-section {
+  width: 100%;
+  padding-top: 1.6667vw;
+  padding-bottom: 1.6667vw;
+  background: var(--color-grey-dark);
+}
+
+.audience-section__container {
+  width: 75vw;
+  margin: 0 auto;
+}
+
+.audience-section__title {
+  color: var(--color-white);
+  margin-bottom: 1.25vw;
+}
+
+.audience-section__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.0417vw;
+}
+
+.audience-section__card {
+  border-radius: 0.8333vw;
+  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
+  border: 0.0521vw solid #22242d;
+  padding: 2.0833vw 1.6667vw 1.6667vw;
+  min-height: 14.0625vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.audience-section__icon-placeholder {
+  width: 9.375vw;
+  height: 6.25vw;
+  border-radius: 0.8333vw;
+  background: linear-gradient(180deg, #936dfb 0%, #7222ea 100%);
+  margin-bottom: 1.0417vw;
+}
+
+.audience-section__card-title {
+  color: var(--color-white);
+  margin-bottom: 0.625vw;
+}
+
+.audience-section__text {
+  color: #d2d4dc;
+  max-width: 21vw;
+}

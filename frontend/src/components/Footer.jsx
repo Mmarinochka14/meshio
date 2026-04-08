@@ -5,7 +5,7 @@ import logo from "../assets/icons/logo.svg";
 import telegramIcon from "../assets/icons/telegram.svg";
 import vkIcon from "../assets/icons/vk.svg";
 
-export default function Footer() {
+export default function Footer({ onOpenSellerModal }) {
   return (
     <footer className="footer">
       <div className="footer__container">
@@ -21,16 +21,20 @@ export default function Footer() {
             <Link to="/catalog" className="footer__link text-p2">
               Каталог моделей
             </Link>
-            <Link to="/qa" className="footer__link text-p2">
+            <Link to="/faq" className="footer__link text-p2">
               Q&amp;A
             </Link>
           </div>
 
           <div className="footer__column">
             <h3 className="footer__title text-p1">Продавцам</h3>
-            <Link to="/seller/start" className="footer__link text-p2">
+            <button
+              type="button"
+              className="footer__link footer__link--button text-p2"
+              onClick={onOpenSellerModal}
+            >
               Стать продавцом
-            </Link>
+            </button>
             <Link to="/seller/terms" className="footer__link text-p2">
               Условия сотрудничества
             </Link>

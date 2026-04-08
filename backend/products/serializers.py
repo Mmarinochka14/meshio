@@ -1,18 +1,21 @@
 from rest_framework import serializers
-
-from core.supabase_storage import create_signed_file_url
+from core.object_storage import create_signed_file_url
 from .models import (
     Category,
     Comment,
+    ContactRequest,
     Favorite,
     GeneratedTexture,
     License,
     MaterialPreset,
+    NewsletterSubscription,
     Order,
     OrderItem,
     Product,
     ProductFile,
     Review,
+    Cart,
+    CartItem,
 )
 
 
@@ -156,6 +159,8 @@ class ProductListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
     main_preview_url = serializers.SerializerMethodField()
+    is_favorite = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -173,11 +178,13 @@ class ProductListSerializer(serializers.ModelSerializer):
             'views_count',
             'favorites_count',
             'sales_count',
+            'comments_count',
             'seller_username',
             'category',
             'license',
             'main_preview',
             'main_preview_url',
+            'is_favorite',
             'created_at',
         ]
 
@@ -199,18 +206,26 @@ class ProductListSerializer(serializers.ModelSerializer):
 
         return None
 
+    def get_is_favorite(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return Favorite.objects.filter(user=request.user, product=obj).exists()
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     seller_username = serializers.CharField(source='seller.username', read_only=True)
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
-    files = ProductFileSerializer(many=True, read_only=True)
     main_preview_url = serializers.SerializerMethodField()
     viewer_url = serializers.SerializerMethodField()
     uv_preview_url = serializers.SerializerMethodField()
     wireframe_preview_url = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
     has_purchase = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -224,6 +239,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'model_format',
             'viewer_format',
             'viewer_status',
+            'comments_count',
             'viewer_error',
             'geometry_type',
             'poly_style',
@@ -250,7 +266,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'wireframe_preview_url',
             'is_favorite',
             'has_purchase',
-            'files',
             'created_at',
             'updated_at',
         ]
@@ -272,6 +287,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return build_public_file_url(preview_file, request=request)
 
         return None
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
 
     def get_viewer_url(self, obj):
         request = self.context.get('request')
@@ -515,3 +533,129 @@ class ProductFileUploadSerializer(serializers.Serializer):
 
 class ProductPreviewUploadSerializer(serializers.Serializer):
     file = serializers.ImageField()
+
+class GenerateTextureSerializer(serializers.Serializer):
+    prompt = serializers.CharField(max_length=1000)
+
+    def validate_prompt(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Промпт не может быть пустым.")
+        return value
+
+class ContactRequestCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactRequest
+        fields = [
+            'name',
+            'email',
+            'subject',
+            'message',
+        ]
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Имя не может быть пустым.')
+        return value
+
+    def validate_subject(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Тема не может быть пустой.')
+        return value
+
+    def validate_message(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Сообщение не может быть пустым.')
+        return value
+
+
+class ContactRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactRequest
+        fields = [
+            'id',
+            'name',
+            'email',
+            'subject',
+            'message',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class NewsletterSubscribeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+
+class NewsletterSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscription
+        fields = [
+            'id',
+            'email',
+            'status',
+            'source',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer(read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = [
+            'id',
+            'product',
+            'created_at',
+        ]
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_items = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = [
+            'id',
+            'items',
+            'total_items',
+            'total_price',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_total_items(self, obj):
+        return obj.items.count()
+
+    def get_total_price(self, obj):
+        total = sum(item.product.price for item in obj.items.select_related('product'))
+        return total
+
+
+class CartActionSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+
+
+class CartMergeSerializer(serializers.Serializer):
+    product_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=True,
+    )
+
+
+class ProductIdsSerializer(serializers.Serializer):
+    product_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=True,
+    )

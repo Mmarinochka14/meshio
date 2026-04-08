@@ -36,7 +36,7 @@ export default function AdvantagesSection() {
   return (
     <section className="advantages-section">
       <div className="advantages-section__container">
-        <h2 className="advantages-section__title text-h2">Преимущества</h2>
+        <h3 className="advantages-section__title text-h3">Преимущества</h3>
 
         <div className="advantages-section__grid">
           {advantages.map((item) => (

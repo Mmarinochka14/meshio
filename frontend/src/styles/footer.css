@@ -112,3 +112,11 @@
 .footer__copyright {
   color: var(--color-white);
 }
+
+.footer__link--button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}

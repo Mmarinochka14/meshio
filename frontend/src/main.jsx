@@ -5,9 +5,7 @@ import { AuthModalProvider } from "./components/AuthModalContext.jsx";
 import "./styles/global.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthModalProvider>
-      <AppRouter />
-    </AuthModalProvider>
-  </React.StrictMode>,
+  <AuthModalProvider>
+    <AppRouter />
+  </AuthModalProvider>,
 );

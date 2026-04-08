@@ -2,14 +2,21 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
+import AboutPage from "../pages/AboutPage";
 import BuyerProfilePage from "../pages/BuyerProfilePage";
+import CartPage from "../pages/CartPage";
 import CatalogPage from "../pages/CatalogPage";
+import ContactsPage from "../pages/ContactsPage";
+import FAQPage from "../pages/FAQPage";
+import FavoritesPage from "../pages/FavoritesPage";
 import HomePage from "../pages/HomePage";
-import LoginPage from "../pages/LoginPage";
+import MyModelsPage from "../pages/MyModelsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProductPage from "../pages/ProductPage";
-import RegisterPage from "../pages/RegisterPage";
 import SellerDashboardPage from "../pages/SellerDashboardPage";
+import SellerLayout from "../layouts/SellerLayout";
+import SellerProfilePage from "../pages/SellerProfilePage";
+import SellerModelsPage from "../pages/SellerModelsPage";
 
 export default function AppRouter() {
   return (
@@ -43,6 +50,69 @@ export default function AppRouter() {
         />
 
         <Route
+          path="/seller/profile"
+          element={
+            <SellerLayout>
+              <SellerProfilePage />
+            </SellerLayout>
+          }
+        />
+
+        <Route
+          path="/favorites"
+          element={
+            <MainLayout>
+              <FavoritesPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/seller/models"
+          element={
+            <SellerLayout>
+              <SellerModelsPage />
+            </SellerLayout>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <MainLayout>
+              <CartPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/my-models"
+          element={
+            <MainLayout>
+              <MyModelsPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/about"
+          element={
+            <MainLayout>
+              <AboutPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/contacts"
+          element={
+            <MainLayout>
+              <ContactsPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
           path="/buyer/profile"
           element={
             <MainLayout>
@@ -60,8 +130,15 @@ export default function AppRouter() {
           }
         />
 
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/faq"
+          element={
+            <MainLayout>
+              <FAQPage />
+            </MainLayout>
+          }
+        />
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

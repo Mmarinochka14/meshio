@@ -1,8 +1,8 @@
-import "@google/model-viewer";
 import { Link } from "react-router-dom";
+import HeroModelCanvas from "./HeroModelCanvas";
 import "../styles/hero-section.css";
 
-export default function HeroSection() {
+export default function HeroSection({ onOpenSellerModal }) {
   return (
     <section className="hero">
       <div className="hero__container">
@@ -27,6 +27,7 @@ export default function HeroSection() {
             <button
               type="button"
               className="hero__button hero__button--secondary text-p1"
+              onClick={onOpenSellerModal}
             >
               Стать продавцом
             </button>
@@ -34,20 +35,7 @@ export default function HeroSection() {
         </div>
 
         <div className="hero__visual">
-          <model-viewer
-            class="hero__model"
-            src="/models/hero-model.glb"
-            camera-controls
-            disable-pan
-            disable-zoom
-            touch-action="pan-y"
-            interaction-prompt="none"
-            auto-rotate
-            auto-rotate-delay="0"
-            rotation-per-second="20deg"
-            shadow-intensity="0"
-            exposure="1.05"
-          ></model-viewer>
+          <HeroModelCanvas />
         </div>
       </div>
     </section>

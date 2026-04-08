@@ -397,6 +397,50 @@ class Favorite(models.Model):
     def __str__(self):
         return f'{self.user.username} -> {self.product.title}'
 
+class Cart(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Корзина'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f'Корзина пользователя {self.user.username}'
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Корзина'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='cart_items',
+        verbose_name='Товар'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+
+    class Meta:
+        verbose_name = 'Элемент корзины'
+        verbose_name_plural = 'Элементы корзины'
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['cart', 'product'], name='unique_cart_product')
+        ]
+
+    def __str__(self):
+        return f'{self.cart.user.username} -> {self.product.title}'
 
 class Review(models.Model):
     user = models.ForeignKey(
@@ -452,3 +496,96 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.user.username} -> {self.product.title}'
+
+
+
+class ContactRequest(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('in_progress', 'In Progress'),
+        ('done', 'Done'),
+    ]
+
+    name = models.CharField(max_length=150, verbose_name='Имя')
+    email = models.EmailField(verbose_name='Email')
+    subject = models.CharField(max_length=255, verbose_name='Тема')
+    message = models.TextField(verbose_name='Сообщение')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='contact_requests',
+        verbose_name='Пользователь'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='new',
+        verbose_name='Статус'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
+
+    class Meta:
+        verbose_name = 'Обращение'
+        verbose_name_plural = 'Обращения'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.email} - {self.subject}'
+
+
+class NewsletterSubscription(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('subscribed', 'Subscribed'),
+        ('failed', 'Failed'),
+        ('unsubscribed', 'Unsubscribed'),
+    ]
+
+    email = models.EmailField(unique=True, verbose_name='Email')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='newsletter_subscriptions',
+        verbose_name='Пользователь'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Статус'
+    )
+
+    source = models.CharField(
+        max_length=100,
+        default='contacts_page',
+        verbose_name='Источник'
+    )
+
+    unisender_result = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name='Ответ Unisender'
+    )
+
+    error_message = models.TextField(blank=True, null=True, verbose_name='Ошибка')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
+
+    class Meta:
+        verbose_name = 'Подписка на рассылку'
+        verbose_name_plural = 'Подписки на рассылку'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.email

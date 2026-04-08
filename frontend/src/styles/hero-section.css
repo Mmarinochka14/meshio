@@ -95,3 +95,8 @@
   outline: none;
   --poster-color: transparent;
 }
+
+.hero__model-canvas {
+  width: 100%;
+  height: 100%;
+}

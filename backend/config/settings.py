@@ -151,6 +151,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -163,3 +164,15 @@ CLOUDRU_SECRET_ACCESS_KEY = os.getenv("CLOUDRU_SECRET_ACCESS_KEY")
 CLOUDRU_STORAGE_ENDPOINT = os.getenv("CLOUDRU_STORAGE_ENDPOINT", "https://s3.cloud.ru")
 CLOUDRU_STORAGE_REGION = os.getenv("CLOUDRU_STORAGE_REGION", "ru-central-1")
 CLOUDRU_STORAGE_BUCKET = os.getenv("CLOUDRU_STORAGE_BUCKET")
+
+
+YANDEX_API_KEY = os.getenv("YANDEX_API_KEY")
+YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
+
+
+UNISENDER_API_KEY = os.getenv("UNISENDER_API_KEY")
+UNISENDER_LIST_ID = os.getenv("UNISENDER_LIST_ID")
+UNISENDER_BASE_URL = os.getenv(
+    "UNISENDER_BASE_URL",
+    "https://api.unisender.com/ru/api",
+)

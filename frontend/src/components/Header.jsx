@@ -11,9 +11,12 @@ import cartIcon from "../assets/icons/cart.svg";
 import loginIcon from "../assets/icons/login.svg";
 import userIcon from "../assets/icons/user.svg";
 
-export default function Header({ onLoginClick }) {
-  // подписка на изменения authStore, чтобы хедер обновлялся сразу после логина
+import { getCartCount } from "../api/cart";
+import { getGuestCartCount, subscribeCart } from "./cart/cartStore";
+
+export default function Header({ onLoginClick, onOpenSellerModal }) {
   const [, forceUpdate] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     const unsub = subscribe(() => forceUpdate((x) => x + 1));
@@ -23,6 +26,40 @@ export default function Header({ onLoginClick }) {
   const authed = isAuthenticated();
   const user = getUser();
   const userName = user?.username || "Профиль";
+  const isBuyer = user?.role === "buyer";
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function syncCartCount() {
+      if (authed && isBuyer) {
+        try {
+          const data = await getCartCount();
+          if (mounted) setCartCount(Number(data?.count || 0));
+        } catch {
+          if (mounted) setCartCount(0);
+        }
+      } else {
+        if (mounted) setCartCount(getGuestCartCount());
+      }
+    }
+
+    syncCartCount();
+
+    const unsubCart = subscribeCart(() => {
+      syncCartCount();
+    });
+
+    const unsubAuth = subscribe(() => {
+      syncCartCount();
+    });
+
+    return () => {
+      mounted = false;
+      unsubCart();
+      unsubAuth();
+    };
+  }, [authed, isBuyer]);
 
   return (
     <header className="header">
@@ -36,18 +73,25 @@ export default function Header({ onLoginClick }) {
         <div className="header__content">
           <div className="header__top-row">
             <nav className="header__nav">
-              <Link to="/" className="header__nav-link">
+              <Link to="/about" className="header__nav-link">
                 О нас
               </Link>
-              <Link to="/" className="header__nav-link">
+
+              <Link to="/contacts" className="header__nav-link">
                 Контакты
               </Link>
-              <Link to="/" className="header__nav-link">
+
+              <Link to="/faq" className="header__nav-link">
                 Q&A
               </Link>
-              <Link to="/" className="header__nav-link">
+
+              <button
+                type="button"
+                className="header__nav-link header__nav-link--button"
+                onClick={onOpenSellerModal}
+              >
                 Стать продавцом
-              </Link>
+              </button>
             </nav>
 
             {authed ? (
@@ -83,24 +127,30 @@ export default function Header({ onLoginClick }) {
             </div>
 
             <div className="header__actions">
-              <button type="button" className="header__action">
+              <Link to="/my-models" className="header__action">
                 <img src={modelsIcon} alt="" className="header__action-icon" />
                 <span className="header__action-label">Мои модели</span>
-              </button>
+              </Link>
 
-              <button type="button" className="header__action">
+              <Link to="/favorites" className="header__action">
                 <img
                   src={favoriteIcon}
                   alt=""
                   className="header__action-icon"
                 />
                 <span className="header__action-label">Избранное</span>
-              </button>
+              </Link>
 
-              <button type="button" className="header__action">
+              <Link to="/cart" className="header__action header__action--cart">
                 <img src={cartIcon} alt="" className="header__action-icon" />
                 <span className="header__action-label">Корзина</span>
-              </button>
+
+                {cartCount > 0 ? (
+                  <span className="header__cart-badge text-p3">
+                    {cartCount}
+                  </span>
+                ) : null}
+              </Link>
             </div>
           </div>
         </div>

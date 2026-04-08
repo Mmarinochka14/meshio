@@ -1,0 +1,100 @@
+.seller-start-modal {
+  width: 100%;
+  color: var(--color-white);
+}
+
+.seller-start-modal__title {
+  color: var(--color-white);
+}
+
+.seller-start-modal__divider {
+  width: 100%;
+  height: 0.0521vw;
+  background: var(--color-grey);
+  margin-bottom: 1.6667vw;
+}
+
+.seller-start-modal__intro {
+  max-width: 42.7083vw;
+  color: var(--color-white);
+  margin-bottom: 2vw;
+}
+
+.seller-start-modal__subtitle {
+  color: var(--color-white);
+  margin-bottom: 1.6667vw;
+}
+
+.seller-start-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8333vw;
+}
+
+.seller-start-modal__card {
+  min-height: 18.2292vw;
+  padding: 1.6667vw;
+  border-radius: 1.0417vw;
+  background: var(--color-grey);
+  border: 0.1vw solid #22242d;
+}
+
+.seller-start-modal__card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2.0833vw;
+}
+
+.seller-start-modal__number {
+  color: var(--color-white);
+  line-height: 1;
+}
+
+.seller-start-modal__icon-wrap {
+  width: 4vw;
+  height: 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100vw;
+  background: var(--color-purple);
+  flex-shrink: 0;
+}
+
+.seller-start-modal__icon {
+  width: 2vw;
+  height: 2vw;
+  object-fit: contain;
+}
+
+.seller-start-modal__card-title {
+  color: var(--color-white);
+  margin-bottom: 0.8333vw;
+}
+
+.seller-start-modal__card-text {
+  color: var(--color-white);
+}
+
+.seller-start-modal__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.6667vw;
+}
+
+.seller-start-modal__button {
+  min-width: 23.4375vw;
+  height: 3.5417vw;
+  padding: 0 1.6667vw;
+  border: none;
+  border-radius: 0.8333vw;
+  background: var(--color-purple);
+  color: var(--color-white);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.seller-start-modal__button:hover {
+  background: var(--color-purple-hover);
+}

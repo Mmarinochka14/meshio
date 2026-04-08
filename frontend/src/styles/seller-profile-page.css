@@ -1,0 +1,256 @@
+.seller-profile-page {
+  width: 100%;
+  padding: 3.3333vw 0 6.25vw;
+  background: var(--color-grey-dark);
+}
+
+.seller-profile-page__container {
+  width: 75vw;
+  margin: 0 auto;
+}
+
+.seller-profile-page__title {
+  color: var(--color-white);
+  margin-bottom: 1.25vw;
+}
+
+.seller-profile-page__divider {
+  width: 100%;
+  height: 0.0521vw;
+  background: var(--color-grey-light);
+  margin-bottom: 1.6667vw;
+}
+
+.seller-profile-page__layout {
+  display: grid;
+  grid-template-columns: 15.2083vw 1fr;
+  gap: 0.8333vw;
+  align-items: start;
+}
+
+.seller-profile-page__sidebar,
+.seller-profile-page__card {
+  background: var(--color-grey);
+  border: 0.0521vw solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.0417vw;
+}
+
+.seller-profile-page__sidebar {
+  padding: 1.0417vw;
+}
+
+.seller-profile-page__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+}
+
+.seller-profile-page__menu-item,
+.seller-profile-page__menu-logout {
+  width: 100%;
+  min-height: 2.9167vw;
+  border: none;
+  border-radius: 0.625vw;
+  background: transparent;
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 1.0417vw;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.seller-profile-page__menu-item:hover,
+.seller-profile-page__menu-logout:hover {
+  background: var(--color-grey-hover);
+}
+
+.seller-profile-page__menu-item.is-active {
+  background: var(--color-grey-hover);
+}
+
+.seller-profile-page__card {
+  padding: 1.5625vw;
+}
+
+.seller-profile-page__head {
+  display: flex;
+  align-items: center;
+  gap: 1.25vw;
+  margin-bottom: 1.875vw;
+}
+
+.seller-profile-page__avatar {
+  width: 7.2917vw;
+  height: 7.2917vw;
+  border-radius: 999vw;
+  background: linear-gradient(
+    135deg,
+    var(--color-purple),
+    var(--color-purple-light)
+  );
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.0833vw;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.seller-profile-page__head-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125vw;
+}
+
+.seller-profile-page__name,
+.seller-profile-page__email,
+.seller-profile-page__role,
+.seller-profile-page__rating {
+  color: var(--color-white);
+}
+
+.seller-profile-page__rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5208vw;
+  margin-top: 0.2083vw;
+}
+
+.seller-profile-page__stars {
+  color: var(--color-purple-light);
+  font-size: 1.1979vw;
+  line-height: 1;
+}
+
+.seller-profile-page__section-title {
+  color: var(--color-white);
+  margin-bottom: 0.8333vw;
+}
+
+.seller-profile-page__form {
+  display: grid;
+  gap: 0.8333vw;
+  margin-bottom: 1.6667vw;
+}
+
+.seller-profile-page__form--account {
+  grid-template-columns: 1fr 1fr;
+}
+
+.seller-profile-page__form--store {
+  grid-template-columns: 1fr;
+}
+
+.seller-profile-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+}
+
+.seller-profile-page__field--full {
+  grid-column: 1 / -1;
+}
+
+.seller-profile-page__label {
+  color: var(--color-grey-super-light);
+}
+
+.seller-profile-page__input,
+.seller-profile-page__textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 0.625vw;
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+}
+
+.seller-profile-page__input {
+  min-height: 2.2917vw;
+  padding: 0 0.8333vw;
+}
+
+.seller-profile-page__textarea {
+  min-height: 6.25vw;
+  padding: 0.8333vw;
+  resize: none;
+}
+
+.seller-profile-page__input::placeholder,
+.seller-profile-page__textarea::placeholder {
+  color: var(--color-grey-super-light);
+}
+
+.seller-profile-page__bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25vw;
+}
+
+.seller-profile-page__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+}
+
+.seller-profile-page__save-msg {
+  color: var(--color-white);
+}
+
+.seller-profile-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8333vw;
+}
+
+.seller-profile-page__secondary,
+.seller-profile-page__save {
+  min-width: 11.4583vw;
+  min-height: 2.6042vw;
+  padding: 0.7292vw 1.25vw;
+  border-radius: 0.625vw;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.seller-profile-page__secondary {
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+  border: 0.0521vw solid var(--color-grey-light);
+}
+
+.seller-profile-page__secondary:hover {
+  background: var(--color-grey-light);
+}
+
+.seller-profile-page__save {
+  background: var(--color-purple);
+  color: var(--color-white);
+  border: none;
+}
+
+.seller-profile-page__save:hover {
+  background: var(--color-purple-hover);
+}
+
+.seller-profile-page__secondary:disabled,
+.seller-profile-page__save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.seller-profile-page__state,
+.seller-profile-page__stub-title,
+.seller-profile-page__stub-text {
+  color: var(--color-white);
+}
+
+.seller-profile-page__stub-text {
+  margin-top: 0.625vw;
+}

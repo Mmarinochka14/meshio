@@ -12,6 +12,8 @@ from .models import (
     Product,
     ProductFile,
     Review,
+    ContactRequest,
+    NewsletterSubscription,
 )
 
 
@@ -125,3 +127,19 @@ class ReviewAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'product', 'created_at')
     search_fields = ('user__username', 'product__title', 'text')
+
+
+@admin.register(ContactRequest)
+class ContactRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'subject', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(NewsletterSubscription)
+class NewsletterSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'email', 'status', 'source', 'created_at')
+    list_filter = ('status', 'source', 'created_at')
+    search_fields = ('email',)
+    readonly_fields = ('created_at', 'updated_at', 'unisender_result', 'error_message')

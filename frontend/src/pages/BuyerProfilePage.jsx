@@ -31,7 +31,7 @@ function formatRuPhone(value) {
   return out;
 }
 
-export default function BuyerProfilePage() {
+export default function BuyerProfilePage({ onOpenSellerModal }) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("profile"); // profile | purchases | notifications | payments | settings
@@ -221,9 +221,7 @@ export default function BuyerProfilePage() {
               <button
                 type="button"
                 className="buyer-profile-page__menu-cta text-p2"
-                onClick={() =>
-                  alert("Становление продавцом сделаем следующим шагом")
-                }
+                onClick={onOpenSellerModal}
               >
                 Стать продавцом
               </button>
@@ -263,7 +261,7 @@ export default function BuyerProfilePage() {
                         <button
                           type="button"
                           className="buyer-profile-page__small-btn text-p2"
-                          onClick={() => alert("Заявка продавца — позже")}
+                          onClick={onOpenSellerModal}
                         >
                           Стать продавцом
                         </button>

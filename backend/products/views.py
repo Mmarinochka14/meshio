@@ -1,10 +1,12 @@
 from pathlib import Path
-
+import time
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .services.viewer_preprocessing import prepare_product_viewer
-
+from django.core.files.base import ContentFile
+from products.services.yandex_art import generate_texture_image
+from core.object_storage import upload_file_to_storage
 from core.object_storage import (
     create_signed_file_url,
     delete_file_from_storage,
@@ -21,6 +23,11 @@ from .models import (
     Product,
     ProductFile,
     Review,
+    GeneratedTexture,
+    ContactRequest,
+    NewsletterSubscription,
+    Cart,
+    CartItem,
 )
 from .permissions import CanModifyProductByStatus, IsOwnerOrReadOnly
 from .serializers import (
@@ -41,8 +48,20 @@ from .serializers import (
     PurchaseSerializer,
     ReviewCreateUpdateSerializer,
     ReviewSerializer,
+    GenerateTextureSerializer,
+    ContactRequestCreateSerializer,
+    ContactRequestSerializer,
+    NewsletterSubscribeSerializer,
+    CartActionSerializer,
+    CartMergeSerializer,
+    CartSerializer,
+    ProductIdsSerializer,
 )
 
+from .services.unisender import (
+    UnisenderServiceError,
+    subscribe_email_to_unisender,
+)
 
 def build_product_file_url(request, product_file):
     if product_file.storage_path:
@@ -85,6 +104,74 @@ def update_product_rating(product):
 
     product.save(update_fields=['average_rating', 'reviews_count'])
 
+
+class GenerateTextureView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GenerateTextureSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        prompt = serializer.validated_data["prompt"]
+
+        generated = GeneratedTexture.objects.create(
+            product=product,
+            user=request.user,
+            prompt=prompt,
+            status="pending",
+        )
+
+        try:
+            image_bytes = generate_texture_image(prompt)
+
+            temp_file = ContentFile(image_bytes, name=f"generated_texture_{generated.id}.png")
+            upload_result = upload_file_to_storage(
+                temp_file,
+                folder=f"products/{product.id}/generated_textures"
+            )
+
+            generated.image_storage_path = upload_result["storage_path"]
+            generated.preview_storage_path = upload_result["storage_path"]
+            generated.width = 1024
+            generated.height = 1024
+            generated.status = "ready"
+            generated.save(
+                update_fields=[
+                    "image_storage_path",
+                    "preview_storage_path",
+                    "width",
+                    "height",
+                    "status",
+                ]
+            )
+
+            return Response(
+                {
+                    "detail": "Текстура сгенерирована.",
+                    "generated_texture_id": generated.id,
+                    "image_url": create_signed_file_url(generated.image_storage_path, expires_in=3600),
+                    "preview_url": create_signed_file_url(generated.preview_storage_path, expires_in=3600),
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            generated.status = "failed"
+            generated.error_message = str(e)
+            generated.save(update_fields=["status", "error_message"])
+
+            return Response(
+                {"detail": f"Ошибка генерации текстуры: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
@@ -245,9 +332,21 @@ class ProductDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_object(self):
+        t0 = time.perf_counter()
+
         obj = super().get_object()
+        t1 = time.perf_counter()
+
         Product.objects.filter(pk=obj.pk).update(views_count=obj.views_count + 1)
+        t2 = time.perf_counter()
+
         obj.refresh_from_db()
+        t3 = time.perf_counter()
+
+        print("DETAIL get object:", round(t1 - t0, 3))
+        print("DETAIL update views:", round(t2 - t1, 3))
+        print("DETAIL refresh:", round(t3 - t2, 3))
+
         return obj
 
 
@@ -1045,4 +1144,255 @@ class ProductUVPreviewUrlView(APIView):
                 'mime_type': uv_file.mime_type,
             },
             status=status.HTTP_200_OK
+        )
+
+
+class ContactRequestCreateView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = ContactRequestCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        contact_request = serializer.save(
+            user=request.user if request.user.is_authenticated else None
+        )
+
+        return Response(
+            {
+                'detail': 'Обращение успешно отправлено.',
+                'contact_request': ContactRequestSerializer(contact_request).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class NewsletterSubscribeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = NewsletterSubscribeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+
+        subscription, created = NewsletterSubscription.objects.get_or_create(
+            email=email,
+            defaults={
+                'user': request.user if request.user.is_authenticated else None,
+                'source': 'contacts_page',
+                'status': 'pending',
+            }
+        )
+
+        if not created:
+            update_fields = ['status', 'error_message', 'updated_at']
+
+            if request.user.is_authenticated and subscription.user is None:
+                subscription.user = request.user
+                update_fields.append('user')
+
+            subscription.status = 'pending'
+            subscription.error_message = None
+            subscription.save(update_fields=update_fields)
+
+        try:
+            result = subscribe_email_to_unisender(email)
+
+            subscription.status = 'pending'
+            subscription.unisender_result = result
+            subscription.error_message = None
+            subscription.save(
+                update_fields=[
+                    'status',
+                    'unisender_result',
+                    'error_message',
+                    'updated_at',
+                ]
+            )
+
+            return Response(
+                {
+                    'detail': 'Подтвердите подписку через письмо, отправленное на указанный email.',
+                    'subscription_id': subscription.id,
+                    'status': subscription.status,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except UnisenderServiceError as e:
+            subscription.status = 'failed'
+            subscription.error_message = str(e)
+            subscription.save(update_fields=['status', 'error_message', 'updated_at'])
+
+            return Response(
+                {
+                    'detail': f'Не удалось оформить подписку: {str(e)}',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+
+class MyCartView(APIView):
+    permission_classes = [IsBuyer]
+
+    def get(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        serializer = CartSerializer(cart, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CartCountView(APIView):
+    permission_classes = [IsBuyer]
+
+    def get(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        return Response(
+            {'count': cart.items.count()},
+            status=status.HTTP_200_OK,
+        )
+
+
+class AddToCartView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = CartActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_id = serializer.validated_data['product_id']
+
+        try:
+            product = Product.objects.get(id=product_id, status='published')
+        except Product.DoesNotExist:
+            return Response(
+                {'detail': 'Товар не найден или не опубликован.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.price <= 0:
+            return Response(
+                {'detail': 'Бесплатный товар не нужно добавлять в корзину.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+        )
+
+        if created:
+            return Response(
+                {'detail': 'Товар добавлен в корзину.'},
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(
+            {'detail': 'Товар уже находится в корзине.'},
+            status=status.HTTP_200_OK,
+        )
+
+
+class RemoveFromCartView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = CartActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_id = serializer.validated_data['product_id']
+
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_item = CartItem.objects.get(cart=cart, product_id=product_id)
+        except (Cart.DoesNotExist, CartItem.DoesNotExist):
+            return Response(
+                {'detail': 'Товар не найден в корзине.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        cart_item.delete()
+
+        return Response(
+            {'detail': 'Товар удалён из корзины.'},
+            status=status.HTTP_200_OK,
+        )
+
+
+class MergeCartView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = CartMergeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_ids = serializer.validated_data['product_ids']
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        added_count = 0
+
+        products = Product.objects.filter(
+            id__in=product_ids,
+            status='published',
+            price__gt=0,
+        )
+
+        existing_ids = set(
+            cart.items.filter(product_id__in=product_ids).values_list('product_id', flat=True)
+        )
+
+        for product in products:
+            if product.id in existing_ids:
+                continue
+            CartItem.objects.create(cart=cart, product=product)
+            added_count += 1
+
+        response_serializer = CartSerializer(cart, context={'request': request})
+
+        return Response(
+            {
+                'detail': 'Корзина синхронизирована.',
+                'added_count': added_count,
+                'cart': response_serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class ProductsByIdsView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = ProductIdsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_ids = serializer.validated_data['product_ids']
+
+        queryset = Product.objects.filter(
+            id__in=product_ids,
+            status='published',
+        ).select_related(
+            'seller',
+            'category',
+            'license',
+        )
+
+        products_by_id = {product.id: product for product in queryset}
+        ordered_products = [
+            products_by_id[product_id]
+            for product_id in product_ids
+            if product_id in products_by_id
+        ]
+
+        response_serializer = ProductListSerializer(
+            ordered_products,
+            many=True,
+            context={'request': request},
+        )
+
+        return Response(
+            {'results': response_serializer.data},
+            status=status.HTTP_200_OK,
         )

@@ -1,7 +1,11 @@
 import apiClient from "./client";
 import { setToken, setUser } from "../components/auth/authStore";
+import {
+  clearGuestCart,
+  getGuestCartProductIds,
+} from "../components/cart/cartStore";
+import { mergeCartRequest } from "./cart";
 
-// ВАЖНО: логин по username
 export async function loginRequest(username, password) {
   const res = await apiClient.post("/users/login/", { username, password });
 
@@ -11,11 +15,23 @@ export async function loginRequest(username, password) {
   if (token) setToken(token);
   if (user) setUser(user);
 
+  if (user?.role === "buyer") {
+    const guestCartIds = getGuestCartProductIds();
+
+    if (guestCartIds.length > 0) {
+      try {
+        await mergeCartRequest(guestCartIds);
+        clearGuestCart();
+      } catch {
+        // молча оставляем локальную корзину, если merge не удался
+      }
+    }
+  }
+
   return user;
 }
 
 export async function registerRequest(payload) {
-  // payload: { username, email, password, password_confirm, role }
   const res = await apiClient.post("/users/register/", payload);
 
   const token = res.data?.token || "";
@@ -23,6 +39,19 @@ export async function registerRequest(payload) {
 
   if (token) setToken(token);
   if (user) setUser(user);
+
+  if (user?.role === "buyer") {
+    const guestCartIds = getGuestCartProductIds();
+
+    if (guestCartIds.length > 0) {
+      try {
+        await mergeCartRequest(guestCartIds);
+        clearGuestCart();
+      } catch {
+        // молча оставляем локальную корзину, если merge не удался
+      }
+    }
+  }
 
   return user;
 }
@@ -47,5 +76,15 @@ export async function changePasswordRequest(old_password, new_password) {
     old_password,
     new_password,
   });
+  return res.data;
+}
+
+export async function getMySellerProfileRequest() {
+  const res = await apiClient.get("/users/seller/me/");
+  return res.data;
+}
+
+export async function updateSellerProfileRequest(payload) {
+  const res = await apiClient.patch("/users/seller/me/", payload);
   return res.data;
 }

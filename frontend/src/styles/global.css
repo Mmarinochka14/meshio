@@ -126,8 +126,11 @@ h4,
 .header {
   width: 100%;
   background: var(--color-grey);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(0.625vw);
 }
-
 .header__container {
   width: 75vw; /* 1440px */
   margin: 0 auto;
@@ -332,4 +335,32 @@ h4,
   line-height: 1;
   color: var(--color-white);
   text-align: center;
+}
+
+.header__nav-link--button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header__action--cart {
+  position: relative;
+  text-decoration: none;
+}
+
+.header__cart-badge {
+  position: absolute;
+  top: -0.2083vw;
+  right: -0.4167vw;
+  min-width: 1.0938vw;
+  height: 1.0938vw;
+  padding: 0 0.2604vw;
+  border-radius: 999vw;
+  background: var(--color-purple);
+  color: var(--color-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }

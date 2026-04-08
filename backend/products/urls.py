@@ -31,18 +31,36 @@ from .views import (
     SendProductToReviewView,
     UploadProductFileView,
     UploadProductPreviewView,
+    GenerateTextureView,
+    ContactRequestCreateView,
+    NewsletterSubscribeView,
+    AddToCartView,
+    CartCountView,
+    MergeCartView,
+    MyCartView,
+    RemoveFromCartView,
+    ProductsByIdsView,
 )
 
 urlpatterns = [
     path('', ProductListView.as_view(), name='product-list'),
     path('filters/', ProductFiltersView.as_view(), name='product-filters'),
     path('presets/', MaterialPresetListView.as_view(), name='material-preset-list'),
+    path('contact-requests/', ContactRequestCreateView.as_view(), name='contact-request-create'),
+    path('newsletter/subscribe/', NewsletterSubscribeView.as_view(), name='newsletter-subscribe'),
 
     path('my/', MyProductListView.as_view(), name='my-product-list'),
     path('my-models/', MyPurchasedProductsView.as_view(), name='my-purchased-products'),
     path('favorites/', MyFavoritesView.as_view(), name='my-favorites'),
     path('favorites/add/', AddFavoriteView.as_view(), name='add-favorite'),
     path('favorites/remove/', RemoveFavoriteView.as_view(), name='remove-favorite'),
+
+    path('cart/', MyCartView.as_view(), name='my-cart'),
+    path('cart/count/', CartCountView.as_view(), name='cart-count'),
+    path('cart/add/', AddToCartView.as_view(), name='cart-add'),
+    path('cart/remove/', RemoveFromCartView.as_view(), name='cart-remove'),
+    path('cart/merge/', MergeCartView.as_view(), name='cart-merge'),
+    path('by-ids/', ProductsByIdsView.as_view(), name='products-by-ids'),
 
     path('create/', ProductCreateView.as_view(), name='product-create'),
     path('purchase/', PurchaseProductView.as_view(), name='product-purchase'),
@@ -71,6 +89,8 @@ urlpatterns = [
     path('<int:pk>/update/', ProductUpdateView.as_view(), name='product-update'),
     path('<int:pk>/delete/', ProductDeleteView.as_view(), name='product-delete'),
 
+
     path('files/<int:pk>/delete/', DeleteProductFileView.as_view(), name='product-file-delete'),
     path('comments/<int:pk>/delete/', DeleteCommentView.as_view(), name='delete-comment'),
+path('<int:pk>/generate-texture/', GenerateTextureView.as_view(), name='generate-texture'),
 ]
