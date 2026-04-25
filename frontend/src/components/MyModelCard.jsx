@@ -19,7 +19,7 @@ function renderStars(rating) {
   );
 }
 
-export default function MyModelCard({ product, onDownload }) {
+export default function MyModelCard({ product, onDownload, onRate }) {
   const {
     id,
     title,
@@ -32,6 +32,7 @@ export default function MyModelCard({ product, onDownload }) {
     has_uv,
     has_textures,
     poly_style,
+    my_review,
   } = product;
 
   const previewSrc = main_preview_url
@@ -114,18 +115,36 @@ export default function MyModelCard({ product, onDownload }) {
           </div>
         )}
 
-        <button
-          type="button"
-          className="product-card__cart-btn text-p2"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onDownload?.(product);
-          }}
-        >
-          <img src={downloadIcon} alt="" className="product-card__cart-icon" />
-          <span>Скачать</span>
-        </button>
+        <div className="product-card__my-model-actions">
+          <button
+            type="button"
+            className="product-card__cart-btn product-card__cart-btn--half text-p2"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onDownload?.(product);
+            }}
+          >
+            <img
+              src={downloadIcon}
+              alt=""
+              className="product-card__cart-icon"
+            />
+            <span>Скачать</span>
+          </button>
+
+          <button
+            type="button"
+            className="product-card__my-model-rate-btn text-p2"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onRate?.(product);
+            }}
+          >
+            <span>{my_review ? "Изменить оценку" : "Оценить"}</span>
+          </button>
+        </div>
       </div>
     </Link>
   );

@@ -10,7 +10,7 @@ function spGetBool(searchParams, key) {
   const v = searchParams.get(key);
   if (v === "true") return true;
   if (v === "false") return false;
-  return false; // по умолчанию выключено
+  return false;
 }
 
 export default function CatalogFilters({
@@ -19,14 +19,13 @@ export default function CatalogFilters({
   onApply,
   onReset,
 }) {
-  // категории — в бэке 1 категория через slug (category=characters)
   const initial = useMemo(
     () => ({
       is_free: spGetBool(searchParams, "is_free"),
       has_uv: spGetBool(searchParams, "has_uv"),
       has_textures: spGetBool(searchParams, "has_textures"),
 
-      category: spGet(searchParams, "category"), // slug
+      category: searchParams.getAll("category"),
       model_format: spGet(searchParams, "model_format"),
       geometry_type: spGet(searchParams, "geometry_type"),
       poly_style: spGet(searchParams, "poly_style"),
@@ -40,7 +39,6 @@ export default function CatalogFilters({
 
   const [draft, setDraft] = useState(initial);
 
-  // если пользователь пришёл по ссылке /catalog?category=animals — подтянуть в UI
   useEffect(() => {
     setDraft(initial);
   }, [initial]);
@@ -60,21 +58,25 @@ export default function CatalogFilters({
   }
 
   function handleCategoryToggle(slug) {
-    // одна категория за раз (как у тебя на бэке: category=slug)
-    setDraft((prev) => ({
-      ...prev,
-      category: prev.category === slug ? "" : slug,
-    }));
+    setDraft((prev) => {
+      const exists = prev.category.includes(slug);
+
+      return {
+        ...prev,
+        category: exists
+          ? prev.category.filter((item) => item !== slug)
+          : [...prev.category, slug],
+      };
+    });
   }
 
   function handleApply() {
     onApply({
-      // booleans отправляем как "true"/пусто
       is_free: draft.is_free ? "true" : "",
       has_uv: draft.has_uv ? "true" : "",
       has_textures: draft.has_textures ? "true" : "",
 
-      category: draft.category || "",
+      category: draft.category,
       model_format: draft.model_format || "",
       geometry_type: draft.geometry_type || "",
       poly_style: draft.poly_style || "",
@@ -90,7 +92,7 @@ export default function CatalogFilters({
       is_free: false,
       has_uv: false,
       has_textures: false,
-      category: "",
+      category: [],
       model_format: "",
       geometry_type: "",
       poly_style: "",
@@ -107,7 +109,6 @@ export default function CatalogFilters({
         <h3 className="catalog-filters__title text-h3">Фильтры</h3>
       </div>
 
-      {/* FREE */}
       <div className="catalog-filters__block">
         <label className="catalog-filters__check">
           <input
@@ -121,7 +122,6 @@ export default function CatalogFilters({
         </label>
       </div>
 
-      {/* Категория */}
       <div className="catalog-filters__block">
         <div className="catalog-filters__block-title text-p2">Категория</div>
         <div className="catalog-filters__list">
@@ -129,7 +129,7 @@ export default function CatalogFilters({
             <label key={c.slug} className="catalog-filters__check">
               <input
                 type="checkbox"
-                checked={draft.category === c.slug}
+                checked={draft.category.includes(c.slug)}
                 onChange={() => handleCategoryToggle(c.slug)}
                 className="catalog-filters__check-input"
               />
@@ -142,7 +142,6 @@ export default function CatalogFilters({
         </div>
       </div>
 
-      {/* Переключатели */}
       <div className="catalog-filters__block">
         <label className="catalog-filters__switch">
           <span className="text-p2">UV-развертка</span>
@@ -169,7 +168,6 @@ export default function CatalogFilters({
         </label>
       </div>
 
-      {/* Формат */}
       <div className="catalog-filters__block">
         <div className="catalog-filters__block-title text-p2">Формат</div>
         <div className="catalog-filters__list">
@@ -195,7 +193,6 @@ export default function CatalogFilters({
         </div>
       </div>
 
-      {/* Тип геометрии (у тебя на бэке это geometry_type) */}
       <div className="catalog-filters__block">
         <div className="catalog-filters__block-title text-p2">
           Тип геометрии
@@ -223,7 +220,6 @@ export default function CatalogFilters({
         </div>
       </div>
 
-      {/* Топология */}
       <div className="catalog-filters__block">
         <div className="catalog-filters__block-title text-p2">Топология</div>
         <div className="catalog-filters__list">
@@ -249,7 +245,6 @@ export default function CatalogFilters({
         </div>
       </div>
 
-      {/* Кол-во полигонов */}
       <div className="catalog-filters__block">
         <div className="catalog-filters__block-title text-p2">
           Кол-во полигонов
@@ -274,7 +269,6 @@ export default function CatalogFilters({
         </div>
       </div>
 
-      {/* Кнопки */}
       <div className="catalog-filters__actions">
         <button
           type="button"

@@ -1,22 +1,22 @@
 .weekly-models-section {
   width: 100%;
-  padding-top: 3.3333vw; /* 64px */
+  padding-top: 3.3333vw;
 }
 
 .weekly-models-section__container {
-  width: 75vw; /* 1440px */
+  width: 75vw;
   margin: 0 auto;
 }
 
 .weekly-models-section__title {
   color: var(--color-white);
-  margin-bottom: 1.6667vw; /* 32px */
+  margin-bottom: 1.6667vw;
 }
 
 .weekly-models-section__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.25vw; /* 24px */
+  gap: 1.25vw;
 }
 
 .weekly-models-section__state {
@@ -26,4 +26,124 @@
   justify-content: center;
   color: var(--color-white);
   opacity: 0.8;
+}
+
+/* ==================== TABLET ==================== */
+
+@media (max-width: 1024px) {
+  .weekly-models-section {
+    padding-top: 5vw;
+  }
+
+  .weekly-models-section__container {
+    width: 89vw;
+  }
+
+  .weekly-models-section__title {
+    margin-bottom: 2.8vw;
+  }
+
+  .weekly-models-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2vw;
+  }
+
+  .weekly-models-section__state {
+    min-height: 24vw;
+  }
+}
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+  .weekly-models-section {
+    padding-top: 8vw;
+  }
+
+  .weekly-models-section__container {
+    width: 91.4667vw;
+  }
+
+  .weekly-models-section__title {
+    margin-bottom: 4.8vw;
+    font-size: 5.3333vw;
+    line-height: 1.15;
+  }
+
+  .weekly-models-section__grid {
+    grid-template-columns: 1fr;
+    gap: 4vw;
+  }
+
+  .weekly-models-section__state {
+    min-height: 32vw;
+    font-size: 4vw;
+    text-align: center;
+  }
+}
+
+/* ==================== SMALL MOBILE ==================== */
+
+@media (max-width: 480px) {
+  .weekly-models-section {
+    padding-top: 8.5333vw;
+  }
+
+  .weekly-models-section__container {
+    width: 91.4667vw;
+  }
+
+  .weekly-models-section__title {
+    margin-bottom: 5.3333vw;
+    font-size: 5.8667vw;
+  }
+
+  .weekly-models-section__grid {
+    gap: 4.2667vw;
+  }
+
+  .weekly-models-section__state {
+    min-height: 34vw;
+    font-size: 4.2667vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .weekly-models-section {
+    padding-top: 8vw;
+  }
+
+  .weekly-models-section__container {
+    width: 91.4667vw;
+  }
+
+  .weekly-models-section__title {
+    margin-bottom: 4.2667vw;
+    font-size: 5.8667vw;
+    line-height: 1.15;
+  }
+
+  .weekly-models-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.2vw;
+  }
+
+  .weekly-models-section__state {
+    min-height: 24vw;
+    font-size: 3.7333vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .weekly-models-section {
+    padding-top: 8.5333vw;
+  }
+
+  .weekly-models-section__title {
+    margin-bottom: 4.8vw;
+  }
+
+  .weekly-models-section__grid {
+    gap: 3.7333vw;
+  }
 }

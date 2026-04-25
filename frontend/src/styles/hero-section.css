@@ -86,6 +86,10 @@
   flex-shrink: 0;
 }
 
+.hero__visual--mobile {
+  display: none;
+}
+
 .hero__model {
   width: 100%;
   height: 100%;
@@ -99,4 +103,150 @@
 .hero__model-canvas {
   width: 100%;
   height: 100%;
+}
+
+/* ==================== TABLET ==================== */
+
+@media (max-width: 1024px) {
+  .hero {
+    border-radius: 0 0 3.125vw 3.125vw;
+  }
+
+  .hero__container {
+    width: 89vw;
+    padding: 6vw 0 7vw;
+    gap: 4vw;
+  }
+
+  .hero__content {
+    width: 44vw;
+  }
+
+  .hero__title {
+    margin-bottom: 1.8vw;
+  }
+
+  .hero__subtitle {
+    max-width: 40vw;
+    margin-bottom: 3vw;
+  }
+
+  .hero__actions {
+    gap: 1.6vw;
+  }
+
+  .hero__button {
+    min-height: 4.6vw;
+    padding: 1.4vw 2.8vw;
+    border-radius: 1vw;
+  }
+
+  .hero__visual {
+    width: 34vw;
+    height: 34vw;
+  }
+}
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+  .hero {
+    border-radius: 0 0 6.4vw 6.4vw;
+  }
+
+  .hero__container {
+    width: 89.3333vw;
+    padding: 8vw 0 10.6667vw;
+    display: block;
+  }
+
+  .hero__content {
+    width: 100%;
+  }
+
+  .hero__title {
+    margin-bottom: 2.9333vw;
+    font-size: 5.8667vw;
+    line-height: 1.1;
+    color: var(--color-white);
+  }
+
+  .hero__title br {
+    display: none;
+  }
+
+  .hero__subtitle {
+    max-width: 100%;
+    margin-bottom: 3.7333vw;
+    font-size: 3.4667vw;
+    line-height: 1.28;
+  }
+
+  .hero__visual--desktop {
+    display: none;
+  }
+
+  .hero__visual--mobile {
+    display: flex;
+    width: 100%;
+    height: 72vw;
+    margin-bottom: 3.4667vw;
+    justify-content: center;
+  }
+
+  .hero__actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2.9333vw;
+  }
+
+  .hero__button {
+    width: 100%;
+    min-height: 12vw;
+    padding: 0 4.2667vw;
+    border-radius: 3.4667vw;
+    font-size: 3.7333vw;
+    line-height: 1;
+  }
+
+  .hero__button--secondary {
+    border-width: 0.2667vw;
+  }
+
+  .hero__model,
+  .hero__model-canvas {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* ==================== SMALL MOBILE ==================== */
+
+@media (max-width: 480px) {
+  .hero__container {
+    width: 91.4667vw;
+    padding: 8.5333vw 0 11.2vw;
+  }
+
+  .hero__title {
+    font-size: 6.4vw;
+  }
+
+  .hero__subtitle {
+    font-size: 3.7333vw;
+    margin-bottom: 4vw;
+  }
+
+  .hero__visual--mobile {
+    height: 76vw;
+    margin-bottom: 3.7333vw;
+  }
+
+  .hero__button {
+    min-height: 12.5333vw;
+    border-radius: 3.7333vw;
+    font-size: 3.7333vw;
+  }
 }

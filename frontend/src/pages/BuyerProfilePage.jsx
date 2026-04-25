@@ -1,6 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/buyer-profile-page.css";
+
+import downloadIcon from "../assets/icons/download.svg";
+import profileIcon from "../assets/icons/user.svg";
+import purchasesIcon from "../assets/icons/models.svg";
+import supportIcon from "../assets/icons/comment.svg";
+import notificationsIcon from "../assets/icons/notification.svg";
+import paymentsIcon from "../assets/icons/card.svg";
+import settingsIcon from "../assets/icons/settings.svg";
+import logoutIcon from "../assets/icons/logout.svg";
+
+import { getMySupportRequests } from "../api/support";
+
+import sbpIcon from "../assets/icons/sbp.svg";
+import sberpayIcon from "../assets/icons/sberpay.svg";
+import mirIcon from "../assets/icons/mir.svg";
+import bankCardIcon from "../assets/icons/card.svg";
+import uploadIcon from "../assets/icons/upload.svg";
+import trashIcon from "../assets/icons/delete.svg";
+
+import ConfirmModal from "../components/ConfirmModal";
+import AddCardModal from "../components/AddCardModal";
 
 import { isAuthenticated, logout } from "../components/auth/authStore";
 import {
@@ -8,6 +29,8 @@ import {
   updateProfileRequest,
   changePasswordRequest,
 } from "../api/auth";
+import { downloadProduct, getMyPurchasedProducts } from "../api/products";
+import apiClient from "../api/client";
 
 function formatRuPhone(value) {
   const digits = value.replace(/\D/g, "");
@@ -31,15 +54,46 @@ function formatRuPhone(value) {
   return out;
 }
 
+function getInitial(username) {
+  if (!username) return "M";
+  return username[0].toUpperCase();
+}
+
+function formatDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function normalizePreview(url) {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `http://127.0.0.1:8000${url}`;
+}
+
+function formatSupportStatus(status) {
+  if (status === "new") return "Новое";
+  if (status === "in_progress") return "В работе";
+  if (status === "done") return "Обработано";
+  return "—";
+}
+
 export default function BuyerProfilePage({ onOpenSellerModal }) {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState("profile"); // profile | purchases | notifications | payments | settings
+  const [activeTab, setActiveTab] = useState("profile");
 
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // профиль (редактирование)
+  const [supportRequests, setSupportRequests] = useState([]);
+  const [supportLoading, setSupportLoading] = useState(false);
+
   const [form, setForm] = useState({
     username: "",
     first_name: "",
@@ -52,10 +106,81 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
-  // смена пароля
-  const [pwForm, setPwForm] = useState({ old_password: "", new_password: "" });
+  const [pwForm, setPwForm] = useState({
+    old_password: "",
+    new_password: "",
+  });
   const [isPwSaving, setIsPwSaving] = useState(false);
   const [pwMsg, setPwMsg] = useState("");
+
+  const [purchases, setPurchases] = useState([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+
+  const [notificationsForm, setNotificationsForm] = useState({
+    sms_notifications: true,
+    search_preferences: false,
+  });
+  const [notificationsMsg, setNotificationsMsg] = useState("");
+
+  const [paymentMethods, setPaymentMethods] = useState([
+    { id: "sbp", label: "СБП •• 5691", active: true, icon: sbpIcon },
+    {
+      id: "sber",
+      label: "SberPay •• 5691",
+      active: false,
+      icon: sberpayIcon,
+    },
+    { id: "mir", label: "МИР •• 5691", active: false, icon: mirIcon },
+  ]);
+  const [paymentsMsg, setPaymentsMsg] = useState("");
+
+  const fileInputRef = useRef(null);
+
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
+    useState(false);
+  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
+
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState("");
+
+  const [settingsForm, setSettingsForm] = useState({
+    dark_theme: true,
+    compact_mode: false,
+  });
+  const [settingsMsg, setSettingsMsg] = useState("");
+
+  const tabs = useMemo(
+    () => [
+      { key: "profile", label: "Профиль", icon: profileIcon },
+      {
+        key: "purchases",
+        label: "История покупок",
+        icon: purchasesIcon,
+      },
+      {
+        key: "support",
+        label: "Поддержка",
+        icon: supportIcon,
+      },
+      {
+        key: "notifications",
+        label: "Уведомления",
+        icon: notificationsIcon,
+      },
+      {
+        key: "payments",
+        label: "Способы оплаты",
+        icon: paymentsIcon,
+      },
+      {
+        key: "settings",
+        label: "Настройки",
+        icon: settingsIcon,
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -88,6 +213,62 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     load();
   }, [navigate]);
 
+  useEffect(() => {
+    if (activeTab !== "support") return;
+
+    let mounted = true;
+
+    async function loadSupport() {
+      try {
+        setSupportLoading(true);
+        const data = await getMySupportRequests();
+        const items = Array.isArray(data?.results) ? data.results : [];
+
+        if (!mounted) return;
+        setSupportRequests(items);
+      } catch (e) {
+        if (!mounted) return;
+        setSupportRequests([]);
+      } finally {
+        if (mounted) setSupportLoading(false);
+      }
+    }
+
+    loadSupport();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "purchases") return;
+
+    let mounted = true;
+
+    async function loadPurchases() {
+      try {
+        setPurchasesLoading(true);
+        const data = await getMyPurchasedProducts();
+        if (!mounted) return;
+
+        const items = Array.isArray(data?.results) ? data.results : [];
+        setPurchases(items);
+      } catch (e) {
+        if (!mounted) return;
+        setPurchases([]);
+      } finally {
+        if (mounted) setPurchasesLoading(false);
+      }
+    }
+
+    loadPurchases();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeTab]);
+
   function setField(name, value) {
     setForm((p) => ({ ...p, [name]: value }));
     setSaveMsg("");
@@ -98,9 +279,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     setPwMsg("");
   }
 
-  function handleLogout() {
-    logout();
-    navigate("/");
+  function toggleNotification(name) {
+    setNotificationsForm((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+    setNotificationsMsg("");
   }
 
   async function handleSaveProfile() {
@@ -114,12 +298,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
         last_name: form.last_name,
         middle_name: form.middle_name,
         email: form.email,
-        phone: form.phone, // приходит строкой +7 (999) ...
+        phone: form.phone,
       };
 
       const updated = await updateProfileRequest(payload);
       setProfile(updated);
-      setSaveMsg("Сохранено");
+      setSaveMsg("");
     } catch (e) {
       const data = e?.response?.data;
       const msg =
@@ -140,7 +324,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
     try {
       await changePasswordRequest(pwForm.old_password, pwForm.new_password);
-      setPwMsg("Пароль изменён");
+      setPwMsg("");
       setPwForm({ old_password: "", new_password: "" });
     } catch (e) {
       const data = e?.response?.data;
@@ -155,8 +339,163 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     }
   }
 
+  async function handleDownload(productId) {
+    try {
+      const data = await downloadProduct(productId);
+      const url = data?.download_url;
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (e) {
+      alert("Не удалось скачать модель");
+    }
+  }
+
+  function handleRemovePayment(id) {
+    setPaymentMethods((prev) => prev.filter((item) => item.id !== id));
+    setPaymentsMsg("");
+  }
+
+  function handleSetActivePayment(id) {
+    setPaymentMethods((prev) =>
+      prev.map((item) => ({
+        ...item,
+        active: item.id === id,
+      })),
+    );
+    setPaymentsMsg("");
+  }
+
+  function handleSavePayments() {
+    setPaymentsMsg("");
+  }
+
+  function handleSaveNotifications() {
+    setNotificationsMsg("");
+  }
+
+  function toggleSettings(name) {
+    setSettingsForm((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+    setSettingsMsg("");
+  }
+
+  function handleSaveSettings() {
+    setSettingsMsg("");
+  }
+
+  async function handleAvatarUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setAvatarUploading(true);
+      setAvatarMsg("");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiClient.post("/users/me/upload-avatar/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const nextProfile = res?.data?.profile;
+      if (nextProfile) {
+        setProfile(nextProfile);
+      }
+
+      setAvatarMsg("");
+    } catch (e) {
+      setAvatarMsg(e?.response?.data?.detail || "Не удалось загрузить аватар");
+    } finally {
+      setAvatarUploading(false);
+      if (event.target) {
+        event.target.value = "";
+      }
+    }
+  }
+
+  async function handleDeleteAvatar() {
+    try {
+      setAvatarUploading(true);
+      setAvatarMsg("");
+
+      const res = await apiClient.delete("/users/me/delete-avatar/");
+      const nextProfile = res?.data?.profile;
+      if (nextProfile) {
+        setProfile(nextProfile);
+      }
+
+      setAvatarMsg("");
+    } catch (e) {
+      setAvatarMsg(e?.response?.data?.detail || "Не удалось удалить аватар");
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
+  function handleOpenFilePicker() {
+    fileInputRef.current?.click();
+  }
+
+  function handleAddCard(cardData) {
+    const last4 = cardData.number.replace(/\D/g, "").slice(-4) || "0000";
+    const brand = cardData.brand || "card";
+
+    const iconMap = {
+      sbp: sbpIcon,
+      sber: sberpayIcon,
+      mir: mirIcon,
+      card: bankCardIcon,
+    };
+
+    const labelMap = {
+      sbp: `СБП •• ${last4}`,
+      sber: `SberPay •• ${last4}`,
+      mir: `МИР •• ${last4}`,
+      card: `Карта •• ${last4}`,
+    };
+
+    setPaymentMethods((prev) => [
+      ...prev.map((item) => ({ ...item, active: false })),
+      {
+        id: `card-${Date.now()}`,
+        label: labelMap[brand] || `Карта •• ${last4}`,
+        active: true,
+        icon: iconMap[brand] || bankCardIcon,
+      },
+    ]);
+
+    setPaymentsMsg("");
+    setIsAddCardModalOpen(false);
+  }
+
+  function handleConfirmLogout() {
+    logout();
+    navigate("/");
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      await apiClient.delete("/users/me/delete/");
+      logout();
+      navigate("/");
+    } catch (e) {
+      alert(
+        e?.response?.data?.detail ||
+          "Удаление аккаунта пока не подключено на бэке",
+      );
+    }
+  }
+
   const userName = profile?.username || "Профиль";
   const userRole = profile?.role === "seller" ? "Продавец" : "Покупатель";
+  const avatarInitial = getInitial(profile?.username);
+  const avatarUrl = profile?.avatar_url || "";
 
   return (
     <section className="buyer-profile-page">
@@ -165,58 +504,25 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
         <div className="buyer-profile-page__divider" />
 
         <div className="buyer-profile-page__layout">
-          {/* LEFT MENU */}
           <aside className="buyer-profile-page__sidebar">
             <nav className="buyer-profile-page__menu">
-              <button
-                type="button"
-                className={`buyer-profile-page__menu-item ${
-                  activeTab === "profile" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("profile")}
-              >
-                <span className="text-p2">Профиль</span>
-              </button>
-
-              <button
-                type="button"
-                className={`buyer-profile-page__menu-item ${
-                  activeTab === "purchases" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("purchases")}
-              >
-                <span className="text-p2">История покупок</span>
-              </button>
-
-              <button
-                type="button"
-                className={`buyer-profile-page__menu-item ${
-                  activeTab === "notifications" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("notifications")}
-              >
-                <span className="text-p2">Уведомления</span>
-              </button>
-
-              <button
-                type="button"
-                className={`buyer-profile-page__menu-item ${
-                  activeTab === "payments" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("payments")}
-              >
-                <span className="text-p2">Способы оплаты</span>
-              </button>
-
-              <button
-                type="button"
-                className={`buyer-profile-page__menu-item ${
-                  activeTab === "settings" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("settings")}
-              >
-                <span className="text-p2">Настройки</span>
-              </button>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`buyer-profile-page__menu-item ${
+                    activeTab === tab.key ? "is-active" : ""
+                  }`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <img
+                    src={tab.icon}
+                    alt=""
+                    className="buyer-profile-page__menu-icon"
+                  />
+                  <span className="text-p2">{tab.label}</span>
+                </button>
+              ))}
 
               <button
                 type="button"
@@ -229,14 +535,18 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
               <button
                 type="button"
                 className="buyer-profile-page__menu-logout text-p2"
-                onClick={handleLogout}
+                onClick={() => setIsLogoutModalOpen(true)}
               >
-                Выйти
+                <img
+                  src={logoutIcon}
+                  alt=""
+                  className="buyer-profile-page__menu-icon"
+                />
+                <span>Выйти</span>
               </button>
             </nav>
           </aside>
 
-          {/* RIGHT CONTENT */}
           <main className="buyer-profile-page__content">
             {isLoading ? (
               <div className="page-state">Загрузка…</div>
@@ -245,7 +555,49 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                 {activeTab === "profile" && (
                   <div className="buyer-profile-page__card">
                     <div className="buyer-profile-page__profile-head">
-                      <div className="buyer-profile-page__avatar" />
+                      <div className="buyer-profile-page__avatar-wrap">
+                        <div className="buyer-profile-page__avatar text-h3">
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={userName}
+                              className="buyer-profile-page__avatar-image"
+                            />
+                          ) : (
+                            avatarInitial
+                          )}
+                        </div>
+
+                        <div className="buyer-profile-page__avatar-actions">
+                          <button
+                            type="button"
+                            className="buyer-profile-page__avatar-btn"
+                            onClick={handleOpenFilePicker}
+                            disabled={avatarUploading}
+                            title="Загрузить аватар"
+                          >
+                            <img src={uploadIcon} alt="" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="buyer-profile-page__avatar-btn"
+                            onClick={handleDeleteAvatar}
+                            disabled={avatarUploading}
+                            title="Удалить аватар"
+                          >
+                            <img src={trashIcon} alt="" />
+                          </button>
+
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="buyer-profile-page__avatar-input"
+                            onChange={handleAvatarUpload}
+                          />
+                        </div>
+                      </div>
 
                       <div className="buyer-profile-page__profile-info">
                         <div className="text-h3 buyer-profile-page__name">
@@ -268,7 +620,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                       </div>
                     </div>
 
-                    {/* PROFILE EDIT */}
+                    {avatarMsg ? (
+                      <div className="buyer-profile-page__save-msg text-p2">
+                        {avatarMsg}
+                      </div>
+                    ) : null}
+
                     <div className="buyer-profile-page__section-title text-p1">
                       Редактировать учетную запись
                     </div>
@@ -372,7 +729,6 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                       </div>
                     )}
 
-                    {/* PASSWORD CHANGE */}
                     <div className="buyer-profile-page__section-title text-p1">
                       Смена пароля
                     </div>
@@ -409,7 +765,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                       </label>
                     </div>
 
-                    <div className="buyer-profile-page__actions buyer-profile-page__actions--password">
+                    <div className="buyer-profile-page__actions">
                       <button
                         type="button"
                         className="buyer-profile-page__save text-p2"
@@ -432,13 +788,361 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                   </div>
                 )}
 
-                {activeTab !== "profile" && (
+                {activeTab === "purchases" && (
                   <div className="buyer-profile-page__card">
                     <div className="text-h3 buyer-profile-page__card-title">
-                      Раздел в разработке
+                      История покупок
                     </div>
-                    <div className="text-p2 buyer-profile-page__muted">
-                      Сделаем после профиля: сначала покупки, потом остальное.
+
+                    {purchasesLoading ? (
+                      <div className="buyer-profile-page__muted text-p2">
+                        Загрузка покупок...
+                      </div>
+                    ) : purchases.length === 0 ? (
+                      <div className="buyer-profile-page__muted text-p2">
+                        У вас пока нет покупок.
+                      </div>
+                    ) : (
+                      <div className="buyer-profile-page__list">
+                        {purchases.map((item) => {
+                          const product = item.product || {};
+                          const previewSrc = normalizePreview(
+                            product.main_preview_url,
+                          );
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="buyer-profile-page__purchase"
+                            >
+                              <div className="buyer-profile-page__purchase-left">
+                                <div className="buyer-profile-page__purchase-thumb">
+                                  {previewSrc ? (
+                                    <img
+                                      src={previewSrc}
+                                      alt={product.title || "Модель"}
+                                      className="buyer-profile-page__purchase-thumb-image"
+                                    />
+                                  ) : null}
+                                </div>
+
+                                <div>
+                                  <div className="buyer-profile-page__purchase-name text-p2">
+                                    {product.title || "Название модели"}
+                                  </div>
+                                  <div className="buyer-profile-page__purchase-sub text-p3">
+                                    {formatDate(item.created_at)} •{" "}
+                                    {Number(item.price_at_purchase || 0)} ₽
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="buyer-profile-page__download text-p2"
+                                onClick={() => handleDownload(product.id)}
+                              >
+                                <img
+                                  src={downloadIcon}
+                                  alt=""
+                                  className="buyer-profile-page__download-icon"
+                                />
+                                <span>Скачать</span>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "support" && (
+                  <div className="buyer-profile-page__card">
+                    <div className="text-h3 buyer-profile-page__card-title">
+                      Поддержка
+                    </div>
+
+                    {supportLoading ? (
+                      <div className="page-state">Загрузка…</div>
+                    ) : supportRequests.length === 0 ? (
+                      <div className="buyer-profile-page__muted text-p2">
+                        У вас пока нет обращений в поддержку.
+                      </div>
+                    ) : (
+                      <div className="buyer-profile-page__support-list">
+                        {supportRequests.map((item) => (
+                          <div
+                            key={item.id}
+                            className="buyer-profile-page__support-item"
+                          >
+                            <div className="buyer-profile-page__support-top">
+                              <div>
+                                <div className="buyer-profile-page__support-subject text-p2">
+                                  {item.subject || "Без темы"}
+                                </div>
+                                <div className="buyer-profile-page__support-date text-p3">
+                                  {new Date(item.created_at).toLocaleString(
+                                    "ru-RU",
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="buyer-profile-page__support-status text-p3">
+                                {formatSupportStatus(item.status)}
+                              </div>
+                            </div>
+
+                            <div className="buyer-profile-page__support-message text-p2">
+                              {item.message}
+                            </div>
+
+                            {item.admin_reply ? (
+                              <div className="buyer-profile-page__support-reply">
+                                <div className="buyer-profile-page__support-reply-title text-p3">
+                                  Ответ поддержки
+                                </div>
+                                <div className="buyer-profile-page__support-reply-text text-p2">
+                                  {item.admin_reply}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="buyer-profile-page__support-waiting text-p3">
+                                Ответа пока нет
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "notifications" && (
+                  <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
+                    <div className="text-h3 buyer-profile-page__card-title">
+                      Уведомления
+                    </div>
+
+                    <div className="buyer-profile-page__toggles">
+                      <div className="buyer-profile-page__toggle-row">
+                        <div>
+                          <div className="text-p2 buyer-profile-page__toggle-title">
+                            Получать СМС-рассылки
+                          </div>
+                          <div className="text-p3 buyer-profile-page__muted">
+                            {form.phone || "+7 906 912-54-87"}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={`buyer-profile-page__switch ${
+                            notificationsForm.sms_notifications ? "is-on" : ""
+                          }`}
+                          onClick={() =>
+                            toggleNotification("sms_notifications")
+                          }
+                        >
+                          <span className="buyer-profile-page__switch-dot" />
+                        </button>
+                      </div>
+
+                      <div className="buyer-profile-page__toggle-row">
+                        <div>
+                          <div className="text-p2 buyer-profile-page__toggle-title">
+                            Учитывать предпочтения
+                          </div>
+                          <div className="text-p3 buyer-profile-page__muted">
+                            в результатах поиска
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={`buyer-profile-page__switch ${
+                            notificationsForm.search_preferences ? "is-on" : ""
+                          }`}
+                          onClick={() =>
+                            toggleNotification("search_preferences")
+                          }
+                        >
+                          <span className="buyer-profile-page__switch-dot" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="buyer-profile-page__actions buyer-profile-page__actions--left">
+                      <button
+                        type="button"
+                        className="buyer-profile-page__save text-p2"
+                        onClick={handleSaveNotifications}
+                      >
+                        Сохранить
+                      </button>
+                    </div>
+
+                    {notificationsMsg && (
+                      <div className="buyer-profile-page__save-msg text-p2">
+                        {notificationsMsg}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "payments" && (
+                  <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
+                    <div className="text-h3 buyer-profile-page__card-title">
+                      Способы оплаты
+                    </div>
+
+                    <div className="buyer-profile-page__payment-list">
+                      {paymentMethods.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`buyer-profile-page__payment ${
+                            item.active ? "is-active" : ""
+                          }`}
+                          onClick={() => handleSetActivePayment(item.id)}
+                        >
+                          <span className="buyer-profile-page__payment-left">
+                            <img
+                              src={item.icon}
+                              alt=""
+                              className="buyer-profile-page__payment-icon"
+                            />
+                            <span className="text-p2">{item.label}</span>
+                          </span>
+
+                          <span
+                            className="buyer-profile-page__x"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePayment(item.id);
+                            }}
+                          >
+                            ×
+                          </span>
+                        </button>
+                      ))}
+
+                      <button
+                        type="button"
+                        className="buyer-profile-page__payment"
+                        onClick={() => setIsAddCardModalOpen(true)}
+                      >
+                        <span className="buyer-profile-page__payment-left">
+                          <img
+                            src={bankCardIcon}
+                            alt=""
+                            className="buyer-profile-page__payment-icon"
+                          />
+                          <span className="text-p2">Добавить карту</span>
+                        </span>
+                        <span className="buyer-profile-page__arrow">›</span>
+                      </button>
+                    </div>
+
+                    <div className="buyer-profile-page__actions buyer-profile-page__actions--left">
+                      <button
+                        type="button"
+                        className="buyer-profile-page__save text-p2"
+                        onClick={handleSavePayments}
+                      >
+                        Сохранить
+                      </button>
+                    </div>
+
+                    {paymentsMsg && (
+                      <div className="buyer-profile-page__save-msg text-p2">
+                        {paymentsMsg}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "settings" && (
+                  <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
+                    <div className="text-h3 buyer-profile-page__card-title">
+                      Настройки
+                    </div>
+
+                    <div className="buyer-profile-page__toggles">
+                      <div className="buyer-profile-page__toggle-row">
+                        <div>
+                          <div className="text-p2 buyer-profile-page__toggle-title">
+                            Тёмная тема
+                          </div>
+                          <div className="text-p3 buyer-profile-page__muted">
+                            Основной режим интерфейса
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={`buyer-profile-page__switch ${
+                            settingsForm.dark_theme ? "is-on" : ""
+                          }`}
+                          onClick={() => toggleSettings("dark_theme")}
+                        >
+                          <span className="buyer-profile-page__switch-dot" />
+                        </button>
+                      </div>
+
+                      <div className="buyer-profile-page__toggle-row">
+                        <div>
+                          <div className="text-p2 buyer-profile-page__toggle-title">
+                            Компактный режим
+                          </div>
+                          <div className="text-p3 buyer-profile-page__muted">
+                            Более плотное отображение блоков
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={`buyer-profile-page__switch ${
+                            settingsForm.compact_mode ? "is-on" : ""
+                          }`}
+                          onClick={() => toggleSettings("compact_mode")}
+                        >
+                          <span className="buyer-profile-page__switch-dot" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="buyer-profile-page__actions buyer-profile-page__actions--left">
+                      <button
+                        type="button"
+                        className="buyer-profile-page__save text-p2"
+                        onClick={handleSaveSettings}
+                      >
+                        Сохранить
+                      </button>
+                    </div>
+
+                    {settingsMsg && (
+                      <div className="buyer-profile-page__save-msg text-p2">
+                        {settingsMsg}
+                      </div>
+                    )}
+
+                    <div className="buyer-profile-page__danger-zone">
+                      <div className="buyer-profile-page__danger-title text-p2">
+                        Опасная зона
+                      </div>
+                      <div className="buyer-profile-page__muted text-p3">
+                        Удаление аккаунта необратимо.
+                      </div>
+
+                      <button
+                        type="button"
+                        className="buyer-profile-page__danger-btn text-p2"
+                        onClick={() => setIsDeleteAccountModalOpen(true)}
+                      >
+                        Удалить аккаунт
+                      </button>
                     </div>
                   </div>
                 )}
@@ -447,6 +1151,33 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
           </main>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        title="Выйти из аккаунта?"
+        description="Вы уверены, что хотите выйти из аккаунта?"
+        confirmText="Выйти"
+        cancelText="Отмена"
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteAccountModalOpen}
+        title="Удалить аккаунт?"
+        description="Это действие необратимо. Все данные аккаунта будут удалены."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        danger
+        onClose={() => setIsDeleteAccountModalOpen(false)}
+        onConfirm={handleDeleteAccount}
+      />
+
+      <AddCardModal
+        isOpen={isAddCardModalOpen}
+        onClose={() => setIsAddCardModalOpen(false)}
+        onSubmit={handleAddCard}
+      />
     </section>
   );
 }

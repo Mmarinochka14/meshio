@@ -31,7 +31,7 @@ export default function CategoriesSection() {
       bg: charactersBg,
       className:
         "categories-section__card--large categories-section__card--characters",
-      to: "/catalog?category=characters",
+      to: "/catalog?category=personazhi",
     },
     {
       id: "animals",
@@ -39,7 +39,7 @@ export default function CategoriesSection() {
       image: animalsImage,
       bg: animalsBg,
       className: "categories-section__card--animals",
-      to: "/catalog?category=animals",
+      to: "/catalog?category=zhivotnye",
     },
     {
       id: "tech",
@@ -47,7 +47,7 @@ export default function CategoriesSection() {
       image: techImage,
       bg: techBg,
       className: "categories-section__card--tech",
-      to: "/catalog?category=tech",
+      to: "/catalog?category=tehnika",
     },
     {
       id: "environment",
@@ -55,7 +55,7 @@ export default function CategoriesSection() {
       image: environmentImage,
       bg: environmentBg,
       className: "categories-section__card--environment",
-      to: "/catalog?category=environment",
+      to: "/catalog?category=okruzhenie",
     },
   ];
 

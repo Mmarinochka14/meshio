@@ -166,3 +166,15 @@
   opacity: 0.8;
   cursor: default;
 }
+
+.contacts-page__admin-note {
+  width: 100%;
+  padding: 1.25vw;
+  border-radius: 0.8333vw;
+  background: var(--color-grey-dark);
+  border: 0.0521vw solid var(--color-grey-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625vw;
+  color: var(--color-white);
+}

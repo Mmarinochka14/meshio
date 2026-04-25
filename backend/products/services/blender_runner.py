@@ -10,6 +10,7 @@ def run_blender_preprocessing(
     source_path: Path,
     output_glb_path: Path,
     output_uv_png_path: Path | None = None,
+    output_preview_png_path: Path | None = None,
     blender_script_path: Path | None = None,
 ) -> dict:
     if not source_path.exists():
@@ -24,8 +25,12 @@ def run_blender_preprocessing(
         raise RuntimeError(f"Blender script not found: {blender_script_path}")
 
     output_glb_path.parent.mkdir(parents=True, exist_ok=True)
+
     if output_uv_png_path is not None:
         output_uv_png_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if output_preview_png_path is not None:
+        output_preview_png_path.parent.mkdir(parents=True, exist_ok=True)
 
     command = [
         BLENDER_EXECUTABLE,
@@ -39,6 +44,9 @@ def run_blender_preprocessing(
 
     if output_uv_png_path is not None:
         command.append(str(output_uv_png_path))
+
+    if output_preview_png_path is not None:
+        command.append(str(output_preview_png_path))
 
     result = subprocess.run(
         command,
@@ -60,11 +68,22 @@ def run_blender_preprocessing(
             f"STDOUT:\n{result.stdout}\n\n"
             f"STDERR:\n{result.stderr}"
         )
+
     uv_exists = output_uv_png_path is not None and output_uv_png_path.exists()
+    preview_exists = output_preview_png_path is not None and output_preview_png_path.exists()
+
+    if output_preview_png_path is not None and not preview_exists:
+        raise RuntimeError(
+            "Blender finished, but preview PNG was not created.\n"
+            f"Expected path: {output_preview_png_path}\n\n"
+            f"STDOUT:\n{result.stdout}\n\n"
+            f"STDERR:\n{result.stderr}"
+        )
 
     return {
         "viewer_glb_path": output_glb_path,
         "uv_preview_path": output_uv_png_path if uv_exists else None,
+        "preview_png_path": output_preview_png_path if preview_exists else None,
         "stdout": result.stdout,
         "stderr": result.stderr,
     }

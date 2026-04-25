@@ -1,0 +1,118 @@
+.modal__panel--payment-success {
+  width: 32vw;
+  padding: 2.0833vw;
+  border-radius: 1.6667vw;
+  border: 0.1vw solid #22242d;
+}
+
+.payment-success-modal {
+  width: 100%;
+  color: var(--color-white);
+  text-align: center;
+}
+
+.payment-success-modal__icon {
+  width: 4.6875vw;
+  height: 4.6875vw;
+  margin: 0 auto 1.25vw;
+  border-radius: 1.25vw;
+  background: linear-gradient(
+    135deg,
+    var(--color-purple),
+    var(--color-purple-light)
+  );
+  color: var(--color-white);
+  font-size: 2.0833vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-success-modal__title {
+  color: var(--color-white);
+  margin-bottom: 0.8333vw;
+}
+
+.payment-success-modal__text {
+  color: rgba(235, 235, 235, 0.8);
+  margin-bottom: 0.8333vw;
+}
+
+.payment-success-modal__meta {
+  color: var(--color-purple-light);
+  margin-bottom: 1.25vw;
+}
+
+.payment-success-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625vw;
+  margin-bottom: 1.25vw;
+  padding: 0.8333vw;
+  border-radius: 0.8333vw;
+  background: var(--color-grey-hover);
+}
+
+.payment-success-modal__list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8333vw;
+  color: var(--color-white);
+}
+
+.payment-success-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7292vw;
+}
+
+.payment-success-modal__actions--single {
+  grid-template-columns: 1fr;
+  margin-top: 0.7292vw;
+}
+
+.payment-success-modal__primary,
+.payment-success-modal__secondary,
+.payment-success-modal__download {
+  min-height: 2.9167vw;
+  border-radius: 0.7292vw;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.payment-success-modal__primary {
+  border: none;
+  background: var(--color-purple);
+  color: var(--color-white);
+}
+
+.payment-success-modal__primary:hover {
+  background: var(--color-purple-hover);
+  transform: translateY(-0.0521vw);
+}
+
+.payment-success-modal__secondary,
+.payment-success-modal__download {
+  border: 0.0521vw solid rgba(235, 235, 235, 0.12);
+  background: transparent;
+  color: var(--color-white);
+}
+
+.payment-success-modal__secondary:hover,
+.payment-success-modal__download:hover {
+  background: var(--color-grey-hover);
+  transform: translateY(-0.0521vw);
+}
+
+.payment-success-modal__download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

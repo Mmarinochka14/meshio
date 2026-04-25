@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getUser, subscribe } from "./auth/authStore";
 import "../styles/seller-header.css";
@@ -8,7 +8,10 @@ import uploadIcon from "../assets/icons/upload.svg";
 import userIcon from "../assets/icons/user.svg";
 
 export default function SellerHeader({ onOpenUploadModal }) {
+  const navigate = useNavigate();
+
   const [, forceUpdate] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     const unsub = subscribe(() => forceUpdate((x) => x + 1));
@@ -17,6 +20,19 @@ export default function SellerHeader({ onOpenUploadModal }) {
 
   const user = getUser();
   const userName = user?.username || "Профиль";
+
+  function handleSearchSubmit(event) {
+    event.preventDefault();
+
+    const value = searchValue.trim();
+
+    if (!value) {
+      navigate("/seller/models");
+      return;
+    }
+
+    navigate(`/seller/models?q=${encodeURIComponent(value)}`);
+  }
 
   return (
     <header className="seller-header">
@@ -71,7 +87,10 @@ export default function SellerHeader({ onOpenUploadModal }) {
               <span>Загрузить</span>
             </button>
 
-            <div className="seller-header__search">
+            <form
+              className="seller-header__search"
+              onSubmit={handleSearchSubmit}
+            >
               <img
                 src={searchIcon}
                 alt=""
@@ -81,8 +100,10 @@ export default function SellerHeader({ onOpenUploadModal }) {
                 type="text"
                 placeholder="Поиск"
                 className="seller-header__search-input"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
               />
-            </div>
+            </form>
           </div>
         </div>
       </div>

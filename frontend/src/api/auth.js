@@ -1,10 +1,15 @@
 import apiClient from "./client";
 import { setToken, setUser } from "../components/auth/authStore";
 import {
+  clearFavoriteIds,
+  getFavoriteIds,
+} from "../components/favorites/favoritesStore";
+import {
   clearGuestCart,
   getGuestCartProductIds,
 } from "../components/cart/cartStore";
 import { mergeCartRequest } from "./cart";
+import { mergeFavoritesRequest } from "./products";
 
 export async function loginRequest(username, password) {
   const res = await apiClient.post("/users/login/", { username, password });
@@ -24,6 +29,17 @@ export async function loginRequest(username, password) {
         clearGuestCart();
       } catch {
         // молча оставляем локальную корзину, если merge не удался
+      }
+    }
+
+    const guestFavoriteIds = getFavoriteIds();
+
+    if (guestFavoriteIds.length > 0) {
+      try {
+        await mergeFavoritesRequest(guestFavoriteIds);
+        clearFavoriteIds();
+      } catch {
+        // молча оставляем локальное избранное, если merge не удался
       }
     }
   }
@@ -49,6 +65,17 @@ export async function registerRequest(payload) {
         clearGuestCart();
       } catch {
         // молча оставляем локальную корзину, если merge не удался
+      }
+    }
+
+    const guestFavoriteIds = getFavoriteIds();
+
+    if (guestFavoriteIds.length > 0) {
+      try {
+        await mergeFavoritesRequest(guestFavoriteIds);
+        clearFavoriteIds();
+      } catch {
+        // молча оставляем локальное избранное, если merge не удался
       }
     }
   }

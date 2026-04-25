@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-profile-page.css";
 
+import SellerAnalyticsPanel from "../components/SellerAnalyticsPanel";
+
+import userIcon from "../assets/icons/user.svg";
+import analyticsIcon from "../assets/icons/analytics.svg";
+import notificationIcon from "../assets/icons/notification.svg";
+import settingsIcon from "../assets/icons/settings.svg";
+import logoutIcon from "../assets/icons/logout.svg";
+
 import { isAuthenticated, logout } from "../components/auth/authStore";
 import {
   meRequest,
@@ -232,7 +240,12 @@ export default function SellerProfilePage() {
                 }`}
                 onClick={() => setActiveTab("profile")}
               >
-                <span className="text-p2">Профиль</span>
+                <img
+                  src={userIcon}
+                  alt=""
+                  className="seller-profile-page__menu-icon"
+                />
+                <span className="text-p1">Профиль</span>
               </button>
 
               <button
@@ -242,7 +255,12 @@ export default function SellerProfilePage() {
                 }`}
                 onClick={() => setActiveTab("analytics")}
               >
-                <span className="text-p2">Аналитика</span>
+                <img
+                  src={analyticsIcon}
+                  alt=""
+                  className="seller-profile-page__menu-icon"
+                />
+                <span className="text-p1">Аналитика</span>
               </button>
 
               <button
@@ -252,7 +270,12 @@ export default function SellerProfilePage() {
                 }`}
                 onClick={() => setActiveTab("notifications")}
               >
-                <span className="text-p2">Уведомления</span>
+                <img
+                  src={notificationIcon}
+                  alt=""
+                  className="seller-profile-page__menu-icon"
+                />
+                <span className="text-p1">Уведомления</span>
               </button>
 
               <button
@@ -262,15 +285,25 @@ export default function SellerProfilePage() {
                 }`}
                 onClick={() => setActiveTab("settings")}
               >
-                <span className="text-p2">Настройки</span>
+                <img
+                  src={settingsIcon}
+                  alt=""
+                  className="seller-profile-page__menu-icon"
+                />
+                <span className="text-p1">Настройки</span>
               </button>
 
               <button
                 type="button"
-                className="seller-profile-page__menu-logout text-p2"
+                className="seller-profile-page__menu-logout text-p1"
                 onClick={handleLogout}
               >
-                Выйти
+                <img
+                  src={logoutIcon}
+                  alt=""
+                  className="seller-profile-page__menu-icon"
+                />
+                <span>Выйти</span>
               </button>
             </nav>
           </aside>
@@ -280,14 +313,15 @@ export default function SellerProfilePage() {
               <div className="seller-profile-page__state text-p2">
                 Загрузка...
               </div>
+            ) : activeTab === "analytics" ? (
+              <SellerAnalyticsPanel />
             ) : activeTab !== "profile" ? (
               <div className="seller-profile-page__card">
                 <div className="seller-profile-page__stub-title text-h3">
                   Раздел в разработке
                 </div>
                 <div className="seller-profile-page__stub-text text-p2">
-                  Сначала добьём профиль, мои модели и загрузку товара, потом
-                  вернёмся сюда.
+                  Этот раздел доделаем следующим этапом.
                 </div>
               </div>
             ) : (
@@ -301,7 +335,7 @@ export default function SellerProfilePage() {
                     <div className="seller-profile-page__name text-h3">
                       {userName}
                     </div>
-                    <div className="seller-profile-page__email text-p2">
+                    <div className="seller-profile-page__email text-p1">
                       {userEmail}
                     </div>
                     <div className="seller-profile-page__role text-p2">
@@ -317,7 +351,7 @@ export default function SellerProfilePage() {
                   </div>
                 </div>
 
-                <div className="seller-profile-page__section-title text-p1">
+                <div className="seller-profile-page__section-title text-h4">
                   Редактировать учетную запись
                 </div>
 
@@ -388,7 +422,7 @@ export default function SellerProfilePage() {
                   </label>
                 </div>
 
-                <div className="seller-profile-page__section-title text-p1">
+                <div className="seller-profile-page__section-title text-h4">
                   Редактировать магазин
                 </div>
 
@@ -422,7 +456,7 @@ export default function SellerProfilePage() {
                   </label>
                 </div>
 
-                <div className="seller-profile-page__section-title text-p1">
+                <div className="seller-profile-page__section-title text-h4">
                   Сменить пароль
                 </div>
 

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   addProductComment,
@@ -8,7 +8,6 @@ import {
   generateTexture,
   getProductById,
   getProductComments,
-  purchaseProduct,
   removeFromFavorites,
 } from "../api/products";
 import { addToCartRequest } from "../api/cart";
@@ -21,6 +20,8 @@ import {
   subscribeCart,
 } from "../components/cart/cartStore";
 import ProductPageViewerPanel from "../components/ProductPageViewerPanel";
+import CheckoutModal from "../components/CheckoutModal";
+import PaymentSuccessModal from "../components/PaymentSuccessModal";
 
 import heartIcon from "../assets/icons/favorite.svg";
 import cartIcon from "../assets/icons/cart.svg";
@@ -109,15 +110,6 @@ function formatPolyStyle(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function buildTags(product) {
-  return [
-    product?.has_textures ? "PBR" : null,
-    product?.model_format ? product.model_format.toUpperCase() : null,
-    product?.has_uv ? "UV" : null,
-    product?.poly_style ? formatPolyStyle(product.poly_style) : null,
-  ].filter(Boolean);
-}
-
 function renderStars(rating) {
   const normalized = Math.round(Number(rating || 0));
   return Array.from({ length: 5 }, (_, index) =>
@@ -150,12 +142,12 @@ function StatInline({ icon, value }) {
 
 export default function ProductPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [viewerUrl, setViewerUrl] = useState("");
   const [viewMode, setViewMode] = useState("default");
   const [isLoading, setIsLoading] = useState(true);
-  const [isActionLoading, setIsActionLoading] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
@@ -179,18 +171,22 @@ export default function ProductPage() {
   const [commentText, setCommentText] = useState("");
   const [commentSending, setCommentSending] = useState(false);
 
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [successData, setSuccessData] = useState(null);
+
   const token = getToken();
   const user = getUser();
 
   const isAuthenticated = Boolean(token);
   const isBuyer = user?.role === "buyer";
+  const isSeller = user?.role === "seller";
   const isFree = Number(product?.price || 0) === 0;
-
-  const tags = useMemo(() => buildTags(product), [product]);
+  const canUseBuyerActions = !isAuthenticated || isBuyer;
 
   const displayRating = Number(product?.average_rating || 0).toFixed(2);
   const displayViews = product?.views_count ?? 0;
   const displayComments = product?.comments_count ?? 0;
+  const displayReviews = product?.reviews_count ?? 0;
 
   const texturePromptSuggestions = [
     "розовый матовый пластик",
@@ -202,21 +198,6 @@ export default function ProductPage() {
     "темная ткань",
     "зеленый окрашенный металл",
   ];
-
-  const relatedModels = useMemo(() => {
-    if (!product) return [];
-
-    return Array.from({ length: 4 }, (_, index) => ({
-      id: `related-${index}`,
-      title: "Название модели",
-      price: product.price,
-      average_rating: product.average_rating || 0,
-      views_count: 1208,
-      comments_count: 100,
-      main_preview_url: product.main_preview_url || "",
-      tags,
-    }));
-  }, [product, tags]);
 
   useEffect(() => {
     let mounted = true;
@@ -230,7 +211,9 @@ export default function ProductPage() {
         if (!mounted) return;
 
         setProduct(detail);
-        setIsFavorite(Boolean(detail?.is_favorite));
+        setIsFavorite(
+          canUseBuyerActions ? Boolean(detail?.is_favorite) : false,
+        );
         setViewerUrl(detail?.viewer_url || "");
       } catch (err) {
         if (!mounted) return;
@@ -245,15 +228,18 @@ export default function ProductPage() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, canUseBuyerActions]);
 
   useEffect(() => {
     if (!product) return;
 
-    if (!isBuyerAuthenticated()) {
+    if (!isBuyerAuthenticated() && !isSeller) {
       setIsInCart(isInGuestCart(product.id));
+      return;
     }
-  }, [product]);
+
+    setIsInCart(false);
+  }, [product, isSeller]);
 
   useEffect(() => {
     let mounted = true;
@@ -267,7 +253,7 @@ export default function ProductPage() {
 
         const results = Array.isArray(data?.results) ? data.results : [];
         setComments(results);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setComments([]);
       } finally {
@@ -284,13 +270,13 @@ export default function ProductPage() {
 
   useEffect(() => {
     const unsub = subscribeCart(() => {
-      if (product && !isBuyerAuthenticated()) {
+      if (product && !isBuyerAuthenticated() && !isSeller) {
         setIsInCart(isInGuestCart(product.id));
       }
     });
 
     return unsub;
-  }, [product]);
+  }, [product, isSeller]);
 
   function applyPresetValues(presetKey) {
     const preset = MATERIAL_PRESET_VALUES[presetKey];
@@ -324,12 +310,16 @@ export default function ProductPage() {
     window.location.href = url;
   }
 
-  async function handleMainAction() {
+  async function handlePrimaryAction() {
     try {
       setError("");
-      setIsActionLoading(true);
 
-      if (isFree) {
+      if (isSeller) {
+        setError("В режиме продавца покупка недоступна.");
+        return;
+      }
+
+      if (product?.has_purchase || isFree) {
         await handleDownloadFlow();
         return;
       }
@@ -344,16 +334,13 @@ export default function ProductPage() {
         return;
       }
 
-      await purchaseProduct(id);
-      await handleDownloadFlow();
+      setIsCheckoutOpen(true);
     } catch (err) {
       setError(
         err?.response?.data?.detail ||
           err?.message ||
           "Не удалось выполнить действие.",
       );
-    } finally {
-      setIsActionLoading(false);
     }
   }
 
@@ -363,6 +350,11 @@ export default function ProductPage() {
 
       if (!product) return;
 
+      if (isSeller) {
+        setError("В режиме продавца корзина недоступна.");
+        return;
+      }
+
       if (Number(product.price || 0) <= 0) {
         await handleDownloadFlow();
         return;
@@ -371,6 +363,11 @@ export default function ProductPage() {
       setIsCartLoading(true);
 
       if (isBuyerAuthenticated() && user?.role === "buyer") {
+        if (isInCart) {
+          navigate("/cart");
+          return;
+        }
+
         await addToCartRequest(product.id);
         setIsInCart(true);
         return;
@@ -480,6 +477,20 @@ export default function ProductPage() {
     }
   }
 
+  function handleCheckoutSuccess(data) {
+    setSuccessData(data);
+
+    setProduct((prev) =>
+      prev
+        ? {
+            ...prev,
+            has_purchase: true,
+            sales_count: (prev.sales_count || 0) + 1,
+          }
+        : prev,
+    );
+  }
+
   if (isLoading) {
     return (
       <section className="product-page">
@@ -503,283 +514,349 @@ export default function ProductPage() {
   }
 
   return (
-    <section className="product-page">
-      <div className="product-page__container">
-        <div className="product-page__top-grid">
-          <div className="product-page__left-column">
-            <ProductPageViewerPanel
-              viewerUrl={viewerUrl}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              texturePrompt={texturePrompt}
-              setTexturePrompt={setTexturePrompt}
-              onGenerateTexture={handleGenerateTexture}
-              generatedTextureUrl={generatedTextureUrl}
-              isGeneratingTexture={isGeneratingTexture}
-              texturePromptSuggestions={texturePromptSuggestions}
-              selectedMaterialPreset={selectedMaterialPreset}
-              setSelectedMaterialPreset={handleMaterialPresetChange}
-              customMaterialColor={customMaterialColor}
-              setCustomMaterialColor={setCustomMaterialColor}
-              customRoughness={customRoughness}
-              setCustomRoughness={setCustomRoughness}
-              customMetalness={customMetalness}
-              setCustomMetalness={setCustomMetalness}
-              customOpacity={customOpacity}
-              setCustomOpacity={setCustomOpacity}
-              customEmissive={customEmissive}
-              setCustomEmissive={setCustomEmissive}
-              onResetMaterial={handleResetMaterial}
-            />
+    <>
+      <section className="product-page">
+        <div className="product-page__container">
+          <div className="product-page__top-grid">
+            <div className="product-page__left-column">
+              <ProductPageViewerPanel
+                viewerUrl={viewerUrl}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                texturePrompt={texturePrompt}
+                setTexturePrompt={setTexturePrompt}
+                onGenerateTexture={handleGenerateTexture}
+                generatedTextureUrl={generatedTextureUrl}
+                isGeneratingTexture={isGeneratingTexture}
+                texturePromptSuggestions={texturePromptSuggestions}
+                selectedMaterialPreset={selectedMaterialPreset}
+                setSelectedMaterialPreset={handleMaterialPresetChange}
+                customMaterialColor={customMaterialColor}
+                setCustomMaterialColor={setCustomMaterialColor}
+                customRoughness={customRoughness}
+                setCustomRoughness={setCustomRoughness}
+                customMetalness={customMetalness}
+                setCustomMetalness={setCustomMetalness}
+                customOpacity={customOpacity}
+                setCustomOpacity={setCustomOpacity}
+                customEmissive={customEmissive}
+                setCustomEmissive={setCustomEmissive}
+                onResetMaterial={handleResetMaterial}
+              />
+            </div>
+
+            <aside className="product-page__right-column">
+              <div className="product-page__sidebar-card">
+                <div className="product-page__stats-line">
+                  <div className="product-page__rating-inline">
+                    {renderStars(product.average_rating).map((icon, index) => (
+                      <img
+                        key={index}
+                        src={icon}
+                        alt=""
+                        className="product-page__stat-icon product-page__stat-icon--star"
+                      />
+                    ))}
+                    <span className="text-p3">{displayRating}</span>
+                    <span className="product-page__reviews-count text-p3">
+                      · {displayReviews} оценок
+                    </span>
+                  </div>
+
+                  <div className="product-page__inline-meta">
+                    <StatInline icon={eyeIcon} value={displayViews} />
+                    <StatInline icon={commentIcon} value={displayComments} />
+                  </div>
+                </div>
+
+                <h1 className="product-page__product-title text-h3">
+                  {product.title}
+                </h1>
+
+                <div className="product-page__price text-h2">
+                  {formatPrice(product.price)}
+                </div>
+
+                {canUseBuyerActions ? (
+                  <div className="product-page__action-stack">
+                    <button
+                      type="button"
+                      className="product-page__buy-btn text-p2"
+                      onClick={handlePrimaryAction}
+                    >
+                      <img
+                        src={cartIcon}
+                        alt=""
+                        className="product-page__buy-icon"
+                      />
+                      <span>
+                        {product.has_purchase || isFree
+                          ? "Скачать модель"
+                          : "Купить модель"}
+                      </span>
+                    </button>
+
+                    {!product.has_purchase && !isFree ? (
+                      <div className="product-page__secondary-row">
+                        <button
+                          type="button"
+                          className={`product-page__cart-btn text-p2 ${
+                            isInCart ? "is-active" : ""
+                          }`}
+                          onClick={handleAddToCart}
+                          disabled={isCartLoading}
+                        >
+                          <img
+                            src={cartIcon}
+                            alt=""
+                            className="product-page__buy-icon"
+                          />
+                          <span>
+                            {isCartLoading
+                              ? "Добавление..."
+                              : isInCart
+                                ? "Перейти в корзину"
+                                : "Добавить в корзину"}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`product-page__favorite-icon-btn ${
+                            isFavorite ? "is-active" : ""
+                          }`}
+                          onClick={handleFavoriteClick}
+                          disabled={isFavoriteLoading}
+                          aria-label={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                          title={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                        >
+                          <img
+                            src={heartIcon}
+                            alt=""
+                            className="product-page__favorite-icon"
+                          />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="product-page__secondary-row product-page__secondary-row--single">
+                        <button
+                          type="button"
+                          className={`product-page__favorite-icon-btn ${
+                            isFavorite ? "is-active" : ""
+                          }`}
+                          onClick={handleFavoriteClick}
+                          disabled={isFavoriteLoading}
+                          aria-label={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                          title={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                        >
+                          <img
+                            src={heartIcon}
+                            alt=""
+                            className="product-page__favorite-icon"
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="product-page__error text-p2">
+                    Вы просматриваете маркет в режиме продавца. Покупка, корзина
+                    и избранное недоступны.
+                  </div>
+                )}
+
+                <div className="product-page__info-block">
+                  <h3 className="product-page__subheading text-h4">
+                    Характеристики
+                  </h3>
+
+                  <div className="product-page__specs-grid">
+                    <SpecItem
+                      label="Категория"
+                      value={product.category?.name}
+                    />
+                    <SpecItem
+                      label="Геометрия"
+                      value={formatPolyStyle(
+                        product.poly_style || product.geometry_type,
+                      )}
+                    />
+                    <SpecItem
+                      label="Формат"
+                      value={product.model_format?.toUpperCase() || "—"}
+                    />
+                    <SpecItem label="Топология" value={product.topology_type} />
+                    <SpecItem
+                      label="Полигоны"
+                      value={product.polygon_count ?? "—"}
+                    />
+                    <SpecItem
+                      label="UV"
+                      value={product.has_uv ? "Есть" : "Нет"}
+                    />
+                    <SpecItem
+                      label="Текстуры"
+                      value={product.has_textures ? "PBR" : "Нет"}
+                    />
+                    <SpecItem
+                      label="Rigging"
+                      value={product.has_rigging ? "Есть" : "Нет"}
+                    />
+                  </div>
+                </div>
+
+                <div className="product-page__info-block">
+                  <h3 className="product-page__subheading text-h4">
+                    Описание модели
+                  </h3>
+                  <div className="product-page__description-card text-p3">
+                    {product.description ||
+                      "Описание пока не добавлено. Здесь будет текст о назначении модели, её качестве, применении и особенностях."}
+                  </div>
+                </div>
+
+                <div className="product-page__info-block">
+                  <h3 className="product-page__subheading text-h4">Автор</h3>
+
+                  <div className="product-page__author-head">
+                    <div className="product-page__author-avatar">
+                      {getInitial(product.seller_username)}
+                    </div>
+
+                    <div className="product-page__author-main">
+                      <div className="product-page__author-name text-p2">
+                        {product.seller_username || "NeonMesh Studio"}
+                      </div>
+
+                      <div className="product-page__rating-inline">
+                        {renderStars(product.average_rating).map(
+                          (icon, index) => (
+                            <img
+                              key={index}
+                              src={icon}
+                              alt=""
+                              className="product-page__stat-icon product-page__stat-icon--star"
+                            />
+                          ),
+                        )}
+                        <span className="text-p3">{displayRating}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="product-page__author-card text-p3">
+                    Автор публикует 3D-модели для игр, визуализации и
+                    интерфейсных сцен. Позже сюда можно вывести описание
+                    продавца и другие его товары.
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="product-page__error text-p2">{error}</div>
+                )}
+              </div>
+            </aside>
           </div>
 
-          <aside className="product-page__right-column">
-            <div className="product-page__sidebar-card">
-              <div className="product-page__stats-line">
-                <div className="product-page__rating-inline">
-                  {renderStars(product.average_rating).map((icon, index) => (
-                    <img
-                      key={index}
-                      src={icon}
-                      alt=""
-                      className="product-page__stat-icon product-page__stat-icon--star"
-                    />
-                  ))}
-                  <span className="text-p3">{displayRating}</span>
-                </div>
+          <div className="product-page__section-card">
+            <h2 className="product-page__block-title text-h3">
+              {comments.length} комментариев
+            </h2>
 
-                <div className="product-page__inline-meta">
-                  <StatInline icon={eyeIcon} value={displayViews} />
-                  <StatInline icon={commentIcon} value={displayComments} />
-                </div>
+            <div className="product-page__comment-form">
+              <div className="product-page__author-avatar">
+                {getInitial(user?.username || "Марина")}
               </div>
 
-              <h1 className="product-page__product-title text-h3">
-                {product.title}
-              </h1>
-
-              <div className="product-page__price text-h2">
-                {formatPrice(product.price)}
-              </div>
-
-              <button
-                type="button"
-                className="product-page__buy-btn text-p2"
-                onClick={handleMainAction}
-                disabled={isActionLoading}
-              >
-                <img src={cartIcon} alt="" className="product-page__buy-icon" />
-                <span>
-                  {isActionLoading
-                    ? "Обработка..."
-                    : isFree
-                      ? "Скачать модель"
-                      : "Купить модель"}
-                </span>
-              </button>
-
-              {!isFree ? (
-                <button
-                  type="button"
-                  className="product-page__cart-btn text-p2"
-                  onClick={handleAddToCart}
-                  disabled={isCartLoading}
-                >
-                  <img
-                    src={cartIcon}
-                    alt=""
-                    className="product-page__buy-icon"
-                  />
-                  <span>
-                    {isCartLoading
-                      ? "Добавление..."
-                      : isInCart
-                        ? "В корзине"
-                        : "Добавить в корзину"}
-                  </span>
-                </button>
-              ) : null}
-
-              <button
-                type="button"
-                className={`product-page__favorite-btn text-p2 ${
-                  isFavorite ? "is-active" : ""
-                }`}
-                onClick={handleFavoriteClick}
-                disabled={isFavoriteLoading}
-              >
-                <img
-                  src={heartIcon}
-                  alt=""
-                  className="product-page__buy-icon"
+              <div className="product-page__comment-form-main">
+                <textarea
+                  className="product-page__comment-textarea text-p2"
+                  placeholder="Введите комментарий"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
                 />
-                <span>
-                  {isFavoriteLoading
-                    ? "Обработка..."
-                    : isFavorite
-                      ? "В избранном"
-                      : "Добавить в избранное"}
-                </span>
-              </button>
 
-              <div className="product-page__info-block">
-                <h3 className="product-page__subheading text-h4">
-                  Характеристики
-                </h3>
-
-                <div className="product-page__specs-grid">
-                  <SpecItem label="Категория" value={product.category?.name} />
-                  <SpecItem
-                    label="Геометрия"
-                    value={formatPolyStyle(
-                      product.poly_style || product.geometry_type,
-                    )}
-                  />
-                  <SpecItem
-                    label="Формат"
-                    value={product.model_format?.toUpperCase() || "—"}
-                  />
-                  <SpecItem label="Топология" value={product.topology_type} />
-                  <SpecItem
-                    label="Полигоны"
-                    value={product.polygon_count ?? "—"}
-                  />
-                  <SpecItem
-                    label="UV"
-                    value={product.has_uv ? "Есть" : "Нет"}
-                  />
-                  <SpecItem
-                    label="Текстуры"
-                    value={product.has_textures ? "PBR" : "Нет"}
-                  />
-                  <SpecItem
-                    label="Rigging"
-                    value={product.has_rigging ? "Есть" : "Нет"}
-                  />
+                <div className="product-page__comment-actions">
+                  <button
+                    type="button"
+                    className="product-page__small-secondary text-p3"
+                    onClick={() => setCommentText("")}
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    type="button"
+                    className="product-page__small-primary text-p3"
+                    onClick={handleSendComment}
+                    disabled={commentSending}
+                  >
+                    {commentSending ? "Отправка..." : "Оставить комментарий"}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className="product-page__info-block">
-                <h3 className="product-page__subheading text-h4">
-                  Описание модели
-                </h3>
-                <div className="product-page__description-card text-p3">
-                  {product.description ||
-                    "Описание пока не добавлено. Здесь будет текст о назначении модели, её качестве, применении и особенностях."}
+            <div className="product-page__comments-list">
+              {commentsLoading ? (
+                <div className="product-page__state text-p2">
+                  Загрузка комментариев...
                 </div>
-              </div>
-
-              <div className="product-page__info-block">
-                <h3 className="product-page__subheading text-h4">Автор</h3>
-
-                <div className="product-page__author-head">
-                  <div className="product-page__author-avatar">
-                    {getInitial(product.seller_username)}
-                  </div>
-
-                  <div className="product-page__author-main">
-                    <div className="product-page__author-name text-p2">
-                      {product.seller_username || "NeonMesh Studio"}
+              ) : comments.length === 0 ? (
+                <div className="product-page__state text-p2">
+                  Пока нет комментариев. Будьте первым.
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="product-page__comment-item">
+                    <div className="product-page__author-avatar">
+                      {getInitial(comment.username)}
                     </div>
 
-                    <div className="product-page__rating-inline">
-                      {renderStars(product.average_rating).map(
-                        (icon, index) => (
-                          <img
-                            key={index}
-                            src={icon}
-                            alt=""
-                            className="product-page__stat-icon product-page__stat-icon--star"
-                          />
-                        ),
-                      )}
-                      <span className="text-p3">{displayRating}</span>
+                    <div className="product-page__comment-content">
+                      <div className="product-page__comment-name text-p2">
+                        {comment.username}
+                      </div>
+                      <div className="product-page__comment-text text-p3">
+                        {comment.text}
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="product-page__author-card text-p3">
-                  Автор публикует 3D-модели для игр, визуализации и интерфейсных
-                  сцен. Позже сюда можно вывести описание продавца и другие его
-                  товары.
-                </div>
-              </div>
-
-              {error && (
-                <div className="product-page__error text-p2">{error}</div>
+                ))
               )}
             </div>
-          </aside>
-        </div>
-
-        <div className="product-page__section-card">
-          <h2 className="product-page__block-title text-h3">
-            {comments.length} комментариев
-          </h2>
-
-          <div className="product-page__comment-form">
-            <div className="product-page__author-avatar">
-              {getInitial(user?.username || "Марина")}
-            </div>
-
-            <div className="product-page__comment-form-main">
-              <textarea
-                className="product-page__comment-textarea text-p2"
-                placeholder="Введите комментарий"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-
-              <div className="product-page__comment-actions">
-                <button
-                  type="button"
-                  className="product-page__small-secondary text-p3"
-                  onClick={() => setCommentText("")}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="button"
-                  className="product-page__small-primary text-p3"
-                  onClick={handleSendComment}
-                  disabled={commentSending}
-                >
-                  {commentSending ? "Отправка..." : "Оставить комментарий"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="product-page__comments-list">
-            {commentsLoading ? (
-              <div className="product-page__state text-p2">
-                Загрузка комментариев...
-              </div>
-            ) : comments.length === 0 ? (
-              <div className="product-page__state text-p2">
-                Пока нет комментариев. Будьте первым.
-              </div>
-            ) : (
-              comments.map((comment) => (
-                <div key={comment.id} className="product-page__comment-item">
-                  <div className="product-page__author-avatar">
-                    {getInitial(comment.username)}
-                  </div>
-
-                  <div className="product-page__comment-content">
-                    <div className="product-page__comment-name text-p2">
-                      {comment.username}
-                    </div>
-                    <div className="product-page__comment-text text-p3">
-                      {comment.text}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={handleCheckoutSuccess}
+        mode="product"
+        productId={product?.id}
+      />
+
+      <PaymentSuccessModal
+        isOpen={Boolean(successData)}
+        onClose={() => setSuccessData(null)}
+        successData={successData}
+      />
+    </>
   );
 }

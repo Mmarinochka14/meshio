@@ -33,12 +33,21 @@
   text-align: center;
 }
 
-.audience-section__icon-placeholder {
-  width: 9.375vw;
+.audience-section__icon-wrap {
+  width: 6.25vw;
   height: 6.25vw;
-  border-radius: 0.8333vw;
+  border-radius: 100vw;
   background: linear-gradient(180deg, #936dfb 0%, #7222ea 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.0417vw;
+}
+
+.audience-section__icon {
+  width: 2.2917vw;
+  height: 2.2917vw;
+  object-fit: contain;
 }
 
 .audience-section__card-title {

@@ -267,12 +267,13 @@ class MySellerProfileView(APIView):
     permission_classes = [IsApprovedSeller]
 
     def get(self, request):
-        profile = SellerProfile.objects.filter(user=request.user).first()
-        if not profile:
-            return Response(
-                {'detail': 'Профиль магазина ещё не создан.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        profile, _ = SellerProfile.objects.get_or_create(
+            user=request.user,
+            defaults={
+                "store_name": f"{request.user.username} Store",
+                "store_description": "",
+            },
+        )
 
         return Response(SellerProfileSerializer(profile, context={'request': request}).data)
 

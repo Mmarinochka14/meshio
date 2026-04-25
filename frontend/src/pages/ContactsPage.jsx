@@ -6,6 +6,7 @@ import { sendContactRequest, subscribeToNewsletter } from "../api/contacts";
 export default function ContactsPage() {
   const storedUser = getUser();
   const isUserAuthenticated = Boolean(storedUser);
+  const isAdminUser = storedUser?.role === "admin";
 
   const [contactForm, setContactForm] = useState(() => ({
     name: storedUser?.username || "",
@@ -38,6 +39,11 @@ export default function ContactsPage() {
 
   async function handleContactSubmit(event) {
     event.preventDefault();
+
+    if (isAdminUser) {
+      setContactError("Администратор не может отправлять обращения.");
+      return;
+    }
 
     setContactSuccess("");
     setContactError("");
@@ -121,76 +127,91 @@ export default function ContactsPage() {
               Форма обратной связи
             </h2>
 
-            <form className="contacts-form" onSubmit={handleContactSubmit}>
-              <label className="contacts-form__field">
-                <span className="contacts-form__label text-p3">Никнейм</span>
-                <input
-                  type="text"
-                  name="name"
-                  className="contacts-form__input text-p2"
-                  placeholder="Введите никнейм"
-                  value={contactForm.name}
-                  onChange={handleContactChange}
-                  readOnly={isUserAuthenticated}
-                />
-              </label>
-
-              <label className="contacts-form__field">
-                <span className="contacts-form__label text-p3">
-                  Электронная почта
-                </span>
-                <input
-                  type="email"
-                  name="email"
-                  className="contacts-form__input text-p2"
-                  placeholder="Введите электронную почту"
-                  value={contactForm.email}
-                  onChange={handleContactChange}
-                  readOnly={isUserAuthenticated}
-                />
-              </label>
-
-              <label className="contacts-form__field">
-                <span className="contacts-form__label text-p3">Тема</span>
-                <input
-                  type="text"
-                  name="subject"
-                  className="contacts-form__input text-p2"
-                  placeholder="Введите тему сообщения"
-                  value={contactForm.subject}
-                  onChange={handleContactChange}
-                />
-              </label>
-
-              <label className="contacts-form__field">
-                <span className="contacts-form__label text-p3">Сообщение</span>
-                <textarea
-                  name="message"
-                  className="contacts-form__textarea text-p2"
-                  placeholder="Введите сообщение"
-                  value={contactForm.message}
-                  onChange={handleContactChange}
-                />
-              </label>
-
-              <button
-                type="submit"
-                className="contacts-form__submit text-p2"
-                disabled={isSendingContact}
-              >
-                {isSendingContact ? "Отправка..." : "Отправить"}
-              </button>
-
-              {contactSuccess ? (
-                <p className="contacts-form__success text-p3">
-                  {contactSuccess}
+            {isAdminUser ? (
+              <div className="contacts-page__admin-note">
+                <p className="text-p2">
+                  Администратор не может отправлять обращения через публичную
+                  форму.
                 </p>
-              ) : null}
+                <p className="text-p3">
+                  Для работы с запросами пользователей используйте панель
+                  администратора.
+                </p>
+              </div>
+            ) : (
+              <form className="contacts-form" onSubmit={handleContactSubmit}>
+                <label className="contacts-form__field">
+                  <span className="contacts-form__label text-p3">Никнейм</span>
+                  <input
+                    type="text"
+                    name="name"
+                    className="contacts-form__input text-p2"
+                    placeholder="Введите никнейм"
+                    value={contactForm.name}
+                    onChange={handleContactChange}
+                    readOnly={isUserAuthenticated}
+                  />
+                </label>
 
-              {contactError ? (
-                <p className="contacts-form__error text-p3">{contactError}</p>
-              ) : null}
-            </form>
+                <label className="contacts-form__field">
+                  <span className="contacts-form__label text-p3">
+                    Электронная почта
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    className="contacts-form__input text-p2"
+                    placeholder="Введите электронную почту"
+                    value={contactForm.email}
+                    onChange={handleContactChange}
+                    readOnly={isUserAuthenticated}
+                  />
+                </label>
+
+                <label className="contacts-form__field">
+                  <span className="contacts-form__label text-p3">Тема</span>
+                  <input
+                    type="text"
+                    name="subject"
+                    className="contacts-form__input text-p2"
+                    placeholder="Введите тему сообщения"
+                    value={contactForm.subject}
+                    onChange={handleContactChange}
+                  />
+                </label>
+
+                <label className="contacts-form__field">
+                  <span className="contacts-form__label text-p3">
+                    Сообщение
+                  </span>
+                  <textarea
+                    name="message"
+                    className="contacts-form__textarea text-p2"
+                    placeholder="Введите сообщение"
+                    value={contactForm.message}
+                    onChange={handleContactChange}
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="contacts-form__submit text-p2"
+                  disabled={isSendingContact}
+                >
+                  {isSendingContact ? "Отправка..." : "Отправить"}
+                </button>
+
+                {contactSuccess ? (
+                  <p className="contacts-form__success text-p3">
+                    {contactSuccess}
+                  </p>
+                ) : null}
+
+                {contactError ? (
+                  <p className="contacts-form__error text-p3">{contactError}</p>
+                ) : null}
+              </form>
+            )}
           </div>
 
           <div className="contacts-page__right">

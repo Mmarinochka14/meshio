@@ -30,3 +30,32 @@ export async function mergeCartRequest(productIds) {
   });
   return response.data;
 }
+
+export async function getCheckoutPreview() {
+  const response = await apiClient.get("/products/checkout/preview/");
+  return response.data;
+}
+
+export async function payCheckout(paymentMethod) {
+  const response = await apiClient.post("/products/checkout/pay/", {
+    payment_method: paymentMethod,
+  });
+  return response.data;
+}
+
+export async function getProductCheckoutPreview(productId) {
+  const response = await apiClient.get(
+    `/products/${productId}/checkout/preview/`,
+  );
+  return response.data;
+}
+
+export async function payProductCheckout(productId, paymentMethod) {
+  const response = await apiClient.post(
+    `/products/${productId}/checkout/pay/`,
+    {
+      payment_method: paymentMethod,
+    },
+  );
+  return response.data;
+}

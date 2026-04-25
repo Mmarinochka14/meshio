@@ -90,6 +90,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return None
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    seller_profile = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -104,8 +106,24 @@ class AdminUserSerializer(serializers.ModelSerializer):
             'seller_status',
             'is_active',
             'date_joined',
+            'seller_profile',
         ]
 
+    def get_seller_profile(self, obj):
+        profile = SellerProfile.objects.filter(user=obj).first()
+
+        if not profile:
+            return None
+
+        return {
+            'store_name': profile.store_name,
+            'store_description': profile.store_description,
+            'store_avatar_url': (
+                create_signed_file_url(profile.store_avatar_storage_path, expires_in=3600)
+                if profile.store_avatar_storage_path
+                else None
+            ),
+        }
 
 class SellerModerationSerializer(serializers.ModelSerializer):
     class Meta:

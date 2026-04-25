@@ -1,0 +1,128 @@
+.modal__panel--rating {
+  width: 34vw;
+  padding: 2.0833vw;
+  border-radius: 1.6667vw;
+  border: 0.1vw solid #22242d;
+}
+
+.rating-modal {
+  width: 100%;
+  color: var(--color-white);
+}
+
+.rating-modal__title {
+  color: var(--color-white);
+  margin-bottom: 0.5208vw;
+}
+
+.rating-modal__subtitle {
+  color: rgba(235, 235, 235, 0.76);
+  margin-bottom: 1.25vw;
+}
+
+.rating-modal__stars {
+  display: flex;
+  align-items: center;
+  gap: 0.4167vw;
+  margin-bottom: 1.25vw;
+}
+
+.rating-modal__star-btn {
+  width: 2.1875vw;
+  height: 2.1875vw;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.rating-modal__star-btn:hover {
+  transform: scale(1.06);
+}
+
+.rating-modal__star-icon {
+  width: 1.6667vw;
+  height: 1.6667vw;
+  object-fit: contain;
+}
+
+.rating-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+  margin-bottom: 1.25vw;
+}
+
+.rating-modal__label {
+  color: var(--color-grey-super-light);
+}
+
+.rating-modal__textarea {
+  width: 100%;
+  min-height: 8.3333vw;
+  padding: 0.9375vw;
+  border: 0.0521vw solid rgba(235, 235, 235, 0.12);
+  border-radius: 0.8333vw;
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+  resize: none;
+  outline: none;
+}
+
+.rating-modal__textarea:focus {
+  border-color: var(--color-purple);
+}
+
+.rating-modal__error {
+  margin-bottom: 1.0417vw;
+  padding: 0.8333vw 1.0417vw;
+  border-radius: 0.7292vw;
+  background: rgba(216, 74, 74, 0.1);
+  border: 0.0521vw solid rgba(216, 74, 74, 0.25);
+  color: #ffb1b1;
+}
+
+.rating-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7292vw;
+}
+
+.rating-modal__primary,
+.rating-modal__secondary {
+  min-height: 2.9167vw;
+  border-radius: 0.7292vw;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.rating-modal__primary {
+  border: none;
+  background: var(--color-purple);
+  color: var(--color-white);
+}
+
+.rating-modal__primary:hover {
+  background: var(--color-purple-hover);
+  transform: translateY(-0.0521vw);
+}
+
+.rating-modal__secondary {
+  border: 0.0521vw solid rgba(235, 235, 235, 0.12);
+  background: transparent;
+  color: var(--color-white);
+}
+
+.rating-modal__secondary:hover {
+  background: var(--color-grey-hover);
+  transform: translateY(-0.0521vw);
+}

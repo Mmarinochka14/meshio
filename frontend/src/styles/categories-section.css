@@ -1,17 +1,16 @@
 .categories-section {
   width: 100%;
-  margin-top: -2.0833vw; /* -40px, блок немного заходит на hero */
+  margin-top: -2.0833vw;
   position: relative;
   z-index: 2;
 }
 
 .categories-section__container {
-  width: 75vw; /* 1440px */
+  width: 75vw;
   margin: 0 auto;
-  padding: 1.6667vw 2.0833vw; /* 40px */
+  padding: 1.6667vw 2.0833vw;
   border-radius: 1.25vw;
   background: var(--color-grey-dark);
-  /* border: 0.01vw solid var(--color-grey-light); */
 }
 
 .categories-section__title {
@@ -22,7 +21,7 @@
 .categories-section__grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 0.8333vw; /* 16px */
+  gap: 0.8333vw;
 }
 
 .categories-section__card {
@@ -38,12 +37,12 @@
 }
 
 .categories-section__card:hover {
-  transform: translateY(-0.1563vw); /* 3px */
+  transform: translateY(-0.1563vw);
 }
 
 .categories-section__card--large {
   grid-column: span 3;
-  min-height: 19.4792vw; /* 374px */
+  min-height: 19.4792vw;
 }
 
 .categories-section__card:not(.categories-section__card--large) {
@@ -65,7 +64,7 @@
   z-index: 1;
   width: 100%;
   height: 100%;
-  padding: 1.875vw 1.6667vw; /* 36px 32px */
+  padding: 1.875vw 1.6667vw;
 }
 
 .categories-section__card-title {
@@ -84,21 +83,21 @@
   pointer-events: none;
 }
 
-/* ===== Индивидуальная настройка фоновых линий ===== */
+/* ===== desktop backgrounds ===== */
 
 .categories-section__card--all .categories-section__card-bg {
   background-size: 50% 100%;
-  background-position: 0vw 0vw;
+  background-position: 0 0;
 }
 
 .categories-section__card--characters .categories-section__card-bg {
   background-size: 70% 100%;
-  background-position: 13vw 0vw;
+  background-position: 13vw 0;
 }
 
 .categories-section__card--animals .categories-section__card-bg {
   background-size: 100% 100%;
-  background-position: 0.7vw 0vw;
+  background-position: 0.7vw 0;
 }
 
 .categories-section__card--tech .categories-section__card-bg {
@@ -108,22 +107,22 @@
 
 .categories-section__card--environment .categories-section__card-bg {
   background-size: 100% 100%;
-  background-position: 2vw 0vw;
+  background-position: 2vw 0;
 }
 
-/* ===== Индивидуальная настройка изображений категорий ===== */
+/* ===== desktop images ===== */
 
 .categories-section__card--all .categories-section__card-image {
   max-width: 76%;
   max-height: 90%;
-  right: 0.2083vw; /* 4px */
+  right: 0.2083vw;
   bottom: 0;
 }
 
 .categories-section__card--characters .categories-section__card-image {
   max-width: 70%;
   max-height: 92%;
-  right: 0.4167vw; /* 8px */
+  right: 0.4167vw;
   bottom: 0;
 }
 
@@ -146,4 +145,210 @@
   max-height: 86%;
   right: 0;
   bottom: 0;
+}
+
+/* ==================== TABLET ==================== */
+
+@media (max-width: 1024px) {
+  .categories-section {
+    margin-top: -3vw;
+  }
+
+  .categories-section__container {
+    width: 89vw;
+    padding: 2.8vw;
+    border-radius: 2vw;
+  }
+
+  .categories-section__title {
+    margin-bottom: 2vw;
+  }
+
+  .categories-section__grid {
+    gap: 1.6vw;
+  }
+
+  .categories-section__card {
+    border-radius: 1.6vw;
+  }
+
+  .categories-section__card--large {
+    min-height: 25vw;
+  }
+
+  .categories-section__card:not(.categories-section__card--large) {
+    min-height: 16vw;
+  }
+
+  .categories-section__card-content {
+    padding: 2.4vw;
+  }
+}
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+  .categories-section {
+    width: 100%;
+    margin-top: 0;
+    padding-top: 5.3333vw;
+    position: relative;
+    z-index: 2;
+  }
+
+  .categories-section__container {
+    width: 91.4667vw;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .categories-section__title {
+    color: var(--color-white);
+    margin-bottom: 4.2667vw;
+    font-size: 5.3333vw;
+    line-height: 1.15;
+  }
+
+  .categories-section__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.2vw;
+  }
+
+  .categories-section__card,
+  .categories-section__card--large,
+  .categories-section__card:not(.categories-section__card--large) {
+    grid-column: span 1;
+    min-height: 40vw;
+    border-radius: 4.2667vw;
+  }
+
+  .categories-section__card--all {
+    grid-column: 1 / -1;
+    min-height: 48vw;
+  }
+
+  .categories-section__card-content {
+    padding: 4.2667vw;
+  }
+
+  .categories-section__card-title {
+    color: var(--color-white);
+    font-size: 4.2667vw;
+    line-height: 1.1;
+    max-width: 26.6667vw;
+  }
+
+  .categories-section__card--all .categories-section__card-title {
+    max-width: 34.6667vw;
+    font-size: 4.8vw;
+  }
+
+  .categories-section__card-bg {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .categories-section__card-image {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .categories-section__card--all .categories-section__card-image {
+    max-width: 47%;
+    max-height: 84%;
+    right: 1.0667vw;
+    bottom: 0;
+  }
+
+  .categories-section__card--characters .categories-section__card-image {
+    max-width: 72%;
+    max-height: 82%;
+    right: 0;
+    bottom: 0;
+  }
+
+  .categories-section__card--animals .categories-section__card-image {
+    max-width: 76%;
+    max-height: 74%;
+    right: 0;
+    bottom: 0;
+  }
+
+  .categories-section__card--tech .categories-section__card-image {
+    max-width: 74%;
+    max-height: 72%;
+    right: 0;
+    bottom: 0;
+  }
+
+  .categories-section__card--environment .categories-section__card-image {
+    max-width: 74%;
+    max-height: 72%;
+    right: 0;
+    bottom: 0;
+  }
+
+  .categories-section__card--all .categories-section__card-bg {
+    background-size: 56% 100%;
+    background-position: left center;
+  }
+
+  .categories-section__card--characters .categories-section__card-bg,
+  .categories-section__card--animals .categories-section__card-bg,
+  .categories-section__card--tech .categories-section__card-bg,
+  .categories-section__card--environment .categories-section__card-bg {
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-section {
+    padding-top: 6.4vw;
+  }
+
+  .categories-section__container {
+    width: 91.4667vw;
+  }
+
+  .categories-section__title {
+    margin-bottom: 4.8vw;
+    font-size: 5.8667vw;
+  }
+
+  .categories-section__grid {
+    gap: 3.7333vw;
+  }
+
+  .categories-section__card,
+  .categories-section__card--large,
+  .categories-section__card:not(.categories-section__card--large) {
+    min-height: 42vw;
+    border-radius: 4.2667vw;
+  }
+
+  .categories-section__card--all {
+    min-height: 50vw;
+  }
+
+  .categories-section__card-content {
+    padding: 4.2667vw;
+  }
+
+  .categories-section__card-title {
+    font-size: 4.5333vw;
+    max-width: 29.3333vw;
+  }
+
+  .categories-section__card--all .categories-section__card-title {
+    font-size: 4.8vw;
+    max-width: 37.3333vw;
+  }
 }

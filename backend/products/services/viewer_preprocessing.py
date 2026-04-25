@@ -30,7 +30,6 @@ def _get_source_file(product: Product) -> ProductFile | None:
     if source_file:
         return source_file
 
-    # fallback для старых записей
     source_file = (
         product.files.filter(file_type='model', is_primary=True)
         .order_by('sort_order', '-created_at')
@@ -60,7 +59,6 @@ def _copy_source_to_temp(product_file: ProductFile, temp_dir: Path) -> Path:
 
     source_path = temp_dir / original_name
 
-    # если файл есть локально через FileField
     if product_file.file:
         product_file.file.open('rb')
         try:
@@ -69,7 +67,6 @@ def _copy_source_to_temp(product_file: ProductFile, temp_dir: Path) -> Path:
             product_file.file.close()
         return source_path
 
-    # если файл только в Object Storage
     if product_file.storage_path:
         signed_url = create_signed_file_url(product_file.storage_path, expires_in=3600)
         with urlopen(signed_url) as response:
@@ -142,11 +139,13 @@ def prepare_product_viewer(product_id: int) -> None:
 
             viewer_output = temp_dir / 'viewer_model.glb'
             uv_output = temp_dir / 'uv_preview.png'
+            preview_output = temp_dir / 'main_preview.png'
 
             result = run_blender_preprocessing(
                 source_path=source_path,
                 output_glb_path=viewer_output,
                 output_uv_png_path=uv_output,
+                output_preview_png_path=preview_output,
             )
 
             _delete_existing_product_files(product, 'viewer_model')
@@ -178,6 +177,17 @@ def prepare_product_viewer(product_id: int) -> None:
                 )
                 product.has_uv = True
                 update_fields.append('has_uv')
+
+            # авто-preview только если пользователь сам ещё не загрузил обложку
+            if result.get('preview_png_path') and not product.main_preview_storage_path:
+                with result['preview_png_path'].open('rb') as f:
+                    upload_result = upload_file_to_storage(
+                        f,
+                        folder=f'products/{product.id}/preview'
+                    )
+
+                product.main_preview_storage_path = upload_result['storage_path']
+                update_fields.append('main_preview_storage_path')
 
             product.save(update_fields=update_fields)
 

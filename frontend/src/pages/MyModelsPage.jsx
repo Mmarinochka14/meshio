@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import CatalogFilters from "../components/CatalogFilters";
 import MyModelCard from "../components/MyModelCard";
+import RatingModal from "../components/RatingModal";
 import {
   downloadProduct,
   getMyPurchasedProducts,
@@ -62,6 +63,9 @@ export default function MyModelsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isRatingOpen, setIsRatingOpen] = useState(false);
+
   useEffect(() => {
     let mounted = true;
 
@@ -85,7 +89,14 @@ export default function MyModelsPage() {
             ? purchasedData
             : [];
 
-        const products = results.map((item) => item.product).filter(Boolean);
+        const products = results.map((item) => {
+          const product = item.product || {};
+
+          return {
+            ...product,
+            my_review: item.review || null,
+          };
+        });
 
         setItems(products);
       } catch (err) {
@@ -153,49 +164,117 @@ export default function MyModelsPage() {
     }
   }
 
+  function handleOpenRating(product) {
+    setSelectedProduct(product);
+    setIsRatingOpen(true);
+  }
+
+  function handleReviewSuccess(review) {
+    if (!review || !selectedProduct) return;
+
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== selectedProduct.id) return item;
+
+        const currentOwnReview = item.my_review;
+        const hadReview = Boolean(currentOwnReview);
+
+        let nextReviewsCount = Number(item.reviews_count || 0);
+        if (!hadReview) {
+          nextReviewsCount += 1;
+        }
+
+        let nextAverageRating = Number(item.average_rating || 0);
+
+        if (hadReview) {
+          const totalWithoutOld =
+            Number(item.average_rating || 0) * Number(item.reviews_count || 0) -
+            Number(currentOwnReview.rating || 0);
+
+          nextAverageRating =
+            nextReviewsCount > 0
+              ? (totalWithoutOld + Number(review.rating || 0)) /
+                nextReviewsCount
+              : 0;
+        } else {
+          const currentTotal =
+            Number(item.average_rating || 0) * Number(item.reviews_count || 0);
+
+          nextAverageRating =
+            nextReviewsCount > 0
+              ? (currentTotal + Number(review.rating || 0)) / nextReviewsCount
+              : 0;
+        }
+
+        return {
+          ...item,
+          my_review: review,
+          average_rating: Number(nextAverageRating.toFixed(2)),
+          reviews_count: nextReviewsCount,
+        };
+      }),
+    );
+  }
+
   return (
-    <section className="catalog-page">
-      <div className="catalog-page__container">
-        <div className="catalog-page__top">
-          <h1 className="catalog-page__title text-h2">Мои модели</h1>
-          <p className="catalog-page__subtitle text-p2">
-            Купленные модели, доступные для повторного скачивания.
-          </p>
-        </div>
+    <>
+      <section className="catalog-page">
+        <div className="catalog-page__container">
+          <div className="catalog-page__top">
+            <h1 className="catalog-page__title text-h2">Мои модели</h1>
+            <p className="catalog-page__subtitle text-p2">
+              Купленные модели, доступные для повторного скачивания и оценки.
+            </p>
+          </div>
 
-        <div className="catalog-page__layout">
-          <aside className="catalog-page__sidebar">
-            <CatalogFilters
-              meta={meta}
-              searchParams={searchParams}
-              onApply={handleApply}
-              onReset={handleReset}
-            />
-          </aside>
+          <div className="catalog-page__layout">
+            <aside className="catalog-page__sidebar">
+              <CatalogFilters
+                meta={meta}
+                searchParams={searchParams}
+                onApply={handleApply}
+                onReset={handleReset}
+              />
+            </aside>
 
-          <div className="catalog-page__content">
-            {isLoading ? (
-              <div className="catalog-page__state text-p2">Загрузка...</div>
-            ) : error ? (
-              <div className="catalog-page__state text-p2">{error}</div>
-            ) : filteredItems.length === 0 ? (
-              <div className="catalog-page__state text-p2">
-                Пока нет купленных моделей.
-              </div>
-            ) : (
-              <div className="catalog-page__grid">
-                {filteredItems.map((product) => (
-                  <MyModelCard
-                    key={product.id}
-                    product={product}
-                    onDownload={handleDownload}
-                  />
-                ))}
-              </div>
-            )}
+            <div className="catalog-page__content">
+              {isLoading ? (
+                <div className="catalog-page__state text-p2">Загрузка...</div>
+              ) : error ? (
+                <div className="catalog-page__state text-p2">{error}</div>
+              ) : filteredItems.length === 0 ? (
+                <div className="catalog-page__state text-p2">
+                  Пока нет купленных моделей.
+                </div>
+              ) : (
+                <div className="catalog-page__grid">
+                  {filteredItems.map((product) => (
+                    <MyModelCard
+                      key={product.id}
+                      product={product}
+                      onDownload={handleDownload}
+                      onRate={handleOpenRating}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <RatingModal
+        isOpen={isRatingOpen}
+        onClose={() => {
+          setIsRatingOpen(false);
+          setSelectedProduct(null);
+        }}
+        productId={selectedProduct?.id}
+        productTitle={selectedProduct?.title || ""}
+        initialRating={selectedProduct?.my_review?.rating || 0}
+        initialText={selectedProduct?.my_review?.text || ""}
+        onSuccess={handleReviewSuccess}
+      />
+    </>
   );
 }

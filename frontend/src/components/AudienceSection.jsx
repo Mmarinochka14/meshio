@@ -1,14 +1,19 @@
 import "../styles/audience-section.css";
 
+import cartIcon from "../assets/icons/cart.svg";
+import moneyIcon from "../assets/icons/money.svg";
+
 export default function AudienceSection() {
   const cards = [
     {
       title: "Покупатели",
       text: "Могут находить, настраивать и приобретать готовые 3D-модели для своих проектов.",
+      icon: cartIcon,
     },
     {
       title: "Продавцы",
       text: "Могут размещать и продавать собственные 3D-модели через личный кабинет продавца.",
+      icon: moneyIcon,
     },
   ];
 
@@ -22,7 +27,13 @@ export default function AudienceSection() {
         <div className="audience-section__grid">
           {cards.map((card) => (
             <article key={card.title} className="audience-section__card">
-              <div className="audience-section__icon-placeholder" />
+              <div className="audience-section__icon-wrap">
+                <img
+                  src={card.icon}
+                  alt=""
+                  className="audience-section__icon"
+                />
+              </div>
 
               <h4 className="audience-section__card-title text-h4">
                 {card.title}

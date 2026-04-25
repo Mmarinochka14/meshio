@@ -94,6 +94,19 @@ export async function addProductComment(productId, text) {
   return response.data;
 }
 
+export async function getProductReviews(productId) {
+  const response = await apiClient.get(`/products/${productId}/reviews/`);
+  return response.data;
+}
+
+export async function addOrUpdateProductReview(productId, payload) {
+  const response = await apiClient.post(
+    `/products/${productId}/review/`,
+    payload,
+  );
+  return response.data;
+}
+
 export async function getMyPurchasedProducts() {
   const response = await apiClient.get("/products/my-models/");
   return response.data;
@@ -107,4 +120,91 @@ export async function getMyProductsRequest(params = {}) {
 export async function deleteProductRequest(productId) {
   const res = await apiClient.delete(`/products/${productId}/delete/`);
   return res.data;
+}
+
+export async function createProductRequest(payload) {
+  const response = await apiClient.post("/products/create/", payload);
+  return response.data;
+}
+
+export async function updateProductRequest(productId, payload) {
+  const response = await apiClient.patch(
+    `/products/${productId}/update/`,
+    payload,
+  );
+  return response.data;
+}
+
+export async function uploadProductPreviewRequest(productId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await apiClient.post(
+    `/products/${productId}/upload-preview/`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function uploadProductFileRequest(
+  productId,
+  file,
+  {
+    file_type = "model_source",
+    is_primary = true,
+    replace_existing = true,
+    sort_order = 0,
+  } = {},
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("file_type", file_type);
+  formData.append("is_primary", String(is_primary));
+  formData.append("replace_existing", String(replace_existing));
+  formData.append("sort_order", String(sort_order));
+
+  const response = await apiClient.post(
+    `/products/${productId}/upload-file/`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function sendProductToReviewRequest(productId) {
+  const response = await apiClient.post(
+    `/products/${productId}/send-to-review/`,
+  );
+  return response.data;
+}
+
+export async function archiveProductRequest(productId) {
+  const response = await apiClient.post(`/products/${productId}/archive/`);
+  return response.data;
+}
+
+export async function getSellerAnalyticsRequest() {
+  const response = await apiClient.get("/products/seller/analytics/");
+  return response.data;
+}
+
+export async function mergeFavoritesRequest(productIds) {
+  for (const productId of productIds) {
+    try {
+      await addToFavorites(productId);
+    } catch {
+      // молча пропускаем дубликаты/ошибки
+    }
+  }
 }

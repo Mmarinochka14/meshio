@@ -18,7 +18,7 @@ function buildParamsFromSearchParams(sp) {
   const params = {};
 
   const q = sp.get("q");
-  const category = sp.get("category");
+  const category = sp.getAll("category");
   const model_format = sp.get("model_format");
   const geometry_type = sp.get("geometry_type");
   const poly_style = sp.get("poly_style");
@@ -32,7 +32,7 @@ function buildParamsFromSearchParams(sp) {
   const page = sp.get("page");
 
   if (q) params.q = q;
-  if (category) params.category = category;
+  if (category.length) params.category = category;
   if (model_format) params.model_format = model_format;
   if (geometry_type) params.geometry_type = geometry_type;
   if (poly_style) params.poly_style = poly_style;
@@ -115,19 +115,29 @@ export default function CatalogPage() {
     const sp = new URLSearchParams(searchParams);
 
     Object.entries(next).forEach(([key, value]) => {
+      sp.delete(key);
+
       if (
         value === null ||
         value === undefined ||
         value === "" ||
         value === false
       ) {
-        sp.delete(key);
         return;
       }
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item !== "" && item !== null && item !== undefined) {
+            sp.append(key, String(item));
+          }
+        });
+        return;
+      }
+
       sp.set(key, String(value));
     });
 
-    // при любом изменении фильтров/сортировки сбрасываем страницу
     if (!("page" in next)) sp.delete("page");
 
     setSearchParams(sp);

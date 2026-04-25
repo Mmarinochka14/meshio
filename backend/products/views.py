@@ -1,67 +1,83 @@
 from pathlib import Path
 import time
+from django.utils import timezone
+
+from django.core.files.base import ContentFile
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.db import transaction
+from django.db.models import F, Q
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .services.viewer_preprocessing import prepare_product_viewer
-from django.core.files.base import ContentFile
-from products.services.yandex_art import generate_texture_image
-from core.object_storage import upload_file_to_storage
+
 from core.object_storage import (
     create_signed_file_url,
     delete_file_from_storage,
     upload_file_to_storage,
 )
+from products.services.yandex_art import generate_texture_image
 from users.permissions import IsAdminRole, IsApprovedSeller, IsBuyer
+
 from .models import (
+    Cart,
+    CartItem,
     Category,
     Comment,
+    ContactRequest,
     Favorite,
+    GeneratedTexture,
+    License,
     MaterialPreset,
+    NewsletterSubscription,
     Order,
     OrderItem,
     Product,
     ProductFile,
     Review,
-    GeneratedTexture,
-    ContactRequest,
-    NewsletterSubscription,
-    Cart,
-    CartItem,
 )
 from .permissions import CanModifyProductByStatus, IsOwnerOrReadOnly
 from .serializers import (
     AdminProductSerializer,
+    CartActionSerializer,
+    CartMergeSerializer,
+    CartSerializer,
     CommentCreateSerializer,
     CommentSerializer,
+    ContactRequestCreateSerializer,
+    ContactRequestSerializer,
     FavoriteActionSerializer,
     FavoriteSerializer,
+    GenerateTextureSerializer,
+    LicenseSerializer,
     MaterialPresetSerializer,
+    NewsletterSubscribeSerializer,
     OrderItemSerializer,
     ProductCreateUpdateSerializer,
     ProductDetailSerializer,
     ProductFileUploadSerializer,
     ProductFiltersSerializer,
+    ProductIdsSerializer,
     ProductListSerializer,
     ProductModerationSerializer,
     ProductPreviewUploadSerializer,
     PurchaseSerializer,
     ReviewCreateUpdateSerializer,
     ReviewSerializer,
-    GenerateTextureSerializer,
-    ContactRequestCreateSerializer,
-    ContactRequestSerializer,
-    NewsletterSubscribeSerializer,
-    CartActionSerializer,
-    CartMergeSerializer,
-    CartSerializer,
-    ProductIdsSerializer,
+    SellerAnalyticsSerializer,
+    AdminContactRequestSerializer,
+    AdminContactRequestSerializer,
+    AdminContactRequestUpdateSerializer,
+    CheckoutPaySerializer,
+    CheckoutPreviewSerializer,
+    PurchasedProductItemSerializer,
 )
-
 from .services.unisender import (
     UnisenderServiceError,
     subscribe_email_to_unisender,
 )
+from .services.viewer_preprocessing import prepare_product_viewer
+
 
 def build_product_file_url(request, product_file):
     if product_file.storage_path:
@@ -104,6 +120,164 @@ def update_product_rating(product):
 
     product.save(update_fields=['average_rating', 'reviews_count'])
 
+def get_product_preview_url(request, product):
+    if product.main_preview_storage_path:
+        return create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
+
+    if product.main_preview:
+        return request.build_absolute_uri(product.main_preview.url)
+
+    preview_file = get_product_file(product, ['preview'], primary_first=True)
+    if preview_file:
+        return build_product_file_url(request, preview_file)
+
+    return ""
+
+
+def get_checkout_tags(product):
+    tags = []
+
+    if product.model_format:
+        tags.append(product.model_format.upper())
+    if product.has_textures:
+        tags.append("PBR")
+    if product.has_uv:
+        tags.append("UV")
+    if product.poly_style:
+        tags.append(
+            product.poly_style
+            .replace("_", "-")
+            .title()
+        )
+
+    return tags[:4]
+
+
+def calculate_split(amount, commission_percent=Decimal("10.00")):
+    amount = Decimal(amount)
+    fee = (amount * commission_percent / Decimal("100")).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+    seller_amount = (amount - fee).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+    return fee, seller_amount
+
+
+def build_checkout_summary(cart, user, request):
+    cart_items = list(
+        cart.items.select_related('product', 'product__seller')
+    )
+
+    if not cart_items:
+        raise ValueError("Корзина пуста.")
+
+    product_ids = [item.product_id for item in cart_items]
+
+    already_purchased_ids = set(
+        OrderItem.objects.filter(
+            order__buyer=user,
+            order__status='paid',
+            product_id__in=product_ids,
+        ).values_list('product_id', flat=True)
+    )
+
+    commission_percent = Decimal("10.00")
+    items = []
+    total_price = Decimal("0.00")
+    total_platform_fee = Decimal("0.00")
+    total_seller_amount = Decimal("0.00")
+
+    for cart_item in cart_items:
+        product = cart_item.product
+
+        if product.status != 'published':
+            raise ValueError(f'Товар "{product.title}" больше недоступен для покупки.')
+
+        if Decimal(product.price) <= 0:
+            raise ValueError(f'Бесплатный товар "{product.title}" нельзя оплачивать через корзину.')
+
+        if product.id in already_purchased_ids:
+            raise ValueError(f'Товар "{product.title}" уже куплен.')
+
+        price = Decimal(product.price).quantize(Decimal("0.01"))
+        item_platform_fee, item_seller_amount = calculate_split(price, commission_percent)
+
+        total_price += price
+        total_platform_fee += item_platform_fee
+        total_seller_amount += item_seller_amount
+
+        items.append({
+            "product_id": product.id,
+            "title": product.title,
+            "price": price,
+            "preview_url": get_product_preview_url(request, product),
+            "tags": get_checkout_tags(product),
+            "seller_username": product.seller.username,
+            "platform_fee": item_platform_fee,
+            "seller_amount": item_seller_amount,
+        })
+
+    return {
+        "items": items,
+        "total_items": len(items),
+        "total_price": total_price.quantize(Decimal("0.01")),
+        "commission_percent": commission_percent.quantize(Decimal("0.01")),
+        "platform_fee": total_platform_fee.quantize(Decimal("0.01")),
+        "seller_amount": total_seller_amount.quantize(Decimal("0.01")),
+        "payment_methods": [
+            {"value": "bank_card", "label": "Банковская карта"},
+            {"value": "sbp", "label": "СБП"},
+            {"value": "sberpay", "label": "SberPay"},
+        ],
+    }
+
+def build_single_product_checkout_summary(product, user, request):
+    if product.status != 'published':
+        raise ValueError(f'Товар "{product.title}" больше недоступен для покупки.')
+
+    if Decimal(product.price) <= 0:
+        raise ValueError(f'Бесплатный товар "{product.title}" нельзя оплачивать через checkout.')
+
+    already_purchased = OrderItem.objects.filter(
+        order__buyer=user,
+        order__status='paid',
+        product=product,
+    ).exists()
+
+    if already_purchased:
+        raise ValueError(f'Товар "{product.title}" уже куплен.')
+
+    commission_percent = Decimal("10.00")
+    price = Decimal(product.price).quantize(Decimal("0.01"))
+    platform_fee, seller_amount = calculate_split(price, commission_percent)
+
+    return {
+        "items": [
+            {
+                "product_id": product.id,
+                "title": product.title,
+                "price": price,
+                "preview_url": get_product_preview_url(request, product),
+                "tags": get_checkout_tags(product),
+                "seller_username": product.seller.username,
+                "platform_fee": platform_fee,
+                "seller_amount": seller_amount,
+            }
+        ],
+        "total_items": 1,
+        "total_price": price,
+        "commission_percent": commission_percent.quantize(Decimal("0.01")),
+        "platform_fee": platform_fee,
+        "seller_amount": seller_amount,
+        "payment_methods": [
+            {"value": "bank_card", "label": "Банковская карта"},
+            {"value": "sbp", "label": "СБП"},
+            {"value": "sberpay", "label": "SberPay"},
+        ],
+    }
 
 class GenerateTextureView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -173,6 +347,7 @@ class GenerateTextureView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
     permission_classes = [permissions.AllowAny]
@@ -185,7 +360,10 @@ class ProductListView(generics.ListAPIView):
         )
 
         q = self.request.query_params.get('q')
-        category = self.request.query_params.get('category')
+        categories = (
+                self.request.query_params.getlist('category')
+                or self.request.query_params.getlist('category[]')
+        )
         model_format = self.request.query_params.get('model_format')
         geometry_type = self.request.query_params.get('geometry_type')
         poly_style = self.request.query_params.get('poly_style')
@@ -199,10 +377,21 @@ class ProductListView(generics.ListAPIView):
         ordering = self.request.query_params.get('ordering')
 
         if q:
-            queryset = queryset.filter(title__icontains=q)
+            normalized_q = q.casefold()
 
-        if category:
-            queryset = queryset.filter(category__slug=category)
+            queryset = queryset.filter(
+                Q(search_title__contains=normalized_q) |
+                Q(search_description__contains=normalized_q) |
+                Q(category__name__icontains=q) |
+                Q(category__slug__icontains=q) |
+                Q(seller__username__icontains=q) |
+                Q(license__name__icontains=q) |
+                Q(model_format__icontains=q) |
+                Q(texture_type__icontains=q)
+            ).distinct()
+
+        if categories:
+            queryset = queryset.filter(category__slug__in=categories)
 
         if model_format:
             queryset = queryset.filter(model_format=model_format)
@@ -270,6 +459,7 @@ class ProductFiltersView(APIView):
 
     def get(self, request):
         categories = Category.objects.all().order_by('name')
+        licenses = License.objects.all().order_by('name')
 
         formats = [{'value': value, 'label': label} for value, label in Product.FORMAT_CHOICES]
         poly_styles = [{'value': value, 'label': label} for value, label in Product.POLY_STYLE_CHOICES]
@@ -298,6 +488,7 @@ class ProductFiltersView(APIView):
             'topology_types': topology_types,
             'sort_options': sort_options,
             'boolean_filters': boolean_filters,
+            'licenses': LicenseSerializer(licenses, many=True).data,
         }
 
         serializer = ProductFiltersSerializer(data)
@@ -315,11 +506,87 @@ class MyProductListView(generics.ListAPIView):
     permission_classes = [IsApprovedSeller]
 
     def get_queryset(self):
-        return Product.objects.filter(seller=self.request.user).select_related(
+        queryset = Product.objects.filter(seller=self.request.user).select_related(
             'seller',
             'category',
             'license',
         )
+
+        q = self.request.query_params.get('q')
+        categories = (
+                self.request.query_params.getlist('category')
+                or self.request.query_params.getlist('category[]')
+        )
+        model_format = self.request.query_params.get('model_format')
+        poly_style = self.request.query_params.get('poly_style')
+        topology_type = self.request.query_params.get('topology_type')
+        has_uv = self.request.query_params.get('has_uv')
+        has_textures = self.request.query_params.get('has_textures')
+        min_polygons = self.request.query_params.get('min_polygons')
+        max_polygons = self.request.query_params.get('max_polygons')
+        ordering = self.request.query_params.get('ordering')
+
+        if q:
+            normalized_q = q.casefold()
+
+            queryset = queryset.filter(
+                Q(search_title__contains=normalized_q) |
+                Q(search_description__contains=normalized_q) |
+                Q(category__name__icontains=q) |
+                Q(model_format__icontains=q) |
+                Q(texture_type__icontains=q)
+            ).distinct()
+
+        if categories:
+            queryset = queryset.filter(category__slug__in=categories)
+
+        if model_format:
+            queryset = queryset.filter(model_format=model_format)
+
+        if poly_style:
+            queryset = queryset.filter(poly_style=poly_style)
+
+        if topology_type:
+            queryset = queryset.filter(topology_type=topology_type)
+
+        if has_uv is not None:
+            if has_uv.lower() == 'true':
+                queryset = queryset.filter(has_uv=True)
+            elif has_uv.lower() == 'false':
+                queryset = queryset.filter(has_uv=False)
+
+        if has_textures is not None:
+            if has_textures.lower() == 'true':
+                queryset = queryset.filter(has_textures=True)
+            elif has_textures.lower() == 'false':
+                queryset = queryset.filter(has_textures=False)
+
+        if min_polygons:
+            try:
+                queryset = queryset.filter(polygon_count__gte=int(min_polygons))
+            except ValueError:
+                pass
+
+        if max_polygons:
+            try:
+                queryset = queryset.filter(polygon_count__lte=int(max_polygons))
+            except ValueError:
+                pass
+
+        if ordering == 'price_asc':
+            queryset = queryset.order_by('price')
+        elif ordering == 'price_desc':
+            queryset = queryset.order_by('-price')
+        elif ordering == 'rating_asc':
+            queryset = queryset.order_by('average_rating')
+        elif ordering == 'rating_desc':
+            queryset = queryset.order_by('-average_rating')
+        elif ordering == 'newest':
+            queryset = queryset.order_by('-created_at')
+        else:
+            queryset = queryset.order_by('-created_at')
+
+        return queryset
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -363,6 +630,14 @@ class ProductUpdateView(generics.UpdateAPIView):
     queryset = Product.objects.all().select_related('seller', 'category', 'license')
     serializer_class = ProductCreateUpdateSerializer
     permission_classes = [IsApprovedSeller, IsOwnerOrReadOnly, CanModifyProductByStatus]
+
+    def perform_update(self, serializer):
+        product = self.get_object()
+        updated_product = serializer.save()
+
+        if product.status == 'published':
+            updated_product.status = 'pending_review'
+            updated_product.save(update_fields=['status'])
 
 
 class ProductDeleteView(generics.DestroyAPIView):
@@ -558,7 +833,6 @@ class UploadProductFileView(APIView):
         if update_fields:
             product.save(update_fields=update_fields)
 
-        # запускаем preprocessing после загрузки исходной модели
         if file_type == 'model_source':
             try:
                 prepare_product_viewer(product.id)
@@ -577,6 +851,7 @@ class UploadProductFileView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
 
 class DeleteProductFileView(APIView):
     permission_classes = [IsApprovedSeller]
@@ -692,11 +967,7 @@ class ModerationQueueView(generics.ListAPIView):
     permission_classes = [IsAdminRole]
 
     def get_queryset(self):
-        return Product.objects.filter(status='pending_review').select_related(
-            'seller',
-            'category',
-            'license',
-        ).order_by('created_at')
+        return Product.objects.all()
 
 
 class AdminAllProductsView(generics.ListAPIView):
@@ -746,16 +1017,28 @@ class PurchaseProductView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        commission_percent = Decimal("10.00")
+        platform_fee, seller_amount = calculate_split(product.price, commission_percent)
+
         order = Order.objects.create(
             buyer=request.user,
             total_price=product.price,
-            status='paid'
+            status='paid',
+            payment_method='bank_card',
+            payment_provider='mock',
+            commission_percent=commission_percent,
+            platform_fee=platform_fee,
+            seller_amount=seller_amount,
+            paid_at=timezone.now(),
         )
 
         OrderItem.objects.create(
             order=order,
             product=product,
-            price_at_purchase=product.price
+            price_at_purchase=product.price,
+            commission_percent=commission_percent,
+            platform_fee=platform_fee,
+            seller_amount=seller_amount,
         )
 
         product.sales_count += 1
@@ -766,22 +1049,206 @@ class PurchaseProductView(APIView):
             status=status.HTTP_201_CREATED
         )
 
-
-class MyPurchasedProductsView(generics.ListAPIView):
-    serializer_class = OrderItemSerializer
+class CheckoutPreviewView(APIView):
     permission_classes = [IsBuyer]
 
-    def get_queryset(self):
-        return OrderItem.objects.filter(
-            order__buyer=self.request.user,
-            order__status='paid'
-        ).select_related(
-            'product',
-            'product__seller',
-            'product__category',
-            'product__license',
-            'order',
+    def get(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        try:
+            summary = build_checkout_summary(cart, request.user, request)
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = CheckoutPreviewSerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CheckoutPayView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        serializer = CheckoutPaySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        payment_method = serializer.validated_data["payment_method"]
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        try:
+            summary = build_checkout_summary(cart, request.user, request)
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        cart_items = list(
+            cart.items.select_related('product', 'product__seller')
         )
+        products_by_id = {item.product.id: item.product for item in cart_items}
+
+        with transaction.atomic():
+            order = Order.objects.create(
+                buyer=request.user,
+                total_price=summary["total_price"],
+                status="pending",
+                payment_method=payment_method,
+                payment_provider="mock",
+                commission_percent=summary["commission_percent"],
+                platform_fee=summary["platform_fee"],
+                seller_amount=summary["seller_amount"],
+            )
+
+            for item in summary["items"]:
+                product = products_by_id[item["product_id"]]
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    price_at_purchase=item["price"],
+                    commission_percent=summary["commission_percent"],
+                    platform_fee=item["platform_fee"],
+                    seller_amount=item["seller_amount"],
+                )
+
+            order.status = "paid"
+            order.paid_at = timezone.now()
+            order.save(update_fields=["status", "paid_at"])
+
+            for product_id in products_by_id.keys():
+                Product.objects.filter(id=product_id).update(
+                    sales_count=F("sales_count") + 1
+                )
+
+            cart.items.all().delete()
+
+        return Response(
+            {
+                "detail": "Оплата прошла успешно.",
+                "order_id": order.id,
+                "status": order.status,
+                "paid_at": order.paid_at,
+                "total_price": order.total_price,
+                "platform_fee": order.platform_fee,
+                "seller_amount": order.seller_amount,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+class ProductCheckoutPreviewView(APIView):
+    permission_classes = [IsBuyer]
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.select_related('seller').get(id=pk)
+        except Product.DoesNotExist:
+            return Response(
+                {"detail": "Товар не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            summary = build_single_product_checkout_summary(product, request.user, request)
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = CheckoutPreviewSerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ProductCheckoutPayView(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request, pk):
+        serializer = CheckoutPaySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        payment_method = serializer.validated_data["payment_method"]
+
+        try:
+            product = Product.objects.select_related('seller').get(id=pk)
+        except Product.DoesNotExist:
+            return Response(
+                {"detail": "Товар не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            summary = build_single_product_checkout_summary(product, request.user, request)
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        item = summary["items"][0]
+
+        with transaction.atomic():
+            order = Order.objects.create(
+                buyer=request.user,
+                total_price=summary["total_price"],
+                status="pending",
+                payment_method=payment_method,
+                payment_provider="mock",
+                commission_percent=summary["commission_percent"],
+                platform_fee=summary["platform_fee"],
+                seller_amount=summary["seller_amount"],
+            )
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                price_at_purchase=item["price"],
+                commission_percent=summary["commission_percent"],
+                platform_fee=item["platform_fee"],
+                seller_amount=item["seller_amount"],
+            )
+
+            order.status = "paid"
+            order.paid_at = timezone.now()
+            order.save(update_fields=["status", "paid_at"])
+
+            Product.objects.filter(id=product.id).update(
+                sales_count=F("sales_count") + 1
+            )
+
+        return Response(
+            {
+                "detail": "Оплата прошла успешно.",
+                "order_id": order.id,
+                "status": order.status,
+                "paid_at": order.paid_at,
+                "total_price": order.total_price,
+                "platform_fee": order.platform_fee,
+                "seller_amount": order.seller_amount,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+class MyPurchasedProductsView(generics.ListAPIView):
+    permission_classes = [IsBuyer]
+    serializer_class = PurchasedProductItemSerializer
+
+    def get_queryset(self):
+        return (
+            OrderItem.objects.filter(
+                order__buyer=self.request.user,
+                order__status='paid'
+            )
+            .select_related('product')
+            .order_by('-created_at')
+        )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
 
 class MyFavoritesView(generics.ListAPIView):
@@ -1151,6 +1618,12 @@ class ContactRequestCreateView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        if request.user.is_authenticated and getattr(request.user, 'role', None) == 'admin':
+            return Response(
+                {'detail': 'Администратор не может создавать обращения.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = ContactRequestCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -1166,6 +1639,12 @@ class ContactRequestCreateView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+class MyContactRequestsView(generics.ListAPIView):
+    serializer_class = ContactRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ContactRequest.objects.filter(user=self.request.user).order_by('-created_at')
 
 class NewsletterSubscribeView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -1231,7 +1710,6 @@ class NewsletterSubscribeView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
 
 
 class MyCartView(APIView):
@@ -1320,6 +1798,39 @@ class RemoveFromCartView(APIView):
             status=status.HTTP_200_OK,
         )
 
+class AdminContactRequestsView(generics.ListAPIView):
+    serializer_class = AdminContactRequestSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        queryset = ContactRequest.objects.all().order_by('-created_at')
+
+        status_filter = self.request.query_params.get('status')
+        if status_filter and status_filter != 'all':
+            queryset = queryset.filter(status=status_filter)
+
+        return queryset
+
+class AdminContactRequestUpdateView(generics.UpdateAPIView):
+    serializer_class = AdminContactRequestUpdateSerializer
+    permission_classes = [IsAdminRole]
+    queryset = ContactRequest.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+        contact_request = self.get_object()
+        serializer = self.get_serializer(contact_request, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if serializer.validated_data.get('admin_reply'):
+            contact_request.replied_at = timezone.now()
+            contact_request.save(update_fields=['replied_at', 'updated_at'])
+
+        response_serializer = AdminContactRequestSerializer(
+            contact_request,
+            context={'request': request}
+        )
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 class MergeCartView(APIView):
     permission_classes = [IsBuyer]
@@ -1396,3 +1907,80 @@ class ProductsByIdsView(APIView):
             {'results': response_serializer.data},
             status=status.HTTP_200_OK,
         )
+
+
+class SellerAnalyticsView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def get(self, request):
+        products = Product.objects.filter(seller=request.user).select_related(
+            'category',
+            'license',
+        )
+
+        paid_items = OrderItem.objects.filter(
+            product__seller=request.user,
+            order__status='paid'
+        ).select_related('product', 'order')
+
+        total_revenue = sum(
+            item.seller_amount if item.seller_amount is not None else item.price_at_purchase
+            for item in paid_items
+        )
+        total_sales = paid_items.count()
+        total_views = sum(product.views_count for product in products)
+        total_favorites = sum(product.favorites_count for product in products)
+        total_reviews = sum(product.reviews_count for product in products)
+        total_comments = Comment.objects.filter(product__seller=request.user).count()
+
+        rated_products = [product.average_rating for product in products if product.reviews_count > 0]
+        average_rating = round(sum(rated_products) / len(rated_products), 2) if rated_products else 0
+
+        status_counts = {
+            'published': products.filter(status='published').count(),
+            'pending_review': products.filter(status='pending_review').count(),
+            'draft': products.filter(status='draft').count(),
+            'archived': products.filter(status='archived').count(),
+            'rejected': products.filter(status='rejected').count(),
+        }
+
+        top_products_qs = products.order_by('-sales_count', '-views_count', '-favorites_count')[:5]
+
+        top_products = []
+        for product in top_products_qs:
+            preview_url = None
+
+            if product.main_preview_storage_path:
+                preview_url = create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
+            elif product.main_preview:
+                preview_url = request.build_absolute_uri(product.main_preview.url)
+
+            top_products.append({
+                'id': product.id,
+                'title': product.title,
+                'status': product.status,
+                'sales_count': product.sales_count,
+                'views_count': product.views_count,
+                'favorites_count': product.favorites_count,
+                'reviews_count': product.reviews_count,
+                'average_rating': product.average_rating,
+                'main_preview_url': preview_url,
+            })
+
+        data = {
+            'summary': {
+                'total_revenue': total_revenue,
+                'total_sales': total_sales,
+                'total_views': total_views,
+                'average_rating': average_rating,
+                'total_favorites': total_favorites,
+                'total_reviews': total_reviews,
+                'total_comments': total_comments,
+                'total_products': products.count(),
+            },
+            'status_counts': status_counts,
+            'top_products': top_products,
+        }
+
+        serializer = SellerAnalyticsSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

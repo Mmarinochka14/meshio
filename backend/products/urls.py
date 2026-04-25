@@ -40,6 +40,16 @@ from .views import (
     MyCartView,
     RemoveFromCartView,
     ProductsByIdsView,
+    SellerAnalyticsView,
+    AdminContactRequestsView,
+    AdminContactRequestUpdateView,
+    MyContactRequestsView,
+    AdminContactRequestsView,
+    AdminContactRequestUpdateView,
+    CheckoutPreviewView,
+    CheckoutPayView,
+    ProductCheckoutPreviewView,
+    ProductCheckoutPayView,
 )
 
 urlpatterns = [
@@ -61,6 +71,9 @@ urlpatterns = [
     path('cart/remove/', RemoveFromCartView.as_view(), name='cart-remove'),
     path('cart/merge/', MergeCartView.as_view(), name='cart-merge'),
     path('by-ids/', ProductsByIdsView.as_view(), name='products-by-ids'),
+
+    path('checkout/preview/', CheckoutPreviewView.as_view(), name='checkout-preview'),
+    path('checkout/pay/', CheckoutPayView.as_view(), name='checkout-pay'),
 
     path('create/', ProductCreateView.as_view(), name='product-create'),
     path('purchase/', PurchaseProductView.as_view(), name='product-purchase'),
@@ -89,7 +102,17 @@ urlpatterns = [
     path('<int:pk>/update/', ProductUpdateView.as_view(), name='product-update'),
     path('<int:pk>/delete/', ProductDeleteView.as_view(), name='product-delete'),
 
+    path('my/contact-requests/', MyContactRequestsView.as_view(), name='my-contact-requests'),
+    path('admin/contact-requests/', AdminContactRequestsView.as_view(), name='admin-contact-requests'),
+    path('admin/contact-requests/<int:pk>/', AdminContactRequestUpdateView.as_view(),
+         name='admin-contact-request-update'),
 
+    path('<int:pk>/checkout/preview/', ProductCheckoutPreviewView.as_view(), name='product-checkout-preview'),
+    path('<int:pk>/checkout/pay/', ProductCheckoutPayView.as_view(), name='product-checkout-pay'),
+
+    path('seller/analytics/', SellerAnalyticsView.as_view(), name='seller-analytics'),
+    path('admin/contact-requests/', AdminContactRequestsView.as_view(), name='admin-contact-requests'),
+    path('admin/contact-requests/<int:pk>/', AdminContactRequestUpdateView.as_view(), name='admin-contact-request-update'),
     path('files/<int:pk>/delete/', DeleteProductFileView.as_view(), name='product-file-delete'),
     path('comments/<int:pk>/delete/', DeleteCommentView.as_view(), name='delete-comment'),
 path('<int:pk>/generate-texture/', GenerateTextureView.as_view(), name='generate-texture'),

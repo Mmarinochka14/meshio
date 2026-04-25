@@ -102,10 +102,10 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Цена')
 
-    # Исходный формат товара, который загрузил продавец
-    model_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='fbx', verbose_name='Формат')
+    search_title = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    search_description = models.TextField(blank=True, default="")
 
-    # Формат browser-view версии
+    model_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='fbx', verbose_name='Формат')
     viewer_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='glb', verbose_name='Формат viewer')
 
     geometry_type = models.CharField(max_length=20, choices=GEOMETRY_CHOICES, default='polygonal', verbose_name='Геометрия')
@@ -138,7 +138,6 @@ class Product(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name='Статус')
     moderation_comment = models.TextField(blank=True, null=True, verbose_name='Комментарий модератора')
 
-    # Оставляем для совместимости/переходного периода
     main_preview = models.ImageField(
         upload_to='products/previews/',
         blank=True,
@@ -166,6 +165,11 @@ class Product(models.Model):
         verbose_name_plural = 'Товары'
         ordering = ['-created_at']
 
+    def save(self, *args, **kwargs):
+        self.search_title = (self.title or "").casefold()
+        self.search_description = (self.description or "").casefold()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
@@ -189,7 +193,6 @@ class ProductFile(models.Model):
         ('generated_texture', 'Generated Texture'),
         ('download_bundle', 'Download Bundle'),
 
-        # legacy fallback
         ('model', 'Legacy 3D Model'),
         ('texture', 'Legacy Texture'),
         ('other', 'Other'),
@@ -323,8 +326,20 @@ class GeneratedTexture(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
+        ('pending', 'Pending'),
         ('paid', 'Paid'),
         ('cancelled', 'Cancelled'),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ('bank_card', 'Bank Card'),
+        ('sbp', 'SBP'),
+        ('sberpay', 'SberPay'),
+    ]
+
+    PAYMENT_PROVIDER_CHOICES = [
+        ('mock', 'Mock'),
+        ('yookassa', 'YooKassa'),
     ]
 
     buyer = models.ForeignKey(
@@ -334,7 +349,47 @@ class Order(models.Model):
         verbose_name='Покупатель'
     )
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Общая сумма')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='paid', verbose_name='Статус')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Статус')
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        default='bank_card',
+        verbose_name='Способ оплаты'
+    )
+    payment_provider = models.CharField(
+        max_length=20,
+        choices=PAYMENT_PROVIDER_CHOICES,
+        default='mock',
+        verbose_name='Провайдер оплаты'
+    )
+    external_payment_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Внешний ID платежа'
+    )
+
+    commission_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=10.00,
+        verbose_name='Комиссия платформы, %'
+    )
+    platform_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name='Сумма комиссии платформы'
+    )
+    seller_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name='Сумма продавцу'
+    )
+
+    paid_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата оплаты')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
 
     class Meta:
@@ -344,7 +399,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Заказ #{self.id} - {self.buyer.username}'
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -360,6 +414,26 @@ class OrderItem(models.Model):
         verbose_name='Товар'
     )
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена на момент покупки')
+
+    commission_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=10.00,
+        verbose_name='Комиссия платформы, %'
+    )
+    platform_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name='Комиссия платформы'
+    )
+    seller_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name='Сумма продавцу'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
 
     class Meta:
@@ -369,7 +443,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.order} - {self.product.title}'
-
 
 class Favorite(models.Model):
     user = models.ForeignKey(
@@ -396,6 +469,7 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.user.username} -> {self.product.title}'
+
 
 class Cart(models.Model):
     user = models.OneToOneField(
@@ -441,6 +515,7 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f'{self.cart.user.username} -> {self.product.title}'
+
 
 class Review(models.Model):
     user = models.ForeignKey(
@@ -498,7 +573,6 @@ class Comment(models.Model):
         return f'{self.user.username} -> {self.product.title}'
 
 
-
 class ContactRequest(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
@@ -510,6 +584,8 @@ class ContactRequest(models.Model):
     email = models.EmailField(verbose_name='Email')
     subject = models.CharField(max_length=255, verbose_name='Тема')
     message = models.TextField(verbose_name='Сообщение')
+    admin_reply = models.TextField(blank=True, null=True, verbose_name='Ответ администратора')
+    replied_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата ответа')
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

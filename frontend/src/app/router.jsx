@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
@@ -17,6 +17,12 @@ import SellerDashboardPage from "../pages/SellerDashboardPage";
 import SellerLayout from "../layouts/SellerLayout";
 import SellerProfilePage from "../pages/SellerProfilePage";
 import SellerModelsPage from "../pages/SellerModelsPage";
+
+import AdminLayout from "../pages/admin/AdminLayout";
+import AdminProductsPage from "../pages/admin/AdminProductsPage";
+import AdminUsersPage from "../pages/admin/AdminUsersPage";
+import AdminRequestsPage from "../pages/admin/AdminRequestsPage";
+import AdminProfilePage from "../pages/admin/AdminProfilePage";
 
 export default function AppRouter() {
   return (
@@ -50,29 +56,11 @@ export default function AppRouter() {
         />
 
         <Route
-          path="/seller/profile"
-          element={
-            <SellerLayout>
-              <SellerProfilePage />
-            </SellerLayout>
-          }
-        />
-
-        <Route
           path="/favorites"
           element={
             <MainLayout>
               <FavoritesPage />
             </MainLayout>
-          }
-        />
-
-        <Route
-          path="/seller/models"
-          element={
-            <SellerLayout>
-              <SellerModelsPage />
-            </SellerLayout>
           }
         />
 
@@ -138,6 +126,32 @@ export default function AppRouter() {
             </MainLayout>
           }
         />
+
+        <Route
+          path="/seller/profile"
+          element={
+            <SellerLayout>
+              <SellerProfilePage />
+            </SellerLayout>
+          }
+        />
+
+        <Route
+          path="/seller/models"
+          element={
+            <SellerLayout>
+              <SellerModelsPage />
+            </SellerLayout>
+          }
+        />
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="products" replace />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="requests" element={<AdminRequestsPage />} />
+          <Route path="profile" element={<AdminProfilePage />} />
+        </Route>
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

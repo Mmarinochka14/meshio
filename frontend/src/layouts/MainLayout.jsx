@@ -3,13 +3,21 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthModal from "../components/auth/AuthModal";
 import SellerStartModal from "../components/modals/SellerStartModal";
+import { getUser, subscribe } from "../components/auth/authStore";
 
 export default function MainLayout({ children }) {
+  const [, forceUpdate] = useState(0);
+
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialStep, setAuthInitialStep] = useState("login");
   const [authInitialRole, setAuthInitialRole] = useState("");
 
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribe(() => forceUpdate((x) => x + 1));
+    return unsub;
+  }, []);
 
   function openLoginModal() {
     setAuthInitialStep("login");
@@ -55,6 +63,9 @@ export default function MainLayout({ children }) {
     };
   }, []);
 
+  const user = getUser();
+  const isAdminUser = user?.role === "admin";
+
   const content = isValidElement(children)
     ? cloneElement(children, { onOpenSellerModal: openSellerModal })
     : children;
@@ -64,6 +75,7 @@ export default function MainLayout({ children }) {
       <Header
         onLoginClick={openLoginModal}
         onOpenSellerModal={openSellerModal}
+        isAdmin={isAdminUser}
       />
 
       <main>{content}</main>

@@ -1,0 +1,84 @@
+.add-card-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 520;
+  background: rgba(10, 10, 12, 0.72);
+  backdrop-filter: blur(0.3125vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25vw;
+}
+
+.add-card-modal__card {
+  width: 28vw;
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
+  border-radius: 1.0417vw;
+  padding: 1.6667vw;
+}
+
+.add-card-modal__title {
+  color: var(--color-white);
+  margin-bottom: 1.0417vw;
+}
+
+.add-card-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8333vw;
+}
+
+.add-card-modal__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8333vw;
+}
+
+.add-card-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+}
+
+.add-card-modal__label {
+  color: var(--color-white);
+  opacity: 0.6;
+}
+
+.add-card-modal__input {
+  height: 2.9167vw;
+  border-radius: 0.8333vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-hover);
+  padding: 0 1.0417vw;
+  color: var(--color-white);
+  outline: none;
+}
+
+.add-card-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625vw;
+  margin-top: 0.625vw;
+}
+
+.add-card-modal__secondary,
+.add-card-modal__primary {
+  min-width: 7.2917vw;
+  height: 2.5521vw;
+  border-radius: 0.625vw;
+  cursor: pointer;
+}
+
+.add-card-modal__secondary {
+  border: 0.0521vw solid var(--color-grey-light);
+  background: transparent;
+  color: var(--color-white);
+}
+
+.add-card-modal__primary {
+  border: none;
+  background: var(--color-purple);
+  color: var(--color-white);
+}

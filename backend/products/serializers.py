@@ -406,6 +406,31 @@ class OrderSerializer(serializers.ModelSerializer):
 class PurchaseSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
 
+class CheckoutPaySerializer(serializers.Serializer):
+    payment_method = serializers.ChoiceField(
+        choices=Order.PAYMENT_METHOD_CHOICES
+    )
+
+
+class CheckoutPreviewItemSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    title = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    preview_url = serializers.CharField(allow_blank=True, allow_null=True)
+    tags = serializers.ListField(child=serializers.CharField())
+    seller_username = serializers.CharField()
+    platform_fee = serializers.DecimalField(max_digits=10, decimal_places=2)
+    seller_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+
+class CheckoutPreviewSerializer(serializers.Serializer):
+    items = CheckoutPreviewItemSerializer(many=True)
+    total_items = serializers.IntegerField()
+    total_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    commission_percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    platform_fee = serializers.DecimalField(max_digits=10, decimal_places=2)
+    seller_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    payment_methods = serializers.ListField(child=serializers.DictField())
 
 class ProductModerationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -425,6 +450,7 @@ class AdminProductSerializer(serializers.ModelSerializer):
     seller_username = serializers.CharField(source='seller.username', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     license_name = serializers.CharField(source='license.name', read_only=True)
+    main_preview_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -438,10 +464,28 @@ class AdminProductSerializer(serializers.ModelSerializer):
             'status',
             'viewer_status',
             'moderation_comment',
+            'main_preview_url',
             'created_at',
             'updated_at',
         ]
 
+    def get_main_preview_url(self, obj):
+        request = self.context.get('request')
+
+        if obj.main_preview_storage_path:
+            return create_signed_file_url(obj.main_preview_storage_path, expires_in=3600)
+
+        if obj.main_preview and request:
+            return request.build_absolute_uri(obj.main_preview.url)
+
+        if obj.main_preview:
+            return obj.main_preview.url
+
+        preview_file = get_first_product_file(obj, ['preview'])
+        if preview_file:
+            return build_public_file_url(preview_file, request=request)
+
+        return None
 
 class ProductFiltersSerializer(serializers.Serializer):
     categories = CategorySerializer(many=True)
@@ -451,6 +495,7 @@ class ProductFiltersSerializer(serializers.Serializer):
     topology_types = serializers.ListField(child=serializers.DictField())
     sort_options = serializers.ListField(child=serializers.DictField())
     boolean_filters = serializers.ListField(child=serializers.DictField())
+    licenses = LicenseSerializer(many=True)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -582,10 +627,39 @@ class ContactRequestSerializer(serializers.ModelSerializer):
             'subject',
             'message',
             'status',
+            'admin_reply',
+            'replied_at',
             'created_at',
             'updated_at',
         ]
 
+class AdminContactRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactRequest
+        fields = [
+            'id',
+            'name',
+            'email',
+            'subject',
+            'message',
+            'status',
+            'admin_reply',
+            'replied_at',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class AdminContactRequestUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactRequest
+        fields = ['status', 'admin_reply']
+
+    def validate_status(self, value):
+        allowed_statuses = ['new', 'in_progress', 'done']
+        if value not in allowed_statuses:
+            raise serializers.ValidationError('Некорректный статус.')
+        return value
 
 class NewsletterSubscribeSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -659,3 +733,30 @@ class ProductIdsSerializer(serializers.Serializer):
         child=serializers.IntegerField(),
         allow_empty=True,
     )
+
+class SellerAnalyticsSerializer(serializers.Serializer):
+    summary = serializers.DictField()
+    status_counts = serializers.DictField()
+    top_products = serializers.ListField(child=serializers.DictField())
+
+class PurchasedProductItemSerializer(serializers.Serializer):
+    product = ProductListSerializer()
+    review = serializers.SerializerMethodField()
+
+    def get_review(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+
+        if not user or not user.is_authenticated:
+            return None
+
+        review = (
+            Review.objects.filter(product=obj.product, user=user)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not review:
+            return None
+
+        return ReviewSerializer(review).data

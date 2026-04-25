@@ -1,73 +1,54 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../styles/favorites-page.css";
-import { syncFavoritesFromProducts } from "../components/favorites/favoritesStore";
-import heartIcon from "../assets/icons/favorite.svg";
 
-import {
-  getUser,
-  isAuthenticated,
-  subscribe,
-} from "../components/auth/authStore";
-import { openAuthModal } from "../components/auth/openAuthModal";
-import { getMyFavorites } from "../api/products";
-import NewModelsSection from "../components/NewModelsSection";
 import ProductCard from "../components/ProductCard";
+import { getMyFavorites, getProductsByIds } from "../api/products";
+import { getUser, isAuthenticated } from "../components/auth/authStore";
+import {
+  getFavoriteIds,
+  subscribeFavorites,
+} from "../components/favorites/favoritesStore";
 
 export default function FavoritesPage() {
-  const [, forceUpdate] = useState(0);
-
-  const [items, setItems] = useState([]);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    const unsub = subscribe(() => forceUpdate((x) => x + 1));
-    return unsub;
-  }, []);
-
-  const authed = isAuthenticated();
-  const user = getUser();
-  const userRole = user?.role || "";
-  const isBuyer = userRole === "buyer";
-
-  useEffect(() => {
-    if (!authed) {
-      openAuthModal("login");
-      setIsLoading(false);
-      setError("Войдите в аккаунт, чтобы посмотреть избранное.");
-      return;
-    }
-
-    if (!isBuyer) {
-      setIsLoading(false);
-      setError("Избранное доступно только покупателю.");
-      return;
-    }
-
     let mounted = true;
 
     async function loadFavorites() {
       try {
         setIsLoading(true);
-        setError("");
 
-        const data = await getMyFavorites();
+        const authed = isAuthenticated();
+        const user = getUser();
+
+        if (authed && user?.role === "buyer") {
+          const data = await getMyFavorites();
+          const items = Array.isArray(data?.results) ? data.results : [];
+
+          if (!mounted) return;
+          setProducts(items.map((item) => item.product).filter(Boolean));
+          return;
+        }
+
+        const ids = getFavoriteIds();
+
+        if (ids.length === 0) {
+          if (!mounted) return;
+          setProducts([]);
+          return;
+        }
+
+        const data = await getProductsByIds(ids);
+        const items = Array.isArray(data?.results) ? data.results : [];
+
         if (!mounted) return;
-
-        const results = Array.isArray(data?.results)
-          ? data.results
-          : Array.isArray(data)
-            ? data
-            : [];
-
-        setItems(results);
-        syncFavoritesFromProducts(results.map((item) => item.product));
-
-        setItems(results);
-      } catch (err) {
+        setProducts(items);
+      } catch (error) {
+        console.error("Не удалось загрузить избранное", error);
         if (!mounted) return;
-        setError("Не удалось загрузить избранное.");
+        setProducts([]);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -75,63 +56,40 @@ export default function FavoritesPage() {
 
     loadFavorites();
 
+    const unsubFavorites = subscribeFavorites(() => {
+      loadFavorites();
+    });
+
     return () => {
       mounted = false;
+      unsubFavorites();
     };
-  }, [authed, isBuyer]);
+  }, []);
 
   return (
     <section className="favorites-page">
       <div className="favorites-page__container">
-        <h1 className="favorites-page__title text-h2">Избранное</h1>
-        <div className="favorites-page__divider" />
+        <div className="favorites-page__header">
+          <h1 className="favorites-page__title text-h2">Избранное</h1>
+          <div className="favorites-page__divider" />
+        </div>
 
         {isLoading ? (
-          <div className="favorites-page__state text-p2">Загрузка...</div>
-        ) : error ? (
-          <div className="favorites-page__state text-p2">{error}</div>
-        ) : items.length === 0 ? (
-          <div className="favorites-page__empty">
-            <div className="favorites-page__empty-icon-wrap">
-              <img
-                src={heartIcon}
-                alt=""
-                className="favorites-page__empty-icon"
-              />
-            </div>
-
-            <h2 className="favorites-page__empty-title text-h3">
-              В избранном пока пусто
-            </h2>
-
-            <p className="favorites-page__empty-text text-p2">
-              Сохраняйте интересные модели, чтобы быстро вернуться к ним позже.
-            </p>
-
-            <Link
-              to="/catalog"
-              className="favorites-page__empty-button text-p2"
-            >
-              Перейти в каталог
-            </Link>
-          </div>
+          <div className="page-state">Загрузка…</div>
+        ) : products.length === 0 ? (
+          <div className="page-state">В избранном пока ничего нет</div>
         ) : (
           <div className="favorites-page__grid">
-            {items.map((item) => (
+            {products.map((product) => (
               <ProductCard
-                key={item.product.id}
-                product={{
-                  ...item.product,
-                  is_favorite: true,
-                }}
+                key={product.id}
+                product={product}
                 forceFavoriteActive
               />
             ))}
           </div>
         )}
       </div>
-
-      <NewModelsSection />
     </section>
   );
 }

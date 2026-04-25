@@ -71,3 +71,152 @@
   color: #c6c8d1;
   max-width: 60vw;
 }
+
+/* ==================== TABLET ==================== */
+
+@media (max-width: 1024px) {
+  .faq-section {
+    padding-top: 4.4vw;
+    padding-bottom: 6vw;
+  }
+
+  .faq-section__container {
+    width: 89vw;
+  }
+
+  .faq-section__title {
+    margin-bottom: 2.8vw;
+  }
+
+  .faq-section__divider {
+    margin-bottom: 2.8vw;
+  }
+
+  .faq-section__list {
+    gap: 1.6vw;
+  }
+
+  .faq-section__item {
+    border-radius: 1.6vw;
+  }
+
+  .faq-section__button {
+    min-height: 7vw;
+    padding: 0 2.4vw;
+  }
+
+  .faq-section__toggle {
+    width: 3.8vw;
+    height: 3.8vw;
+    border-width: 0.16vw;
+  }
+
+  .faq-section__answer {
+    padding: 0 2.4vw 2.4vw;
+    max-width: 100%;
+  }
+}
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+  .faq-section {
+    padding-top: 8vw;
+    padding-bottom: 9.6vw;
+  }
+
+  .faq-section__container {
+    width: 91.4667vw;
+  }
+
+  .faq-section__title {
+    margin-bottom: 4.8vw;
+    font-size: 5.3333vw;
+    line-height: 1.15;
+  }
+
+  .faq-section__divider {
+    height: 0.2667vw;
+    margin-bottom: 4.8vw;
+  }
+
+  .faq-section__list {
+    gap: 3.2vw;
+  }
+
+  .faq-section__item {
+    border-width: 0.2667vw;
+    border-radius: 4.2667vw;
+  }
+
+  .faq-section__button {
+    min-height: 15.2vw;
+    padding: 0 4.2667vw;
+    gap: 3.2vw;
+  }
+
+  .faq-section__question {
+    font-size: 4vw;
+    line-height: 1.35;
+  }
+
+  .faq-section__toggle {
+    width: 8vw;
+    height: 8vw;
+    border-width: 0.2667vw;
+    font-size: 4.8vw;
+  }
+
+  .faq-section__answer {
+    padding: 0 4.2667vw 4.2667vw;
+    max-width: 100%;
+    font-size: 3.7333vw;
+    line-height: 1.45;
+  }
+}
+
+/* ==================== SMALL MOBILE ==================== */
+
+@media (max-width: 480px) {
+  .faq-section {
+    padding-top: 8.5333vw;
+    padding-bottom: 10.1333vw;
+  }
+
+  .faq-section__title {
+    margin-bottom: 5.3333vw;
+    font-size: 5.8667vw;
+  }
+
+  .faq-section__divider {
+    margin-bottom: 5.3333vw;
+  }
+
+  .faq-section__list {
+    gap: 3.7333vw;
+  }
+
+  .faq-section__item {
+    border-radius: 4.2667vw;
+  }
+
+  .faq-section__button {
+    min-height: 16vw;
+    padding: 0 4.2667vw;
+  }
+
+  .faq-section__question {
+    font-size: 4.2667vw;
+  }
+
+  .faq-section__toggle {
+    width: 8.5333vw;
+    height: 8.5333vw;
+    font-size: 5.0667vw;
+  }
+
+  .faq-section__answer {
+    padding: 0 4.2667vw 4.5333vw;
+    font-size: 4vw;
+  }
+}

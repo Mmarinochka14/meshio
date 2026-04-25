@@ -16,6 +16,10 @@ export default function HeroSection({ onOpenSellerModal }) {
             текстур
           </h3>
 
+          <div className="hero__visual hero__visual--mobile">
+            <HeroModelCanvas />
+          </div>
+
           <div className="hero__actions">
             <Link
               to="/catalog"
@@ -34,7 +38,7 @@ export default function HeroSection({ onOpenSellerModal }) {
           </div>
         </div>
 
-        <div className="hero__visual">
+        <div className="hero__visual hero__visual--desktop">
           <HeroModelCanvas />
         </div>
       </div>
