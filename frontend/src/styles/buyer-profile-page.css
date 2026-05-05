@@ -23,6 +23,10 @@
   margin-bottom: 1.6667vw;
 }
 
+.buyer-profile-page__mobile-tabs {
+  display: none;
+}
+
 .buyer-profile-page__layout {
   display: grid;
   grid-template-columns: 18.75vw 1fr;
@@ -155,6 +159,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .buyer-profile-page__name {
@@ -228,10 +233,8 @@
   margin-top: 1.25vw;
 }
 
-.buyer-profile-page__actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.25vw;
+.buyer-profile-page__actions--left {
+  justify-content: flex-start;
 }
 
 .buyer-profile-page__save {
@@ -247,6 +250,11 @@
 
 .buyer-profile-page__save:hover {
   background: var(--color-purple-hover);
+}
+
+.buyer-profile-page__save:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
 .buyer-profile-page__save-msg {
@@ -281,6 +289,7 @@
 }
 
 .buyer-profile-page__purchase-left {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 0.8333vw;
@@ -321,10 +330,21 @@
   color: var(--color-white);
   cursor: pointer;
   transition: background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4167vw;
+  flex-shrink: 0;
 }
 
 .buyer-profile-page__download:hover {
   background: var(--color-purple-hover);
+}
+
+.buyer-profile-page__download-icon {
+  width: 0.9375vw;
+  height: 0.9375vw;
+  object-fit: contain;
 }
 
 .buyer-profile-page__toggles {
@@ -444,23 +464,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9375vw;
   line-height: 1;
   color: var(--color-white);
-  opacity: 0.9;
+  opacity: 0.8;
   flex-shrink: 0;
+  font-size: 1.0417vw;
 }
 
 .buyer-profile-page__x:hover,
 .buyer-profile-page__arrow:hover {
   background: rgba(255, 255, 255, 0.18);
-}
-
-.buyer-profile-page__x,
-.buyer-profile-page__arrow {
-  font-size: 1.0417vw;
-  line-height: 1;
-  opacity: 0.8;
 }
 
 .buyer-profile-page__avatar-wrap {
@@ -494,6 +507,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.buyer-profile-page__avatar-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
 .buyer-profile-page__avatar-btn img {
@@ -568,6 +586,7 @@
   color: var(--color-white);
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .buyer-profile-page__support-message {
@@ -596,27 +615,682 @@
   opacity: 0.55;
 }
 
-.buyer-profile-page__download {
-  height: 2.3438vw;
-  padding: 0 1.0417vw;
-  border: none;
-  border-radius: 0.625vw;
-  background: var(--color-purple);
-  color: var(--color-white);
-  cursor: pointer;
-  transition: background 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4167vw;
+.buyer-profile-page__mobile-bar,
+.buyer-profile-page__mobile-overlay,
+.buyer-profile-page__mobile-sheet {
+  display: none;
 }
 
-.buyer-profile-page__download:hover {
-  background: var(--color-purple-hover);
+@media (max-width: 1024px) and (min-width: 769px) {
+  .buyer-profile-page {
+    padding-top: 4.4vw;
+    padding-bottom: 6vw;
+  }
+
+  .buyer-profile-page__container {
+    width: 89vw;
+  }
+
+  .buyer-profile-page .text-h2 {
+    font-size: 4vw;
+    line-height: 1.15;
+  }
+
+  .buyer-profile-page .text-h3 {
+    font-size: 2.6vw;
+    line-height: 1.2;
+  }
+
+  .buyer-profile-page .text-p1 {
+    font-size: 2vw;
+    line-height: 1.35;
+  }
+
+  .buyer-profile-page .text-p2 {
+    font-size: 1.55vw;
+    line-height: 1.35;
+  }
+
+  .buyer-profile-page .text-p3 {
+    font-size: 1.35vw;
+    line-height: 1.35;
+  }
+
+  .buyer-profile-page__title {
+    margin-bottom: 1.6vw;
+  }
+
+  .buyer-profile-page__divider {
+    margin-bottom: 2.8vw;
+  }
+
+  .buyer-profile-page__mobile-tabs,
+  .buyer-profile-page__mobile-bar,
+  .buyer-profile-page__mobile-overlay,
+  .buyer-profile-page__mobile-sheet {
+    display: none !important;
+  }
+
+  .buyer-profile-page__sidebar {
+    display: block;
+    position: sticky;
+    top: 2vw;
+  }
+
+  .buyer-profile-page__layout {
+    grid-template-columns: 22vw 1fr;
+    gap: 2vw;
+    align-items: start;
+  }
+
+  .buyer-profile-page__menu {
+    border-radius: 1.6vw;
+    padding: 1.6vw;
+    gap: 0.8vw;
+  }
+
+  .buyer-profile-page__menu-item {
+    min-height: 4.6vw;
+    border-radius: 1vw;
+    padding: 0 1.4vw;
+    gap: 0.9vw;
+  }
+
+  .buyer-profile-page__menu-icon {
+    width: 1.7vw;
+    height: 1.7vw;
+  }
+
+  .buyer-profile-page__menu-cta,
+  .buyer-profile-page__menu-logout {
+    height: 4.8vw;
+    border-radius: 1.2vw;
+    padding: 0 1.4vw;
+  }
+
+  .buyer-profile-page__card {
+    border-radius: 1.6vw;
+    padding: 2.4vw;
+  }
+
+  .buyer-profile-page__card--narrow {
+    max-width: 100%;
+  }
+
+  .buyer-profile-page__profile-head {
+    grid-template-columns: 8.6vw 1fr;
+    gap: 1.8vw;
+    margin-bottom: 2vw;
+  }
+
+  .buyer-profile-page__avatar {
+    width: 8.6vw;
+    height: 8.6vw;
+  }
+
+  .buyer-profile-page__name {
+    margin-bottom: 0.7vw;
+  }
+
+  .buyer-profile-page__small-btn {
+    margin-top: 1.2vw;
+    min-height: 4vw;
+    padding: 0 1.6vw;
+    border-radius: 1vw;
+  }
+
+  .buyer-profile-page__section-title {
+    margin-top: 2vw;
+    margin-bottom: 1.2vw;
+  }
+
+  .buyer-profile-page__form {
+    gap: 1.8vw;
+  }
+
+  .buyer-profile-page__field {
+    gap: 0.7vw;
+  }
+
+  .buyer-profile-page__input {
+    height: 4.6vw;
+    border-radius: 1vw;
+    padding: 0 1.4vw;
+  }
+
+  .buyer-profile-page__actions {
+    margin-top: 1.8vw;
+  }
+
+  .buyer-profile-page__save {
+    min-height: 4.6vw;
+    padding: 0 1.8vw;
+    border-radius: 1vw;
+  }
+
+  .buyer-profile-page__save-msg {
+    margin-top: 1.2vw;
+  }
+
+  .buyer-profile-page__form--password {
+    margin-top: 1.2vw;
+  }
+
+  .buyer-profile-page__card-title {
+    margin-bottom: 1.8vw;
+  }
+
+  .buyer-profile-page__list {
+    gap: 1.1vw;
+  }
+
+  .buyer-profile-page__purchase {
+    border-radius: 1.2vw;
+    padding: 1.2vw;
+    gap: 1.8vw;
+  }
+
+  .buyer-profile-page__purchase-left {
+    gap: 1.2vw;
+  }
+
+  .buyer-profile-page__purchase-thumb {
+    width: 5.6vw;
+    height: 5.6vw;
+    border-radius: 0.9vw;
+  }
+
+  .buyer-profile-page__download {
+    min-height: 4vw;
+    padding: 0 1.6vw;
+    border-radius: 1vw;
+    gap: 0.7vw;
+  }
+
+  .buyer-profile-page__download-icon {
+    width: 1.5vw;
+    height: 1.5vw;
+  }
+
+  .buyer-profile-page__toggles {
+    gap: 1.1vw;
+  }
+
+  .buyer-profile-page__toggle-row {
+    border-radius: 1.2vw;
+    padding: 1.5vw;
+    gap: 1.8vw;
+  }
+
+  .buyer-profile-page__switch {
+    width: 4.8vw;
+    height: 2.6vw;
+  }
+
+  .buyer-profile-page__switch-dot {
+    width: 2vw;
+    height: 2vw;
+    left: 0.3vw;
+  }
+
+  .buyer-profile-page__switch.is-on .buyer-profile-page__switch-dot {
+    left: 2.35vw;
+  }
+
+  .buyer-profile-page__payment-list {
+    gap: 1.1vw;
+  }
+
+  .buyer-profile-page__payment {
+    min-height: 6vw;
+    border-radius: 1.2vw;
+    padding: 0 1.8vw;
+  }
+
+  .buyer-profile-page__payment-left {
+    gap: 1.2vw;
+  }
+
+  .buyer-profile-page__payment-icon {
+    width: 3.2vw;
+    height: 3.2vw;
+  }
+
+  .buyer-profile-page__x,
+  .buyer-profile-page__arrow {
+    width: 2.6vw;
+    height: 2.6vw;
+    font-size: 1.7vw;
+  }
+
+  .buyer-profile-page__avatar-actions {
+    gap: 0.7vw;
+  }
+
+  .buyer-profile-page__avatar-btn {
+    width: 3.2vw;
+    height: 3.2vw;
+    border-radius: 0.8vw;
+  }
+
+  .buyer-profile-page__avatar-btn img {
+    width: 1.7vw;
+    height: 1.7vw;
+  }
+
+  .buyer-profile-page__danger-zone {
+    margin-top: 2.2vw;
+    padding-top: 1.8vw;
+    gap: 0.9vw;
+  }
+
+  .buyer-profile-page__danger-btn {
+    min-height: 4.6vw;
+    padding: 0 1.8vw;
+    border-radius: 1vw;
+  }
+
+  .buyer-profile-page__support-list {
+    gap: 1.4vw;
+  }
+
+  .buyer-profile-page__support-item {
+    border-radius: 1.2vw;
+    padding: 1.6vw;
+  }
+
+  .buyer-profile-page__support-top {
+    gap: 1.8vw;
+    margin-bottom: 0.9vw;
+  }
+
+  .buyer-profile-page__support-status {
+    min-height: 3.2vw;
+    padding: 0 1.2vw;
+  }
+
+  .buyer-profile-page__support-message {
+    margin-bottom: 1.2vw;
+  }
+
+  .buyer-profile-page__support-reply {
+    border-radius: 0.9vw;
+    padding: 1.2vw;
+  }
 }
 
-.buyer-profile-page__download-icon {
-  width: 0.9375vw;
-  height: 0.9375vw;
-  object-fit: contain;
+@media (max-width: 768px) {
+  .buyer-profile-page {
+    padding-top: 24px;
+    padding-bottom: 96px;
+  }
+
+  .buyer-profile-page__container {
+    width: calc(100% - 32px);
+  }
+
+  .buyer-profile-page .text-h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .buyer-profile-page .text-h3 {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .buyer-profile-page .text-p1 {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .buyer-profile-page .text-p2 {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .buyer-profile-page .text-p3 {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .buyer-profile-page__title {
+    margin-bottom: 12px;
+  }
+
+  .buyer-profile-page__divider {
+    height: 1px;
+    margin-bottom: 14px;
+  }
+
+  .buyer-profile-page__mobile-tabs {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-bottom: 16px;
+    padding: 0 16px 4px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .buyer-profile-page__mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .buyer-profile-page__mobile-tab {
+    min-width: max-content;
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: var(--color-grey);
+    padding: 0 16px;
+    color: var(--color-white);
+    font-size: 14px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .buyer-profile-page__mobile-tab.is-active {
+    border-color: var(--color-purple);
+    background: var(--color-purple);
+    box-shadow: 0 10px 24px rgba(114, 34, 234, 0.22);
+  }
+
+  .buyer-profile-page__layout {
+    display: block;
+  }
+
+  .buyer-profile-page__sidebar {
+    display: none;
+  }
+
+  .buyer-profile-page__content {
+    width: 100%;
+  }
+
+  .buyer-profile-page__card,
+  .buyer-profile-page__card--narrow {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .buyer-profile-page__profile-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .buyer-profile-page__avatar-wrap {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .buyer-profile-page__avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .buyer-profile-page__avatar-actions {
+    gap: 6px;
+  }
+
+  .buyer-profile-page__avatar-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border-width: 1px;
+  }
+
+  .buyer-profile-page__avatar-btn img {
+    width: 17px;
+    height: 17px;
+  }
+
+  .buyer-profile-page__profile-info {
+    min-width: 0;
+  }
+
+  .buyer-profile-page__name {
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  .buyer-profile-page__email {
+    word-break: break-word;
+  }
+
+  .buyer-profile-page__small-btn {
+    min-height: 42px;
+    margin-top: 10px;
+    padding: 0 14px;
+    border-radius: 12px;
+  }
+
+  .buyer-profile-page__section-title {
+    margin-top: 22px;
+    margin-bottom: 12px;
+  }
+
+  .buyer-profile-page__form,
+  .buyer-profile-page__form--password {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__field {
+    gap: 7px;
+  }
+
+  .buyer-profile-page__input {
+    width: 100%;
+    height: 48px;
+    border-width: 1px;
+    border-radius: 14px;
+    padding: 0 14px;
+    font-size: 15px;
+  }
+
+  .buyer-profile-page__actions,
+  .buyer-profile-page__actions--left {
+    justify-content: stretch;
+    margin-top: 16px;
+  }
+
+  .buyer-profile-page__save {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 14px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+
+  .buyer-profile-page__save-msg {
+    margin-top: 12px;
+  }
+
+  .buyer-profile-page__card-title {
+    margin-bottom: 16px;
+  }
+
+  .buyer-profile-page__list {
+    gap: 12px;
+  }
+
+  .buyer-profile-page__purchase {
+    border-radius: 16px;
+    padding: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__purchase-left {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__purchase-thumb {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+  }
+
+  .buyer-profile-page__purchase-name {
+    word-break: break-word;
+  }
+
+  .buyer-profile-page__download {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 13px;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .buyer-profile-page__download-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .buyer-profile-page__toggles {
+    gap: 12px;
+  }
+
+  .buyer-profile-page__toggle-row {
+    min-height: 72px;
+    border-radius: 16px;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__switch {
+    width: 50px;
+    height: 28px;
+    border-width: 1px;
+  }
+
+  .buyer-profile-page__switch-dot {
+    width: 22px;
+    height: 22px;
+    left: 3px;
+  }
+
+  .buyer-profile-page__switch.is-on .buyer-profile-page__switch-dot {
+    left: 23px;
+  }
+
+  .buyer-profile-page__payment-list {
+    gap: 12px;
+  }
+
+  .buyer-profile-page__payment {
+    min-height: 62px;
+    border-radius: 16px;
+    border-width: 1px;
+    padding: 0 14px;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__payment-left {
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .buyer-profile-page__payment-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .buyer-profile-page__x,
+  .buyer-profile-page__arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+  }
+
+  .buyer-profile-page__danger-zone {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top-width: 1px;
+    gap: 8px;
+  }
+
+  .buyer-profile-page__danger-btn {
+    width: 100%;
+    min-height: 46px;
+    border-width: 1px;
+    border-radius: 14px;
+    padding: 0 18px;
+    margin-top: 4px;
+  }
+
+  .buyer-profile-page__support-list {
+    gap: 12px;
+  }
+
+  .buyer-profile-page__support-item {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .buyer-profile-page__support-top {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .buyer-profile-page__support-status {
+    min-height: 30px;
+    padding: 0 12px;
+    border-width: 1px;
+    align-self: flex-start;
+  }
+
+  .buyer-profile-page__support-message {
+    margin-bottom: 12px;
+    word-break: break-word;
+  }
+
+  .buyer-profile-page__support-reply {
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .buyer-profile-page__support-reply-title {
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 390px) {
+  .buyer-profile-page__container {
+    width: calc(100% - 24px);
+  }
+
+  .buyer-profile-page__mobile-tabs {
+    width: calc(100% + 24px);
+    margin-left: -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .buyer-profile-page__card,
+  .buyer-profile-page__card--narrow {
+    padding: 16px;
+  }
+
+  .buyer-profile-page__profile-head {
+    align-items: flex-start;
+  }
+
+  .buyer-profile-page__avatar {
+    width: 64px;
+    height: 64px;
+  }
 }

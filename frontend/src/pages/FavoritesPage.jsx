@@ -2,10 +2,17 @@ import { useEffect, useState } from "react";
 import "../styles/favorites-page.css";
 
 import ProductCard from "../components/ProductCard";
-import { getMyFavorites, getProductsByIds } from "../api/products";
+import {
+  addToFavorites,
+  getMyFavorites,
+  getProductsByIds,
+  removeFromFavorites,
+} from "../api/products";
 import { getUser, isAuthenticated } from "../components/auth/authStore";
 import {
+  addFavoriteId,
   getFavoriteIds,
+  removeFavoriteId,
   subscribeFavorites,
 } from "../components/favorites/favoritesStore";
 
@@ -28,6 +35,7 @@ export default function FavoritesPage() {
           const items = Array.isArray(data?.results) ? data.results : [];
 
           if (!mounted) return;
+
           setProducts(items.map((item) => item.product).filter(Boolean));
           return;
         }
@@ -44,10 +52,13 @@ export default function FavoritesPage() {
         const items = Array.isArray(data?.results) ? data.results : [];
 
         if (!mounted) return;
+
         setProducts(items);
       } catch (error) {
         console.error("Не удалось загрузить избранное", error);
+
         if (!mounted) return;
+
         setProducts([]);
       } finally {
         if (mounted) setIsLoading(false);
@@ -65,6 +76,37 @@ export default function FavoritesPage() {
       unsubFavorites();
     };
   }, []);
+
+  async function handleToggleFavorite(product, nextFavorite) {
+    if (!product?.id) return;
+
+    const authed = isAuthenticated();
+    const user = getUser();
+
+    try {
+      if (authed && user?.role === "buyer") {
+        if (nextFavorite) {
+          await addToFavorites(product.id);
+        } else {
+          await removeFromFavorites(product.id);
+          setProducts((prev) => prev.filter((item) => item.id !== product.id));
+        }
+
+        return;
+      }
+
+      const productId = String(product.id);
+
+      if (nextFavorite) {
+        addFavoriteId(productId);
+      } else {
+        removeFavoriteId(productId);
+        setProducts((prev) => prev.filter((item) => item.id !== product.id));
+      }
+    } catch (error) {
+      console.error("Не удалось обновить избранное", error);
+    }
+  }
 
   return (
     <section className="favorites-page">
@@ -84,7 +126,9 @@ export default function FavoritesPage() {
               <ProductCard
                 key={product.id}
                 product={product}
-                forceFavoriteActive
+                isFavorite={true}
+                forceFavoriteActive={true}
+                onToggleFavorite={handleToggleFavorite}
               />
             ))}
           </div>

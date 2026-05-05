@@ -18,8 +18,26 @@
 .seller-models-filters__block {
   display: flex;
   flex-direction: column;
-  gap: 0.625vw;
   margin-bottom: 1.0417vw;
+}
+
+.seller-models-filters__block:last-of-type {
+  margin-bottom: 0;
+}
+
+.seller-models-filters__block-head {
+  width: 100%;
+  min-height: 2.1875vw;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625vw;
+  cursor: pointer;
+  text-align: left;
 }
 
 .seller-models-filters__block-title {
@@ -27,7 +45,54 @@
   opacity: 0.9;
 }
 
-.seller-models-filters__list {
+.seller-models-filters__block-arrow {
+  position: relative;
+  width: 1.25vw;
+  height: 1.25vw;
+  flex-shrink: 0;
+}
+
+.seller-models-filters__block-arrow::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.4167vw;
+  height: 0.4167vw;
+  border-right: 0.1042vw solid rgba(235, 235, 235, 0.78);
+  border-bottom: 0.1042vw solid rgba(235, 235, 235, 0.78);
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.seller-models-filters__block.is-collapsed
+  .seller-models-filters__block-arrow::before {
+  transform: translate(-50%, -45%) rotate(-45deg);
+}
+
+.seller-models-filters__block-body {
+  overflow: hidden;
+  max-height: 28vw;
+  opacity: 1;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    margin-top 0.2s ease;
+}
+
+.seller-models-filters__block:not(.is-collapsed)
+  .seller-models-filters__block-body {
+  margin-top: 0.625vw;
+}
+
+.seller-models-filters__block.is-collapsed .seller-models-filters__block-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.seller-models-filters__list,
+.seller-models-filters__switches {
   display: flex;
   flex-direction: column;
   gap: 0.5208vw;
@@ -54,6 +119,9 @@
   border: 0.0521vw solid var(--color-grey-super-light);
   background: transparent;
   flex-shrink: 0;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .seller-models-filters__check-input:checked
@@ -69,28 +137,30 @@
 
 .seller-models-filters__switch {
   width: 100%;
+  min-height: 1.875vw;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.8333vw;
   color: var(--color-white);
-  opacity: 0.9;
 }
 
 .seller-models-filters__switch-btn {
   width: 2.6042vw;
   height: 1.3542vw;
-  border-radius: 999px;
+  border-radius: 999vw;
   border: 0.0521vw solid var(--color-grey-super-light);
   background: transparent;
   position: relative;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .seller-models-filters__switch-dot {
   width: 1.0938vw;
   height: 1.0938vw;
-  border-radius: 50%;
+  border-radius: 999vw;
   background: var(--color-grey-super-light);
   position: absolute;
   top: 50%;
@@ -118,6 +188,8 @@
 }
 
 .seller-models-filters__range-input {
+  width: 100%;
+  min-width: 0;
   height: 2.3438vw;
   border-radius: 0.625vw;
   border: 0.0521vw solid var(--color-grey-super-light);
@@ -125,8 +197,6 @@
   padding: 0 0.8333vw;
   color: var(--color-white);
   outline: none;
-  width: 100%;
-  min-width: 0;
 }
 
 .seller-models-filters__range-input::placeholder {
@@ -139,21 +209,29 @@
   opacity: 0.6;
 }
 
+.seller-models-filters__empty {
+  color: var(--color-grey-super-light);
+  opacity: 0.8;
+}
+
 .seller-models-filters__actions {
   display: flex;
   gap: 0.625vw;
   margin-top: 1.25vw;
 }
 
-.seller-models-filters__apply {
+.seller-models-filters__apply,
+.seller-models-filters__reset {
   flex: 1;
   height: 2.5521vw;
-  border: none;
   border-radius: 0.625vw;
-  background: var(--color-purple);
   color: var(--color-white);
   cursor: pointer;
-  transition: background 0.2s ease;
+}
+
+.seller-models-filters__apply {
+  border: none;
+  background: var(--color-purple);
 }
 
 .seller-models-filters__apply:hover {
@@ -161,11 +239,224 @@
 }
 
 .seller-models-filters__reset {
-  flex: 1;
-  height: 2.5521vw;
-  border-radius: 0.625vw;
   border: 0.0521vw solid var(--color-grey-light);
   background: transparent;
-  color: var(--color-white);
-  cursor: pointer;
+}
+
+.seller-models-filters__reset:hover {
+  background: var(--color-grey-hover);
+}
+
+/* ===== TABLET ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .seller-models-filters {
+    border-radius: 1.6vw;
+    padding: 1.8vw;
+  }
+
+  .seller-models-filters__header {
+    padding-bottom: 1.2vw;
+    border-bottom-width: 0.0977vw;
+    margin-bottom: 1.8vw;
+  }
+
+  .seller-models-filters__block {
+    margin-bottom: 1.5vw;
+  }
+
+  .seller-models-filters__block-head {
+    min-height: 3.8vw;
+    gap: 1vw;
+  }
+
+  .seller-models-filters__block-arrow {
+    width: 2vw;
+    height: 2vw;
+  }
+
+  .seller-models-filters__block-arrow::before {
+    width: 0.7vw;
+    height: 0.7vw;
+    border-right-width: 0.0977vw;
+    border-bottom-width: 0.0977vw;
+  }
+
+  .seller-models-filters__block-body {
+    max-height: 42vw;
+  }
+
+  .seller-models-filters__list,
+  .seller-models-filters__switches {
+    gap: 0.8vw;
+  }
+
+  .seller-models-filters__check {
+    gap: 1vw;
+  }
+
+  .seller-models-filters__check-box {
+    width: 1.7vw;
+    height: 1.7vw;
+    border-radius: 0.4vw;
+    border-width: 0.0977vw;
+  }
+
+  .seller-models-filters__switch-btn {
+    width: 4.6vw;
+    height: 2.4vw;
+    border-width: 0.0977vw;
+  }
+
+  .seller-models-filters__switch-dot {
+    width: 1.9vw;
+    height: 1.9vw;
+    left: 0.3vw;
+  }
+
+  .seller-models-filters__switch-btn.is-on .seller-models-filters__switch-dot {
+    left: 2.2vw;
+  }
+
+  .seller-models-filters__range {
+    gap: 0.9vw;
+  }
+
+  .seller-models-filters__range-input {
+    height: 4.2vw;
+    border-width: 0.0977vw;
+    border-radius: 1vw;
+    padding: 0 1.2vw;
+  }
+
+  .seller-models-filters__actions {
+    gap: 1vw;
+    margin-top: 1.8vw;
+  }
+
+  .seller-models-filters__apply,
+  .seller-models-filters__reset {
+    height: 4.6vw;
+    border-radius: 1.1vw;
+  }
+
+  .seller-models-filters__reset {
+    border-width: 0.0977vw;
+  }
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+  .seller-models-filters {
+    border-radius: 4.8vw;
+    padding: 4.2667vw;
+  }
+
+  .seller-models-filters__header {
+    display: none;
+  }
+
+  .seller-models-filters__block {
+    margin-bottom: 4.2667vw;
+  }
+
+  .seller-models-filters__block-head {
+    min-height: 10.6667vw;
+    gap: 2.1333vw;
+  }
+
+  .seller-models-filters__block-arrow {
+    width: 4.2667vw;
+    height: 4.2667vw;
+  }
+
+  .seller-models-filters__block-arrow::before {
+    width: 1.6vw;
+    height: 1.6vw;
+    border-right-width: 0.2667vw;
+    border-bottom-width: 0.2667vw;
+  }
+
+  .seller-models-filters__block-body {
+    max-height: 110vw;
+  }
+
+  .seller-models-filters__block:not(.is-collapsed)
+    .seller-models-filters__block-body {
+    margin-top: 2.1333vw;
+  }
+
+  .seller-models-filters__list,
+  .seller-models-filters__switches {
+    gap: 2.1333vw;
+  }
+
+  .seller-models-filters__check {
+    gap: 2.6667vw;
+  }
+
+  .seller-models-filters__check-box {
+    width: 4.5333vw;
+    height: 4.5333vw;
+    border-radius: 1.0667vw;
+    border-width: 0.2667vw;
+  }
+
+  .seller-models-filters__switch {
+    min-height: 8vw;
+    gap: 2.1333vw;
+  }
+
+  .seller-models-filters__switch-btn {
+    width: 12vw;
+    height: 6.4vw;
+    border-width: 0.2667vw;
+  }
+
+  .seller-models-filters__switch-dot {
+    width: 5.3333vw;
+    height: 5.3333vw;
+    left: 0.5333vw;
+  }
+
+  .seller-models-filters__switch-btn.is-on .seller-models-filters__switch-dot {
+    left: 5.8667vw;
+  }
+
+  .seller-models-filters__range {
+    grid-template-columns: 1fr;
+    gap: 2.1333vw;
+  }
+
+  .seller-models-filters__range-sep {
+    display: none;
+  }
+
+  .seller-models-filters__range-input {
+    height: 11.7333vw;
+    border-width: 0.2667vw;
+    border-radius: 3.2vw;
+    padding: 0 3.2vw;
+    font-size: 3.7333vw;
+  }
+
+  .seller-models-filters__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 4.2667vw;
+  }
+
+  .seller-models-filters__apply,
+  .seller-models-filters__reset {
+    width: 100%;
+    height: 12.2667vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .seller-models-filters__reset {
+    border-width: 0.2667vw;
+  }
 }

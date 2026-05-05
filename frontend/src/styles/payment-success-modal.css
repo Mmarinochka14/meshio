@@ -116,3 +116,144 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* ===== PAYMENT SUCCESS MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .modal__panel--payment-success {
+    width: 56vw;
+    padding: 2.6vw;
+    border-radius: 1.8vw;
+    border-width: 0.0977vw;
+  }
+
+  .payment-success-modal__icon {
+    width: 7vw;
+    height: 7vw;
+    margin-bottom: 1.8vw;
+    border-radius: 1.8vw;
+    font-size: 3vw;
+  }
+
+  .payment-success-modal__title {
+    margin-bottom: 1.2vw;
+  }
+
+  .payment-success-modal__text {
+    margin-bottom: 1.2vw;
+  }
+
+  .payment-success-modal__meta {
+    margin-bottom: 1.8vw;
+  }
+
+  .payment-success-modal__list {
+    gap: 1vw;
+    margin-bottom: 1.8vw;
+    padding: 1.3vw;
+    border-radius: 1.2vw;
+  }
+
+  .payment-success-modal__list-item {
+    gap: 1.2vw;
+  }
+
+  .payment-success-modal__actions {
+    gap: 1vw;
+  }
+
+  .payment-success-modal__actions--single {
+    margin-top: 1vw;
+  }
+
+  .payment-success-modal__primary,
+  .payment-success-modal__secondary,
+  .payment-success-modal__download {
+    min-height: 4.8vw;
+    border-radius: 1.1vw;
+  }
+
+  .payment-success-modal__secondary,
+  .payment-success-modal__download {
+    border-width: 0.0977vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal__panel--payment-success {
+    width: calc(100% - 8.5334vw);
+    max-height: 86dvh;
+    overflow-y: auto;
+    padding: 4.8vw;
+    border-radius: 4.8vw;
+    border-width: 0.2667vw;
+  }
+
+  .payment-success-modal__icon {
+    width: 17.0667vw;
+    height: 17.0667vw;
+    margin-bottom: 4.2667vw;
+    border-radius: 4.2667vw;
+    font-size: 7.4667vw;
+  }
+
+  .payment-success-modal__title {
+    margin-bottom: 2.1333vw;
+  }
+
+  .payment-success-modal__text {
+    margin-bottom: 2.1333vw;
+  }
+
+  .payment-success-modal__meta {
+    margin-bottom: 4.2667vw;
+  }
+
+  .payment-success-modal__list {
+    gap: 2.1333vw;
+    margin-bottom: 4.2667vw;
+    padding: 3.2vw;
+    border-radius: 3.7333vw;
+  }
+
+  .payment-success-modal__list-item {
+    align-items: flex-start;
+    gap: 2.1333vw;
+  }
+
+  .payment-success-modal__actions,
+  .payment-success-modal__actions--single {
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 2.6667vw;
+  }
+
+  .payment-success-modal__primary,
+  .payment-success-modal__secondary,
+  .payment-success-modal__download {
+    width: 100%;
+    min-height: 12.2667vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .payment-success-modal__secondary,
+  .payment-success-modal__download {
+    border-width: 0.2667vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .modal__panel--payment-success {
+    width: calc(100% - 6.4vw);
+    padding: 4.2667vw;
+    border-radius: 4.2667vw;
+  }
+
+  .payment-success-modal__icon {
+    width: 16vw;
+    height: 16vw;
+    border-radius: 3.7333vw;
+    font-size: 7.2vw;
+  }
+}

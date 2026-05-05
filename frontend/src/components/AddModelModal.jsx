@@ -677,8 +677,8 @@ export default function AddModelModal({
         </div>
 
         <div className="add-model-modal__note text-p3">
-          Если обложка карточки не загружена вручную, потом можно будет
-          автоматически подставлять кадр, сгенерированный из Blender.
+          Если обложка карточки не загружена вручную, она будет добавлена
+          автоматически.
         </div>
 
         {statusText ? (

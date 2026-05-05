@@ -98,3 +98,143 @@
 .seller-start-modal__button:hover {
   background: var(--color-purple-hover);
 }
+
+/* ===== SELLER START MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .seller-start-modal__divider {
+    height: 0.0977vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .seller-start-modal__intro {
+    max-width: 72vw;
+    margin-bottom: 2.8vw;
+  }
+
+  .seller-start-modal__subtitle {
+    margin-bottom: 2.4vw;
+  }
+
+  .seller-start-modal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.4vw;
+  }
+
+  .seller-start-modal__card {
+    min-height: 22vw;
+    padding: 2vw;
+    border-width: 0.0977vw;
+    border-radius: 1.6vw;
+  }
+
+  .seller-start-modal__card-top {
+    margin-bottom: 2.4vw;
+  }
+
+  .seller-start-modal__icon-wrap {
+    width: 6vw;
+    height: 6vw;
+  }
+
+  .seller-start-modal__icon {
+    width: 3vw;
+    height: 3vw;
+  }
+
+  .seller-start-modal__card-title {
+    margin-bottom: 1.2vw;
+  }
+
+  .seller-start-modal__actions {
+    margin-top: 2.4vw;
+  }
+
+  .seller-start-modal__button {
+    min-width: 34vw;
+    height: 5vw;
+    padding: 0 2.4vw;
+    border-radius: 1.2vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .seller-start-modal__divider {
+    height: 0.2667vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .seller-start-modal__intro {
+    max-width: 100%;
+    margin-bottom: 5.3333vw;
+  }
+
+  .seller-start-modal__subtitle {
+    margin-bottom: 4.2667vw;
+  }
+
+  .seller-start-modal__grid {
+    grid-template-columns: 1fr;
+    gap: 3.2vw;
+  }
+
+  .seller-start-modal__card {
+    min-height: auto;
+    padding: 4.2667vw;
+    border-width: 0.2667vw;
+    border-radius: 4.2667vw;
+  }
+
+  .seller-start-modal__card-top {
+    margin-bottom: 4.2667vw;
+  }
+
+  .seller-start-modal__icon-wrap {
+    width: 14.9333vw;
+    height: 14.9333vw;
+  }
+
+  .seller-start-modal__icon {
+    width: 7.4667vw;
+    height: 7.4667vw;
+  }
+
+  .seller-start-modal__card-title {
+    margin-bottom: 2.1333vw;
+  }
+
+  .seller-start-modal__actions {
+    margin-top: 4.2667vw;
+  }
+
+  .seller-start-modal__button {
+    width: 100%;
+    min-width: 0;
+    height: 12.2667vw;
+    padding: 0 4.8vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .seller-start-modal__card {
+    padding: 3.7333vw;
+    border-radius: 3.7333vw;
+  }
+
+  .seller-start-modal__icon-wrap {
+    width: 13.8667vw;
+    height: 13.8667vw;
+  }
+
+  .seller-start-modal__icon {
+    width: 6.9333vw;
+    height: 6.9333vw;
+  }
+
+  .seller-start-modal__button {
+    height: 12vw;
+    border-radius: 3.4667vw;
+  }
+}

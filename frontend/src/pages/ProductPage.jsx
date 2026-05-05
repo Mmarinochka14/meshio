@@ -19,6 +19,14 @@ import {
   isInGuestCart,
   subscribeCart,
 } from "../components/cart/cartStore";
+
+import {
+  addFavoriteId,
+  getFavoriteIds,
+  removeFavoriteId,
+  subscribeFavorites,
+} from "../components/favorites/favoritesStore";
+
 import ProductPageViewerPanel from "../components/ProductPageViewerPanel";
 import CheckoutModal from "../components/CheckoutModal";
 import PaymentSuccessModal from "../components/PaymentSuccessModal";
@@ -182,6 +190,7 @@ export default function ProductPage() {
   const isSeller = user?.role === "seller";
   const isFree = Number(product?.price || 0) === 0;
   const canUseBuyerActions = !isAuthenticated || isBuyer;
+  const canUseFavoriteActions = !isAuthenticated || isBuyer;
 
   const displayRating = Number(product?.average_rating || 0).toFixed(2);
   const displayViews = product?.views_count ?? 0;
@@ -211,9 +220,13 @@ export default function ProductPage() {
         if (!mounted) return;
 
         setProduct(detail);
-        setIsFavorite(
-          canUseBuyerActions ? Boolean(detail?.is_favorite) : false,
-        );
+        if (!isAuthenticated) {
+          setIsFavorite(getFavoriteIds().includes(String(detail?.id)));
+        } else if (isBuyer) {
+          setIsFavorite(Boolean(detail?.is_favorite));
+        } else {
+          setIsFavorite(false);
+        }
         setViewerUrl(detail?.viewer_url || "");
       } catch (err) {
         if (!mounted) return;
@@ -277,6 +290,18 @@ export default function ProductPage() {
 
     return unsub;
   }, [product, isSeller]);
+
+  useEffect(() => {
+    const unsub = subscribeFavorites(() => {
+      if (!product) return;
+
+      if (!isAuthenticated) {
+        setIsFavorite(getFavoriteIds().includes(String(product.id)));
+      }
+    });
+
+    return unsub;
+  }, [product, isAuthenticated]);
 
   function applyPresetValues(presetKey) {
     const preset = MATERIAL_PRESET_VALUES[presetKey];
@@ -393,8 +418,26 @@ export default function ProductPage() {
     try {
       setError("");
 
+      if (!product) return;
+
+      if (isSeller) {
+        setError("В режиме продавца избранное недоступно.");
+        return;
+      }
+
+      setIsFavoriteLoading(true);
+
       if (!isAuthenticated) {
-        openAuthModal("login");
+        const productId = String(product.id);
+
+        if (isFavorite) {
+          removeFavoriteId(productId);
+          setIsFavorite(false);
+        } else {
+          addFavoriteId(productId);
+          setIsFavorite(true);
+        }
+
         return;
       }
 
@@ -402,8 +445,6 @@ export default function ProductPage() {
         setError("Избранное доступно только покупателю.");
         return;
       }
-
-      setIsFavoriteLoading(true);
 
       if (isFavorite) {
         await removeFromFavorites(id);
@@ -676,8 +717,7 @@ export default function ProductPage() {
                   </div>
                 ) : (
                   <div className="product-page__error text-p2">
-                    Вы просматриваете маркет в режиме продавца. Покупка, корзина
-                    и избранное недоступны.
+                    Покупка, корзинаи избранное недоступны.
                   </div>
                 )}
 

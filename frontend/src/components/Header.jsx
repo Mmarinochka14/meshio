@@ -1,6 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getUser, isAuthenticated, subscribe } from "./auth/authStore";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { getUser, isAuthenticated, logout, subscribe } from "./auth/authStore";
+
+import AdminHeader from "./AdminHeader";
+import SellerHeader from "./SellerHeader";
+import ConfirmModal from "./ConfirmModal";
 
 import homeIcon from "../assets/icons/home.svg";
 import logoIcon from "../assets/icons/logo.svg";
@@ -11,16 +15,30 @@ import favoriteIcon from "../assets/icons/favorite.svg";
 import cartIcon from "../assets/icons/cart.svg";
 import loginIcon from "../assets/icons/login.svg";
 import userIcon from "../assets/icons/user.svg";
+import logoutIcon from "../assets/icons/logout.svg";
 
 import { getCartCount } from "../api/cart";
 import { getGuestCartCount, subscribeCart } from "./cart/cartStore";
 import { getMyFavorites } from "../api/products";
-import { getFavoriteIds, subscribeFavorites } from "./favorites/favoritesStore";
+import {
+  getFavoriteIds,
+  setFavoriteIds,
+  subscribeFavorites,
+} from "./favorites/favoritesStore";
+
+function areSameIds(firstIds, secondIds) {
+  const first = [...firstIds].map(String).sort();
+  const second = [...secondIds].map(String).sort();
+
+  if (first.length !== second.length) return false;
+
+  return first.every((id, index) => id === second[index]);
+}
 
 export default function Header({
   onLoginClick,
   onOpenSellerModal,
-  isAdmin = false,
+  onOpenUploadModal,
 }) {
   const navigate = useNavigate();
 
@@ -29,8 +47,11 @@ export default function Header({
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [searchValue, setSearchValue] = useState("");
   const [favoritesPulse, setFavoritesPulse] = useState(false);
-  const [favoritesReady, setFavoritesReady] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const favoritesReadyRef = useRef(false);
+  const favoritesPulseTimerRef = useRef(null);
 
   useEffect(() => {
     const unsub = subscribe(() => forceUpdate((x) => x + 1));
@@ -50,29 +71,42 @@ export default function Header({
 
   const authed = isAuthenticated();
   const user = getUser();
+
   const userName = user?.username || "Профиль";
   const isBuyer = user?.role === "buyer";
   const isSeller = user?.role === "seller";
   const isAdminUser = user?.role === "admin";
 
-  const isAdminMode = isAdmin || isAdminUser;
-  const canUseBuyerActions = !isAdminMode && (isBuyer || !authed);
-
   useEffect(() => {
     let mounted = true;
 
     async function syncCartCount() {
-      if (authed && isBuyer && !isAdminMode) {
+      if (authed && isBuyer) {
         try {
           const data = await getCartCount();
-          if (mounted) setCartCount(Number(data?.count || 0));
+
+          if (mounted) {
+            setCartCount(Number(data?.count || 0));
+          }
         } catch {
-          if (mounted) setCartCount(0);
+          if (mounted) {
+            setCartCount(0);
+          }
         }
-      } else if (!authed) {
-        if (mounted) setCartCount(getGuestCartCount());
-      } else {
-        if (mounted) setCartCount(0);
+
+        return;
+      }
+
+      if (!authed) {
+        if (mounted) {
+          setCartCount(getGuestCartCount());
+        }
+
+        return;
+      }
+
+      if (mounted) {
+        setCartCount(0);
       }
     }
 
@@ -91,41 +125,23 @@ export default function Header({
       unsubCart();
       unsubAuth();
     };
-  }, [authed, isBuyer, isAdminMode]);
+  }, [authed, isBuyer]);
 
   useEffect(() => {
     let mounted = true;
-    let pulseTimer = null;
 
-    async function syncFavoritesCount() {
-      const currentUser = getUser();
-      const authedNow = isAuthenticated();
-
-      let nextCount = 0;
-
-      if (authedNow && currentUser?.role === "buyer" && !isAdminMode) {
-        try {
-          const data = await getMyFavorites();
-          const items = Array.isArray(data?.results) ? data.results : [];
-          nextCount = items.length;
-        } catch {
-          nextCount = 0;
-        }
-      } else if (!authedNow) {
-        nextCount = getFavoriteIds().length;
-      } else {
-        nextCount = 0;
-      }
-
+    function updateFavoritesCount(nextCount) {
       if (!mounted) return;
 
       setFavoritesCount((prevCount) => {
-        if (favoritesReady && nextCount > prevCount) {
+        if (favoritesReadyRef.current && nextCount > prevCount) {
           setFavoritesPulse(true);
 
-          if (pulseTimer) clearTimeout(pulseTimer);
+          if (favoritesPulseTimerRef.current) {
+            clearTimeout(favoritesPulseTimerRef.current);
+          }
 
-          pulseTimer = setTimeout(() => {
+          favoritesPulseTimerRef.current = setTimeout(() => {
             setFavoritesPulse(false);
           }, 450);
         }
@@ -133,28 +149,64 @@ export default function Header({
         return nextCount;
       });
 
-      if (!favoritesReady) {
-        setFavoritesReady(true);
+      favoritesReadyRef.current = true;
+    }
+
+    async function syncFavoritesFromApi() {
+      const currentUser = getUser();
+      const authedNow = isAuthenticated();
+
+      if (!authedNow) {
+        updateFavoritesCount(getFavoriteIds().length);
+        return;
+      }
+
+      if (currentUser?.role !== "buyer") {
+        updateFavoritesCount(0);
+        return;
+      }
+
+      try {
+        const data = await getMyFavorites();
+        const items = Array.isArray(data?.results) ? data.results : [];
+
+        const apiFavoriteIds = items
+          .map((item) => item?.product?.id || item?.product_id || item?.id)
+          .filter(Boolean)
+          .map(String);
+
+        const currentFavoriteIds = getFavoriteIds();
+
+        if (!areSameIds(apiFavoriteIds, currentFavoriteIds)) {
+          setFavoriteIds(apiFavoriteIds);
+        }
+
+        updateFavoritesCount(apiFavoriteIds.length);
+      } catch {
+        updateFavoritesCount(getFavoriteIds().length);
       }
     }
 
-    syncFavoritesCount();
+    syncFavoritesFromApi();
 
     const unsubFavorites = subscribeFavorites(() => {
-      syncFavoritesCount();
+      updateFavoritesCount(getFavoriteIds().length);
     });
 
     const unsubAuth = subscribe(() => {
-      syncFavoritesCount();
+      syncFavoritesFromApi();
     });
 
     return () => {
       mounted = false;
       unsubFavorites();
       unsubAuth();
-      if (pulseTimer) clearTimeout(pulseTimer);
+
+      if (favoritesPulseTimerRef.current) {
+        clearTimeout(favoritesPulseTimerRef.current);
+      }
     };
-  }, [favoritesReady, isAdminMode]);
+  }, []);
 
   function handleSearchSubmit(event) {
     event.preventDefault();
@@ -194,7 +246,6 @@ export default function Header({
   }
 
   function handleProfileClickPath() {
-    if (isAdminUser) return "/admin/profile";
     if (isSeller) return "/seller/profile";
     return "/buyer/profile";
   }
@@ -206,6 +257,41 @@ export default function Header({
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
+  }
+
+  function handleMobileLoginClick() {
+    closeMobileMenu();
+
+    if (typeof onLoginClick === "function") {
+      onLoginClick();
+    }
+  }
+
+  function handleMobileSellerClick() {
+    closeMobileMenu();
+
+    if (typeof onOpenSellerModal === "function") {
+      onOpenSellerModal();
+    }
+  }
+
+  function handleLogoutClick() {
+    closeMobileMenu();
+    setIsLogoutModalOpen(true);
+  }
+
+  function handleConfirmLogout() {
+    logout();
+    setIsLogoutModalOpen(false);
+    navigate("/");
+  }
+
+  if (isAdminUser) {
+    return <AdminHeader />;
+  }
+
+  if (isSeller) {
+    return <SellerHeader onOpenUploadModal={onOpenUploadModal} />;
   }
 
   return (
@@ -233,7 +319,7 @@ export default function Header({
                   Q&amp;A
                 </Link>
 
-                {!authed && (
+                {!authed ? (
                   <button
                     type="button"
                     className="header__nav-link header__nav-link--button"
@@ -241,19 +327,7 @@ export default function Header({
                   >
                     Стать продавцом
                   </button>
-                )}
-
-                {isSeller && !isAdminMode && (
-                  <Link to="/seller/models" className="header__nav-link">
-                    Кабинет продавца
-                  </Link>
-                )}
-
-                {isAdminMode && (
-                  <Link to="/admin/products" className="header__nav-link">
-                    Панель администратора
-                  </Link>
-                )}
+                ) : null}
               </nav>
 
               {authed ? (
@@ -307,7 +381,9 @@ export default function Header({
 
               <button
                 type="button"
-                className={`header__burger ${isMobileMenuOpen ? "is-open" : ""}`}
+                className={`header__burger ${
+                  isMobileMenuOpen ? "is-open" : ""
+                }`}
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 aria-label="Открыть меню"
               >
@@ -316,72 +392,46 @@ export default function Header({
                 <span />
               </button>
 
-              {isAdminMode ? (
-                <div className="header__admin-actions">
-                  <Link to="/admin/products" className="header__admin-back-btn">
-                    К заявкам
-                  </Link>
-                </div>
-              ) : (
-                <div className="header__actions">
-                  <Link to={handleModelsPath()} className="header__action">
-                    <img
-                      src={modelsIcon}
-                      alt=""
-                      className="header__action-icon"
-                    />
-                    <span className="header__action-label">Мои модели</span>
-                  </Link>
+              <div className="header__actions">
+                <Link to={handleModelsPath()} className="header__action">
+                  <img
+                    src={modelsIcon}
+                    alt=""
+                    className="header__action-icon"
+                  />
+                  <span className="header__action-label">Мои модели</span>
+                </Link>
 
-                  {canUseBuyerActions && (
-                    <Link
-                      to="/favorites"
-                      className={`header__action header__action--favorite ${
-                        favoritesPulse ? "header__action--favorite-pulse" : ""
-                      }`}
-                    >
-                      <img
-                        src={favoriteIcon}
-                        alt=""
-                        className="header__action-icon"
-                      />
-                      <span className="header__action-label">Избранное</span>
+                <Link
+                  to="/favorites"
+                  className={`header__action header__action--favorite ${
+                    favoritesPulse ? "header__action--favorite-pulse" : ""
+                  }`}
+                >
+                  <img
+                    src={favoriteIcon}
+                    alt=""
+                    className="header__action-icon"
+                  />
+                  <span className="header__action-label">Избранное</span>
 
-                      {favoritesCount > 0 && (
-                        <span
-                          className={`header__favorite-badge text-p3 ${
-                            favoritesPulse
-                              ? "header__favorite-badge--pulse"
-                              : ""
-                          }`}
-                        >
-                          {favoritesCount}
-                        </span>
-                      )}
-                    </Link>
-                  )}
+                  {favoritesCount > 0 ? (
+                    <span className="header__badge">{favoritesCount}</span>
+                  ) : null}
+                </Link>
 
-                  {canUseBuyerActions && (
-                    <Link
-                      to="/cart"
-                      className="header__action header__action--cart"
-                    >
-                      <img
-                        src={cartIcon}
-                        alt=""
-                        className="header__action-icon"
-                      />
-                      <span className="header__action-label">Корзина</span>
+                <Link
+                  to="/cart"
+                  className="header__action header__action--cart"
+                >
+                  <img src={cartIcon} alt="" className="header__action-icon" />
+                  <span className="header__action-label">Корзина</span>
 
-                      {cartCount > 0 && (
-                        <span className="header__cart-badge text-p3">
-                          {cartCount}
-                        </span>
-                      )}
-                    </Link>
-                  )}
-                </div>
-              )}
+                  {cartCount > 0 ? (
+                    <span className="header__badge">{cartCount}</span>
+                  ) : null}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -395,6 +445,7 @@ export default function Header({
       <aside className={`mobile-menu ${isMobileMenuOpen ? "is-open" : ""}`}>
         <div className="mobile-menu__head">
           <div className="mobile-menu__title text-h4">Меню</div>
+
           <button
             type="button"
             className="mobile-menu__close"
@@ -406,20 +457,78 @@ export default function Header({
         </div>
 
         <div className="mobile-menu__list">
-          <Link
-            to="/"
-            className="mobile-menu__link text-p1"
-            onClick={closeMobileMenu}
-          >
-            Главная
-          </Link>
+          {authed ? (
+            <Link
+              to={handleProfileClickPath()}
+              className="mobile-menu__profile"
+              onClick={closeMobileMenu}
+            >
+              <span className="mobile-menu__avatar">
+                {userName[0]?.toUpperCase() || "M"}
+              </span>
+
+              <span className="mobile-menu__profile-info">
+                <span className="mobile-menu__profile-name text-p1">
+                  {userName}
+                </span>
+                <span className="mobile-menu__profile-role text-p3">
+                  Покупатель
+                </span>
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="mobile-menu__login text-p1"
+              onClick={handleMobileLoginClick}
+            >
+              <img src={loginIcon} alt="" className="mobile-menu__link-icon" />
+              <span>Войти</span>
+            </button>
+          )}
 
           <Link
             to="/catalog"
             className="mobile-menu__link text-p1"
             onClick={closeMobileMenu}
           >
-            Каталог
+            <img src={catalogIcon} alt="" className="mobile-menu__link-icon" />
+            <span>Каталог</span>
+          </Link>
+
+          <Link
+            to={handleModelsPath()}
+            className="mobile-menu__link text-p1"
+            onClick={closeMobileMenu}
+          >
+            <img src={modelsIcon} alt="" className="mobile-menu__link-icon" />
+            <span>Мои модели</span>
+          </Link>
+
+          <Link
+            to="/favorites"
+            className="mobile-menu__link text-p1"
+            onClick={closeMobileMenu}
+          >
+            <img src={favoriteIcon} alt="" className="mobile-menu__link-icon" />
+            <span>Избранное</span>
+
+            {favoritesCount > 0 ? (
+              <span className="mobile-menu__badge">{favoritesCount}</span>
+            ) : null}
+          </Link>
+
+          <Link
+            to="/cart"
+            className="mobile-menu__link text-p1"
+            onClick={closeMobileMenu}
+          >
+            <img src={cartIcon} alt="" className="mobile-menu__link-icon" />
+            <span>Корзина</span>
+
+            {cartCount > 0 ? (
+              <span className="mobile-menu__badge">{cartCount}</span>
+            ) : null}
           </Link>
 
           <Link
@@ -446,92 +555,63 @@ export default function Header({
             Q&amp;A
           </Link>
 
-          {authed ? (
-            <Link
-              to={handleProfileClickPath()}
-              className="mobile-menu__link text-p1"
-              onClick={closeMobileMenu}
-            >
-              Профиль
-            </Link>
-          ) : (
+          {!authed ? (
             <button
               type="button"
-              className="mobile-menu__link mobile-menu__link--button text-p1"
-              onClick={() => {
-                closeMobileMenu();
-                onLoginClick?.();
-              }}
-            >
-              Войти
-            </button>
-          )}
-
-          {!authed && (
-            <button
-              type="button"
-              className="mobile-menu__cta text-p1"
-              onClick={() => {
-                closeMobileMenu();
-                onOpenSellerModal?.();
-              }}
+              className="mobile-menu__seller text-p1"
+              onClick={handleMobileSellerClick}
             >
               Стать продавцом
             </button>
-          )}
+          ) : null}
 
-          {isSeller && !isAdminMode && (
-            <Link
-              to="/seller/models"
-              className="mobile-menu__link text-p1"
-              onClick={closeMobileMenu}
+          {authed ? (
+            <button
+              type="button"
+              className="mobile-menu__logout text-p1"
+              onClick={handleLogoutClick}
             >
-              Кабинет продавца
-            </Link>
-          )}
-
-          {isAdminMode && (
-            <Link
-              to="/admin/products"
-              className="mobile-menu__link text-p1"
-              onClick={closeMobileMenu}
-            >
-              Панель администратора
-            </Link>
-          )}
+              <img src={logoutIcon} alt="" className="mobile-menu__link-icon" />
+              <span>Выйти</span>
+            </button>
+          ) : null}
         </div>
       </aside>
 
-      {!isAdminMode && (
-        <nav className="mobile-bottom-nav">
-          <Link to="/" className="mobile-bottom-nav__item">
-            <img
-              src={homeIcon}
-              alt=""
-              className="mobile-bottom-nav__icon mobile-bottom-nav__icon--home"
-            />
-            <span className="mobile-bottom-nav__label">Главная</span>
-          </Link>
+      <nav className="mobile-bottom-nav">
+        <NavLink to="/" className="mobile-bottom-nav__item">
+          <img
+            src={homeIcon}
+            alt=""
+            className="mobile-bottom-nav__icon mobile-bottom-nav__icon--home"
+          />
+          <span className="mobile-bottom-nav__label">Главная</span>
+        </NavLink>
 
-          <Link to={handleModelsPath()} className="mobile-bottom-nav__item">
-            <img src={modelsIcon} alt="" className="mobile-bottom-nav__icon" />
-            <span className="mobile-bottom-nav__label">Модели</span>
-          </Link>
+        <NavLink to={handleModelsPath()} className="mobile-bottom-nav__item">
+          <img src={modelsIcon} alt="" className="mobile-bottom-nav__icon" />
+          <span className="mobile-bottom-nav__label">Модели</span>
+        </NavLink>
 
-          <Link
-            to="/cart"
-            className="mobile-bottom-nav__item mobile-bottom-nav__item--badge"
-          >
-            <img src={cartIcon} alt="" className="mobile-bottom-nav__icon" />
-            <span className="mobile-bottom-nav__label">Корзина</span>
-            {cartCount > 0 && (
-              <span className="mobile-bottom-nav__badge text-p3">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-        </nav>
-      )}
+        <NavLink to="/cart" className="mobile-bottom-nav__item">
+          <img src={cartIcon} alt="" className="mobile-bottom-nav__icon" />
+          <span className="mobile-bottom-nav__label">Корзина</span>
+
+          {cartCount > 0 ? (
+            <span className="mobile-bottom-nav__badge">{cartCount}</span>
+          ) : null}
+        </NavLink>
+      </nav>
+
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        title="Выйти из аккаунта?"
+        description="Вы уверены, что хотите выйти из аккаунта?"
+        confirmText="Выйти"
+        cancelText="Отмена"
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
     </>
   );
 }

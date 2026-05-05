@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/seller-models-page.css";
 
 import Pagination from "../components/Pagination";
-
+import uploadIcon from "../assets/icons/upload.svg";
 import { isAuthenticated } from "../components/auth/authStore";
 import SellerModelCard from "../components/SellerModelCard";
 import SellerModelsFilters from "../components/SellerModelsFilters";
@@ -71,6 +71,8 @@ export default function SellerModelsPage() {
   const [products, setProducts] = useState([]);
   const [meta, setMeta] = useState(null);
 
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
   const [pageData, setPageData] = useState({
     count: 0,
     next: null,
@@ -96,13 +98,22 @@ export default function SellerModelsPage() {
     async function loadMeta() {
       try {
         setMetaLoading(true);
+
         const data = await getProductFilters();
-        if (mounted) setMeta(data);
+
+        if (mounted) {
+          setMeta(data);
+        }
       } catch (e) {
         console.error("Не удалось загрузить фильтры", e);
-        if (mounted) setMeta(null);
+
+        if (mounted) {
+          setMeta(null);
+        }
       } finally {
-        if (mounted) setMetaLoading(false);
+        if (mounted) {
+          setMetaLoading(false);
+        }
       }
     }
 
@@ -119,6 +130,7 @@ export default function SellerModelsPage() {
     async function loadProducts() {
       try {
         setIsLoading(true);
+
         const data = await getMyProductsRequest(params);
 
         if (!mounted) return;
@@ -131,7 +143,9 @@ export default function SellerModelsPage() {
         });
       } catch (e) {
         console.error("Не удалось загрузить модели продавца", e);
+
         if (!mounted) return;
+
         setProducts([]);
         setPageData({
           count: 0,
@@ -139,7 +153,9 @@ export default function SellerModelsPage() {
           previous: null,
         });
       } finally {
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -165,6 +181,7 @@ export default function SellerModelsPage() {
   async function loadProductsManually() {
     try {
       setIsLoading(true);
+
       const data = await getMyProductsRequest(params);
 
       setProducts(data?.results || []);
@@ -211,6 +228,7 @@ export default function SellerModelsPage() {
 
     try {
       await deleteProductRequest(product.id);
+
       setProducts((prev) => prev.filter((item) => item.id !== product.id));
       setPageData((prev) => ({
         ...prev,
@@ -228,8 +246,10 @@ export default function SellerModelsPage() {
       await loadProductsManually();
     } catch (e) {
       console.error(e);
+
       const msg =
         e?.response?.data?.detail || "Не удалось отправить модель на модерацию";
+
       alert(msg);
     }
   }
@@ -255,13 +275,16 @@ export default function SellerModelsPage() {
             sp.append(key, String(item));
           }
         });
+
         return;
       }
 
       sp.set(key, String(value));
     });
 
-    if (!("page" in next)) sp.delete("page");
+    if (!("page" in next)) {
+      sp.delete("page");
+    }
 
     setSearchParams(sp);
   }
@@ -279,8 +302,31 @@ export default function SellerModelsPage() {
     setSearchParams(sp);
   }
 
+  function handleApplyFilters(nextFilters) {
+    applyQuery(nextFilters);
+    setIsFiltersOpen(false);
+  }
+
+  function handleResetFilters() {
+    const next = new URLSearchParams();
+
+    const currentQuery = searchParams.get("q") || "";
+
+    if (statusTab !== "all") {
+      next.set("status_tab", statusTab);
+    }
+
+    if (currentQuery) {
+      next.set("q", currentQuery);
+    }
+
+    setSearchParams(next);
+    setIsFiltersOpen(false);
+  }
+
   const filteredProducts = useMemo(() => {
     if (statusTab === "all") return products;
+
     return products.filter((product) => product.status === statusTab);
   }, [products, statusTab]);
 
@@ -299,7 +345,12 @@ export default function SellerModelsPage() {
             className="seller-models-page__upload-btn text-p2"
             onClick={handleOpenUpload}
           >
-            Загрузить модель
+            <img
+              src={uploadIcon}
+              alt=""
+              className="seller-models-page__upload-icon"
+            />
+            <span>Загрузить модель</span>
           </button>
         </div>
 
@@ -308,7 +359,9 @@ export default function SellerModelsPage() {
         <div className="seller-models-page__tabs">
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "all" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "all" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("all")}
           >
             Все
@@ -316,7 +369,9 @@ export default function SellerModelsPage() {
 
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "published" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "published" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("published")}
           >
             Опубликованные
@@ -324,7 +379,9 @@ export default function SellerModelsPage() {
 
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "pending_review" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "pending_review" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("pending_review")}
           >
             На модерации
@@ -332,7 +389,9 @@ export default function SellerModelsPage() {
 
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "draft" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "draft" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("draft")}
           >
             Черновики
@@ -340,7 +399,9 @@ export default function SellerModelsPage() {
 
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "archived" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "archived" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("archived")}
           >
             Архив
@@ -348,15 +409,35 @@ export default function SellerModelsPage() {
 
           <button
             type="button"
-            className={`seller-models-page__tab text-p2 ${statusTab === "rejected" ? "is-active" : ""}`}
+            className={`seller-models-page__tab text-p2 ${
+              statusTab === "rejected" ? "is-active" : ""
+            }`}
             onClick={() => setStatusTab("rejected")}
           >
             Отклонённые
           </button>
         </div>
 
+        <button
+          type="button"
+          className={`seller-models-page__filters-toggle ${
+            isFiltersOpen ? "is-open" : ""
+          }`}
+          onClick={() => setIsFiltersOpen((prev) => !prev)}
+        >
+          <span className="seller-models-page__filters-toggle-text text-p2">
+            Фильтры
+          </span>
+
+          <span className="seller-models-page__filters-toggle-arrow" />
+        </button>
+
         <div className="seller-models-page__layout">
-          <aside className="seller-models-page__sidebar">
+          <aside
+            className={`seller-models-page__sidebar ${
+              isFiltersOpen ? "is-open" : ""
+            }`}
+          >
             {metaLoading ? (
               <div className="seller-models-page__sidebar-state text-p2">
                 Загрузка фильтров...
@@ -365,13 +446,8 @@ export default function SellerModelsPage() {
               <SellerModelsFilters
                 meta={meta}
                 searchParams={searchParams}
-                onApply={(nextFilters) => applyQuery(nextFilters)}
-                onReset={() => {
-                  const next = new URLSearchParams();
-                  if (statusTab !== "all") next.set("status_tab", statusTab);
-                  if (currentQuery) next.set("q", currentQuery);
-                  setSearchParams(next);
-                }}
+                onApply={handleApplyFilters}
+                onReset={handleResetFilters}
               />
             )}
           </aside>
@@ -386,6 +462,7 @@ export default function SellerModelsPage() {
                 <div className="seller-models-page__empty-title text-h3">
                   Ничего не найдено
                 </div>
+
                 <div className="seller-models-page__empty-text text-p2">
                   В этом разделе пока нет моделей.
                 </div>

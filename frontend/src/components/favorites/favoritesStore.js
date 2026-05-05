@@ -1,60 +1,76 @@
-const FAVORITES_KEY = "meshio_guest_favorites";
+const FAVORITES_STORAGE_KEY = "meshio_favorites";
 
 const listeners = new Set();
 
-function emit() {
-  listeners.forEach((listener) => listener());
+function normalizeId(id) {
+  return String(id);
 }
 
 function readIds() {
   try {
-    const raw = localStorage.getItem(FAVORITES_KEY);
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+
     if (!raw) return [];
+
     const parsed = JSON.parse(raw);
+
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (id) => Number.isInteger(id) || /^\d+$/.test(String(id)),
-    );
+
+    return parsed.map(normalizeId);
   } catch {
     return [];
   }
 }
 
 function writeIds(ids) {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
-  emit();
+  const uniqueIds = Array.from(new Set(ids.map(normalizeId)));
+
+  localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(uniqueIds));
+  notifyFavorites();
 }
 
 export function getFavoriteIds() {
-  return readIds().map((id) => Number(id));
+  return readIds();
 }
 
-export function isFavoriteStored(productId) {
-  const id = Number(productId);
-  return getFavoriteIds().includes(id);
+export function setFavoriteIds(ids) {
+  writeIds(Array.isArray(ids) ? ids : []);
 }
 
-export function addFavoriteId(productId) {
-  const id = Number(productId);
-  const ids = getFavoriteIds();
+export function addFavoriteId(id) {
+  const productId = normalizeId(id);
+  const ids = readIds();
 
-  if (ids.includes(id)) return;
+  if (ids.includes(productId)) return;
 
-  writeIds([...ids, id]);
+  writeIds([...ids, productId]);
 }
 
-export function removeFavoriteId(productId) {
-  const id = Number(productId);
-  const ids = getFavoriteIds().filter((item) => item !== id);
-  writeIds(ids);
+export function removeFavoriteId(id) {
+  const productId = normalizeId(id);
+  const ids = readIds();
+
+  writeIds(ids.filter((item) => item !== productId));
 }
 
 export function clearFavoriteIds() {
-  localStorage.removeItem(FAVORITES_KEY);
-  emit();
+  writeIds([]);
 }
 
-export function subscribeFavorites(listener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+export function isFavoriteId(id) {
+  const productId = normalizeId(id);
+
+  return readIds().includes(productId);
+}
+
+export function subscribeFavorites(callback) {
+  listeners.add(callback);
+
+  return () => {
+    listeners.delete(callback);
+  };
+}
+
+export function notifyFavorites() {
+  listeners.forEach((callback) => callback());
 }

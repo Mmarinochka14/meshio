@@ -42,10 +42,12 @@ function buildParamsFromSearchParams(sp) {
     const b = parseBool(has_uv);
     if (b !== null) params.has_uv = b;
   }
+
   if (has_textures !== null) {
     const b = parseBool(has_textures);
     if (b !== null) params.has_textures = b;
   }
+
   if (is_free !== null) {
     const b = parseBool(is_free);
     if (b !== null) params.is_free = b;
@@ -66,6 +68,7 @@ export default function CatalogPage() {
   const [filtersMeta, setFiltersMeta] = useState(null);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const params = useMemo(
     () => buildParamsFromSearchParams(searchParams),
@@ -85,6 +88,7 @@ export default function CatalogPage() {
     }
 
     loadFilters();
+
     return () => {
       mounted = false;
     };
@@ -106,10 +110,22 @@ export default function CatalogPage() {
     }
 
     loadProducts();
+
     return () => {
       mounted = false;
     };
   }, [params]);
+
+  useEffect(() => {
+    if (!isFiltersOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isFiltersOpen]);
 
   function applyQuery(next) {
     const sp = new URLSearchParams(searchParams);
@@ -143,6 +159,16 @@ export default function CatalogPage() {
     setSearchParams(sp);
   }
 
+  function handleApplyFilters(nextFilters) {
+    applyQuery(nextFilters);
+    setIsFiltersOpen(false);
+  }
+
+  function handleResetFilters() {
+    setSearchParams({});
+    setIsFiltersOpen(false);
+  }
+
   const results = Array.isArray(data?.results) ? data.results : [];
   const totalCount = data?.count || 0;
   const currentPage = Number(searchParams.get("page") || 1);
@@ -156,11 +182,21 @@ export default function CatalogPage() {
         </div>
 
         <div className="catalog-page__top-row">
-          <CatalogSort
-            value={searchParams.get("ordering") || "newest"}
-            options={filtersMeta?.sort_options || []}
-            onChange={(ordering) => applyQuery({ ordering })}
-          />
+          <div className="catalog-page__top-controls">
+            <CatalogSort
+              value={searchParams.get("ordering") || "newest"}
+              options={filtersMeta?.sort_options || []}
+              onChange={(ordering) => applyQuery({ ordering })}
+            />
+
+            <button
+              type="button"
+              className="catalog-page__mobile-filters-btn text-p2"
+              onClick={() => setIsFiltersOpen(true)}
+            >
+              Фильтры
+            </button>
+          </div>
         </div>
 
         <div className="catalog-page__layout">
@@ -197,6 +233,39 @@ export default function CatalogPage() {
           </main>
         </div>
       </div>
+
+      {isFiltersOpen && (
+        <>
+          <div
+            className="catalog-page__filters-backdrop"
+            onClick={() => setIsFiltersOpen(false)}
+          />
+
+          <div className="catalog-page__filters-sheet">
+            <div className="catalog-page__filters-sheet-header">
+              <h2 className="catalog-page__filters-sheet-title text-h3">
+                Фильтры
+              </h2>
+
+              <button
+                type="button"
+                className="catalog-page__filters-close"
+                onClick={() => setIsFiltersOpen(false)}
+                aria-label="Закрыть фильтры"
+              >
+                ×
+              </button>
+            </div>
+
+            <CatalogFilters
+              meta={filtersMeta}
+              searchParams={searchParams}
+              onApply={handleApplyFilters}
+              onReset={handleResetFilters}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

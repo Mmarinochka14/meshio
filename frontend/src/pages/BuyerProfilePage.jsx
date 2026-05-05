@@ -87,7 +87,6 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("profile");
-
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -502,6 +501,21 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
       <div className="buyer-profile-page__container">
         <h1 className="buyer-profile-page__title text-h2">Личный кабинет</h1>
         <div className="buyer-profile-page__divider" />
+
+        <div className="buyer-profile-page__mobile-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`buyer-profile-page__mobile-tab ${
+                activeTab === tab.key ? "is-active" : ""
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
         <div className="buyer-profile-page__layout">
           <aside className="buyer-profile-page__sidebar">

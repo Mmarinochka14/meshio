@@ -278,3 +278,326 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* ===== ADD MODEL MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .add-model-modal__backdrop {
+    backdrop-filter: blur(0.5vw);
+  }
+
+  .add-model-modal__dialog {
+    width: 89vw;
+    max-height: 88vh;
+    margin-top: 4vw;
+    border-width: 0.0977vw;
+    border-radius: 1.8vw;
+    padding: 2.4vw;
+  }
+
+  .add-model-modal__close {
+    top: 1.6vw;
+    right: 1.6vw;
+    width: 4.4vw;
+    height: 4.4vw;
+    border-radius: 1.1vw;
+  }
+
+  .add-model-modal__header {
+    margin-bottom: 2.2vw;
+    padding-right: 5vw;
+  }
+
+  .add-model-modal__title {
+    margin-bottom: 1vw;
+  }
+
+  .add-model-modal__subtitle {
+    max-width: 68vw;
+  }
+
+  .add-model-modal__content {
+    grid-template-columns: 1fr;
+    gap: 2vw;
+    margin-bottom: 2vw;
+  }
+
+  .add-model-modal__left,
+  .add-model-modal__right {
+    gap: 2vw;
+  }
+
+  .add-model-modal__panel {
+    padding: 2vw;
+    border-radius: 1.6vw;
+    border-width: 0.0977vw;
+  }
+
+  .add-model-modal__panel-title {
+    margin-bottom: 1.6vw;
+  }
+
+  .add-model-modal__upload-area {
+    min-height: 18vw;
+    border-width: 0.0977vw;
+    border-radius: 1.3vw;
+    gap: 0.8vw;
+    padding: 2vw;
+  }
+
+  .add-model-modal__preview-box,
+  .add-model-modal__viewer-box {
+    height: 28vw;
+    border-radius: 1.3vw;
+    border-width: 0.0977vw;
+  }
+
+  .add-model-modal__viewer-state {
+    padding: 2vw;
+  }
+
+  .add-model-modal__fields {
+    gap: 1.4vw;
+  }
+
+  .add-model-modal__field {
+    gap: 0.8vw;
+  }
+
+  .add-model-modal__input {
+    min-height: 4.8vw;
+    border-width: 0.0977vw;
+    border-radius: 1.1vw;
+    padding: 0 1.5vw;
+  }
+
+  .add-model-modal__textarea {
+    min-height: 13vw;
+    border-width: 0.0977vw;
+    border-radius: 1.1vw;
+    padding: 1.5vw;
+  }
+
+  .add-model-modal__toggles {
+    gap: 1.4vw;
+    margin-top: 1.6vw;
+  }
+
+  .add-model-modal__toggle {
+    gap: 0.9vw;
+  }
+
+  .add-model-modal__note {
+    margin-bottom: 1.4vw;
+  }
+
+  .add-model-modal__status,
+  .add-model-modal__error,
+  .add-model-modal__success {
+    min-height: 4.6vw;
+    border-radius: 1.1vw;
+    padding: 0 1.5vw;
+    margin-bottom: 1.4vw;
+  }
+
+  .add-model-modal__error,
+  .add-model-modal__success {
+    border-width: 0.0977vw;
+  }
+
+  .add-model-modal__actions {
+    gap: 1.2vw;
+  }
+
+  .add-model-modal__secondary,
+  .add-model-modal__primary {
+    min-width: 18vw;
+    min-height: 4.8vw;
+    border-radius: 1.1vw;
+    padding: 0 2vw;
+  }
+
+  .add-model-modal__secondary {
+    border-width: 0.0977vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .add-model-modal__backdrop {
+    backdrop-filter: blur(1.6vw);
+  }
+
+  .add-model-modal__dialog {
+    width: calc(100% - 8.5334vw);
+    max-height: 88dvh;
+    margin: 6.4vw auto 0;
+    border-width: 0.2667vw;
+    border-radius: 4.8vw;
+    padding: 4.8vw;
+  }
+
+  .add-model-modal__close {
+    top: 3.2vw;
+    right: 3.2vw;
+    width: 10.6667vw;
+    height: 10.6667vw;
+    border-radius: 3.2vw;
+    font-size: 5.3333vw;
+  }
+
+  .add-model-modal__header {
+    margin-bottom: 4.8vw;
+    padding-right: 12vw;
+  }
+
+  .add-model-modal__title {
+    margin-bottom: 2.1333vw;
+  }
+
+  .add-model-modal__subtitle {
+    max-width: 100%;
+    line-height: 1.45;
+  }
+
+  .add-model-modal__content {
+    grid-template-columns: 1fr;
+    gap: 4.2667vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .add-model-modal__left,
+  .add-model-modal__right {
+    gap: 4.2667vw;
+  }
+
+  .add-model-modal__panel {
+    padding: 4.2667vw;
+    border-radius: 4.2667vw;
+    border-width: 0.2667vw;
+  }
+
+  .add-model-modal__panel-title {
+    margin-bottom: 3.2vw;
+  }
+
+  .add-model-modal__upload-area {
+    min-height: 42.6667vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+    gap: 1.8667vw;
+    padding: 4.2667vw;
+  }
+
+  .add-model-modal__preview-box,
+  .add-model-modal__viewer-box {
+    height: 56vw;
+    border-radius: 3.7333vw;
+    border-width: 0.2667vw;
+  }
+
+  .add-model-modal__viewer-state {
+    padding: 4.2667vw;
+    line-height: 1.45;
+  }
+
+  .add-model-modal__fields {
+    grid-template-columns: 1fr;
+    gap: 3.2vw;
+  }
+
+  .add-model-modal__field {
+    gap: 1.8667vw;
+  }
+
+  .add-model-modal__input {
+    min-height: 12.8vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+    padding: 0 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .add-model-modal__textarea {
+    min-height: 34.6667vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+    padding: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .add-model-modal__toggles {
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 3.2vw;
+  }
+
+  .add-model-modal__toggle {
+    gap: 2.1333vw;
+  }
+
+  .add-model-modal__note {
+    margin-bottom: 3.2vw;
+    line-height: 1.45;
+  }
+
+  .add-model-modal__status,
+  .add-model-modal__error,
+  .add-model-modal__success {
+    min-height: 12.2667vw;
+    border-radius: 3.7333vw;
+    padding: 2.6667vw 3.7333vw;
+    margin-bottom: 3.2vw;
+    align-items: center;
+  }
+
+  .add-model-modal__error,
+  .add-model-modal__success {
+    border-width: 0.2667vw;
+  }
+
+  .add-model-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+  }
+
+  .add-model-modal__secondary,
+  .add-model-modal__primary {
+    width: 100%;
+    min-width: 0;
+    min-height: 12.2667vw;
+    border-radius: 3.7333vw;
+    padding: 0 4.8vw;
+    font-size: 4vw;
+  }
+
+  .add-model-modal__secondary {
+    border-width: 0.2667vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .add-model-modal__dialog {
+    width: calc(100% - 6.4vw);
+    border-radius: 4.2667vw;
+    padding: 4.2667vw;
+  }
+
+  .add-model-modal__panel {
+    border-radius: 3.7333vw;
+    padding: 3.7333vw;
+  }
+
+  .add-model-modal__preview-box,
+  .add-model-modal__viewer-box {
+    height: 52vw;
+    border-radius: 3.4667vw;
+  }
+
+  .add-model-modal__input,
+  .add-model-modal__secondary,
+  .add-model-modal__primary {
+    min-height: 12vw;
+    border-radius: 3.4667vw;
+  }
+}

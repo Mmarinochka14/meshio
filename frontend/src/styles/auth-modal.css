@@ -187,3 +187,197 @@
   color: var(--color-white);
   margin-bottom: 0.8333vw;
 }
+
+/* ===== AUTH MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .auth-modal__title {
+    margin-bottom: 2.4vw;
+  }
+
+  .auth-modal__form {
+    gap: 1.8vw;
+  }
+
+  .auth-modal__field {
+    gap: 0.8vw;
+  }
+
+  .auth-modal__input,
+  .auth-modal__primary,
+  .auth-modal__secondary {
+    height: 4.8vw;
+    border-radius: 1.2vw;
+  }
+
+  .auth-modal__input {
+    border-width: 0.0977vw;
+    padding: 0 1.5vw;
+  }
+
+  .auth-modal__secondary {
+    border-width: 0.0977vw;
+  }
+
+  .auth-modal__footer {
+    margin-top: 0.8vw;
+  }
+
+  .auth-modal__agree {
+    gap: 1vw;
+  }
+
+  .auth-modal__subtitle {
+    margin-bottom: 2.4vw;
+  }
+
+  .auth-modal__code {
+    gap: 1.2vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .auth-modal__code-cell {
+    height: 6vw;
+    border-width: 0.0977vw;
+    border-radius: 1.2vw;
+  }
+
+  .auth-modal__roles {
+    gap: 1.8vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .auth-modal__role {
+    grid-template-columns: 2vw 1fr;
+    gap: 1.2vw;
+    padding: 1.8vw;
+    border-width: 0.0977vw;
+    border-radius: 1.2vw;
+  }
+
+  .auth-modal__radio {
+    width: 1.7vw;
+    height: 1.7vw;
+    border-width: 0.0977vw;
+    margin-top: 0.3vw;
+  }
+
+  .auth-modal__success-actions {
+    gap: 1.8vw;
+    margin-top: 2.4vw;
+  }
+
+  .auth-modal__brand,
+  .auth-modal__success-title {
+    margin-bottom: 1.2vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-modal__title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .auth-modal__form {
+    gap: 3.7333vw;
+  }
+
+  .auth-modal__field {
+    gap: 1.8667vw;
+  }
+
+  .auth-modal__input,
+  .auth-modal__primary,
+  .auth-modal__secondary {
+    height: 12.8vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .auth-modal__input {
+    border-width: 0.2667vw;
+    padding: 0 3.7333vw;
+  }
+
+  .auth-modal__secondary {
+    border-width: 0.2667vw;
+  }
+
+  .auth-modal__footer {
+    margin-top: 1.0667vw;
+  }
+
+  .auth-modal__agree {
+    gap: 2.1333vw;
+  }
+
+  .auth-modal__subtitle {
+    margin-bottom: 4.2667vw;
+  }
+
+  .auth-modal__code {
+    gap: 2.1333vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .auth-modal__code-cell {
+    height: 12.8vw;
+    border-width: 0.2667vw;
+    border-radius: 3.2vw;
+    font-size: 5.3333vw;
+  }
+
+  .auth-modal__roles {
+    gap: 3.2vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .auth-modal__role {
+    grid-template-columns: 4.8vw 1fr;
+    gap: 2.6667vw;
+    padding: 3.7333vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+  }
+
+  .auth-modal__radio {
+    width: 4.2667vw;
+    height: 4.2667vw;
+    border-width: 0.2667vw;
+    margin-top: 0.5333vw;
+  }
+
+  .auth-modal__success-actions {
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 4.2667vw;
+  }
+
+  .auth-modal__brand,
+  .auth-modal__success-title {
+    margin-bottom: 2.1333vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .auth-modal__input,
+  .auth-modal__primary,
+  .auth-modal__secondary {
+    height: 12.2667vw;
+    border-radius: 3.4667vw;
+  }
+
+  .auth-modal__code {
+    gap: 1.6vw;
+  }
+
+  .auth-modal__code-cell {
+    height: 12vw;
+    border-radius: 2.9333vw;
+  }
+
+  .auth-modal__role {
+    padding: 3.2vw;
+    border-radius: 3.4667vw;
+  }
+}

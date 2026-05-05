@@ -104,6 +104,22 @@
   background: linear-gradient(90deg, #7222ea 0%, #8c39ff 100%);
   color: var(--color-white);
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.contacts-form__submit:hover,
+.contacts-page__subscribe-button:hover {
+  transform: translateY(-0.0521vw);
+}
+
+.contacts-form__submit:disabled,
+.contacts-page__subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
 }
 
 .contacts-form__submit {
@@ -177,4 +193,345 @@
   flex-direction: column;
   gap: 0.625vw;
   color: var(--color-white);
+}
+
+.contacts-form__success {
+  color: var(--color-purple-light);
+}
+
+.contacts-form__error {
+  color: #ffb8b8;
+}
+
+/* ===== TABLET ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .contacts-page {
+    padding-top: 4.4vw;
+    padding-bottom: 7vw;
+  }
+
+  .contacts-page__container {
+    width: 89vw;
+  }
+
+  .contacts-page .text-h2 {
+    font-size: 4vw;
+    line-height: 1.15;
+  }
+
+  .contacts-page .text-h3 {
+    font-size: 2.6vw;
+    line-height: 1.2;
+  }
+
+  .contacts-page .text-p1 {
+    font-size: 1.75vw;
+    line-height: 1.35;
+  }
+
+  .contacts-page .text-p2 {
+    font-size: 1.55vw;
+    line-height: 1.4;
+  }
+
+  .contacts-page .text-p3 {
+    font-size: 1.35vw;
+    line-height: 1.4;
+  }
+
+  .contacts-page__title {
+    margin-bottom: 2.4vw;
+  }
+
+  .contacts-page__divider {
+    height: 0.0977vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .contacts-page__grid {
+    grid-template-columns: 1fr;
+    gap: 2vw;
+  }
+
+  .contacts-page__form-card,
+  .contacts-page__info-card {
+    border-width: 0.0977vw;
+    border-radius: 1.6vw;
+    padding: 2.4vw;
+  }
+
+  .contacts-page__form-card {
+    min-height: auto;
+  }
+
+  .contacts-page__right {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 2vw;
+  }
+
+  .contacts-page__card-title,
+  .contacts-page__info-title {
+    margin-bottom: 1.6vw;
+  }
+
+  .contacts-form {
+    gap: 1.5vw;
+  }
+
+  .contacts-form__field {
+    gap: 0.7vw;
+  }
+
+  .contacts-form__input {
+    height: 4.8vw;
+    border-radius: 1.2vw;
+    padding: 0 1.5vw;
+  }
+
+  .contacts-form__textarea {
+    min-height: 13vw;
+    border-radius: 1.2vw;
+    padding: 1.5vw;
+  }
+
+  .contacts-form__submit {
+    height: 4.8vw;
+    border-radius: 1.2vw;
+    margin-top: 0.8vw;
+  }
+
+  .contacts-page__info-card--center {
+    min-height: 24vw;
+  }
+
+  .contacts-page__icon-wrap {
+    width: 7vw;
+    height: 7vw;
+    margin-bottom: 1.6vw;
+  }
+
+  .contacts-page__icon {
+    font-size: 5vw;
+  }
+
+  .contacts-page__info-email {
+    margin-bottom: 0.8vw;
+    word-break: break-word;
+  }
+
+  .contacts-page__subscribe {
+    grid-template-columns: 1fr;
+    gap: 1.2vw;
+    margin-top: 2vw;
+  }
+
+  .contacts-page__subscribe-input,
+  .contacts-page__subscribe-button {
+    height: 4.8vw;
+    border-radius: 1.2vw;
+  }
+
+  .contacts-page__subscribe-input {
+    padding: 0 1.5vw;
+  }
+
+  .contacts-page__subscribe-button {
+    padding: 0 1.8vw;
+  }
+
+  .contacts-page__admin-note {
+    padding: 1.8vw;
+    border-radius: 1.2vw;
+    border-width: 0.0977vw;
+    gap: 0.9vw;
+  }
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+  .contacts-page {
+    padding-top: 6.4vw;
+    padding-bottom: 25.6vw;
+  }
+
+  .contacts-page__container {
+    width: calc(100% - 8.5334vw);
+  }
+
+  .contacts-page .text-h2 {
+    font-size: 7.4667vw;
+    line-height: 1.15;
+  }
+
+  .contacts-page .text-h3 {
+    font-size: 5.6vw;
+    line-height: 1.2;
+  }
+
+  .contacts-page .text-p1,
+  .contacts-page .text-p2 {
+    font-size: 4vw;
+    line-height: 1.4;
+  }
+
+  .contacts-page .text-p3 {
+    font-size: 3.4667vw;
+    line-height: 1.35;
+  }
+
+  .contacts-page__title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .contacts-page__divider {
+    height: 0.2667vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .contacts-page__grid {
+    grid-template-columns: 1fr;
+    gap: 3.7333vw;
+  }
+
+  .contacts-page__form-card,
+  .contacts-page__info-card {
+    border-width: 0.2667vw;
+    border-radius: 4.8vw;
+    padding: 4.8vw;
+  }
+
+  .contacts-page__form-card {
+    min-height: auto;
+  }
+
+  .contacts-page__right {
+    grid-template-rows: auto;
+    gap: 3.7333vw;
+  }
+
+  .contacts-page__card-title,
+  .contacts-page__info-title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .contacts-form {
+    gap: 3.2vw;
+  }
+
+  .contacts-form__field {
+    gap: 1.8667vw;
+  }
+
+  .contacts-form__input,
+  .contacts-page__subscribe-input {
+    height: 12.8vw;
+    border-radius: 3.7333vw;
+    padding: 0 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .contacts-form__textarea {
+    min-height: 34.6667vw;
+    border-radius: 3.7333vw;
+    padding: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .contacts-form__submit {
+    height: 12.2667vw;
+    border-radius: 3.7333vw;
+    margin-top: 1.0667vw;
+    font-size: 4vw;
+  }
+
+  .contacts-page__info-card--center {
+    min-height: 58.6667vw;
+  }
+
+  .contacts-page__icon-wrap {
+    width: 17.0667vw;
+    height: 17.0667vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .contacts-page__icon {
+    font-size: 12.8vw;
+  }
+
+  .contacts-page__info-email {
+    margin-bottom: 2.1333vw;
+    word-break: break-word;
+  }
+
+  .contacts-page__subscribe {
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 4.2667vw;
+  }
+
+  .contacts-page__subscribe-button {
+    width: 100%;
+    height: 12.2667vw;
+    border-radius: 3.7333vw;
+    padding: 0 4.8vw;
+    font-size: 4vw;
+  }
+
+  .contacts-page__admin-note {
+    padding: 3.7333vw;
+    border-radius: 3.7333vw;
+    border-width: 0.2667vw;
+    gap: 2.1333vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .contacts-page__container {
+    width: calc(100% - 6.4vw);
+  }
+
+  .contacts-page__form-card,
+  .contacts-page__info-card {
+    border-radius: 4.2667vw;
+    padding: 4.2667vw;
+  }
+
+  .contacts-form {
+    gap: 2.9333vw;
+  }
+
+  .contacts-form__input,
+  .contacts-page__subscribe-input {
+    height: 12.2667vw;
+    border-radius: 3.4667vw;
+    padding: 0 3.4667vw;
+  }
+
+  .contacts-form__textarea {
+    min-height: 36vw;
+    border-radius: 3.4667vw;
+    padding: 3.4667vw;
+  }
+
+  .contacts-form__submit,
+  .contacts-page__subscribe-button {
+    height: 12vw;
+    border-radius: 3.4667vw;
+  }
+
+  .contacts-page__info-card--center {
+    min-height: 56vw;
+  }
+
+  .contacts-page__icon-wrap {
+    width: 16vw;
+    height: 16vw;
+  }
+
+  .contacts-page__icon {
+    font-size: 12vw;
+  }
 }

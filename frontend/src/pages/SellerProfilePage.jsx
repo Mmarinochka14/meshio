@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-profile-page.css";
 
+import ConfirmModal from "../components/ConfirmModal";
 import SellerAnalyticsPanel from "../components/SellerAnalyticsPanel";
 
 import userIcon from "../assets/icons/user.svg";
@@ -38,6 +39,7 @@ function formatRuPhone(value) {
   if (p2) out += ` ${p2}`;
   if (p3) out += `-${p3}`;
   if (p4) out += `-${p4}`;
+
   return out;
 }
 
@@ -76,6 +78,17 @@ export default function SellerProfilePage() {
   const [isPwSaving, setIsPwSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const tabs = useMemo(
+    () => [
+      { key: "profile", label: "Профиль", icon: userIcon },
+      { key: "analytics", label: "Аналитика", icon: analyticsIcon },
+      { key: "notifications", label: "Уведомления", icon: notificationIcon },
+      { key: "settings", label: "Настройки", icon: settingsIcon },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -143,6 +156,10 @@ export default function SellerProfilePage() {
   }
 
   function handleLogout() {
+    setIsLogoutModalOpen(true);
+  }
+
+  function handleConfirmLogout() {
     logout();
     navigate("/");
   }
@@ -184,11 +201,13 @@ export default function SellerProfilePage() {
       );
     } catch (e) {
       const data = e?.response?.data;
+
       const msg =
         data?.email?.[0] ||
         data?.phone?.[0] ||
         data?.detail ||
         "Ошибка сохранения";
+
       setSaveMsg(msg);
     } finally {
       setIsSaving(false);
@@ -201,15 +220,21 @@ export default function SellerProfilePage() {
 
     try {
       await changePasswordRequest(pwForm.old_password, pwForm.new_password);
+
       setPwMsg("Пароль изменён");
-      setPwForm({ old_password: "", new_password: "" });
+      setPwForm({
+        old_password: "",
+        new_password: "",
+      });
     } catch (e) {
       const data = e?.response?.data;
+
       const msg =
         data?.old_password?.[0] ||
         data?.new_password?.[0] ||
         data?.detail ||
         "Ошибка смены пароля";
+
       setPwMsg(msg);
     } finally {
       setIsPwSaving(false);
@@ -230,68 +255,49 @@ export default function SellerProfilePage() {
         <h1 className="seller-profile-page__title text-h2">Личный кабинет</h1>
         <div className="seller-profile-page__divider" />
 
+        <div className="seller-profile-page__mobile-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`seller-profile-page__mobile-tab ${
+                activeTab === tab.key ? "is-active" : ""
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="seller-profile-page__mobile-tab seller-profile-page__mobile-tab--logout"
+            onClick={handleLogout}
+          >
+            Выйти
+          </button>
+        </div>
+
         <div className="seller-profile-page__layout">
           <aside className="seller-profile-page__sidebar">
             <nav className="seller-profile-page__menu">
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "profile" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("profile")}
-              >
-                <img
-                  src={userIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Профиль</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "analytics" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("analytics")}
-              >
-                <img
-                  src={analyticsIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Аналитика</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "notifications" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("notifications")}
-              >
-                <img
-                  src={notificationIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Уведомления</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "settings" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("settings")}
-              >
-                <img
-                  src={settingsIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Настройки</span>
-              </button>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`seller-profile-page__menu-item ${
+                    activeTab === tab.key ? "is-active" : ""
+                  }`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <img
+                    src={tab.icon}
+                    alt=""
+                    className="seller-profile-page__menu-icon"
+                  />
+                  <span className="text-p1">{tab.label}</span>
+                </button>
+              ))}
 
               <button
                 type="button"
@@ -335,9 +341,11 @@ export default function SellerProfilePage() {
                     <div className="seller-profile-page__name text-h3">
                       {userName}
                     </div>
+
                     <div className="seller-profile-page__email text-p1">
                       {userEmail}
                     </div>
+
                     <div className="seller-profile-page__role text-p2">
                       Продавец
                     </div>
@@ -536,6 +544,16 @@ export default function SellerProfilePage() {
           </main>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        title="Выйти из аккаунта?"
+        description="Вы уверены, что хотите выйти из аккаунта продавца?"
+        confirmText="Выйти"
+        cancelText="Отмена"
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
     </section>
   );
 }

@@ -79,3 +79,207 @@
   flex-direction: column;
   gap: 0.1042vw;
 }
+
+/* ===== TABLET ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .about-section {
+    padding-top: 4.4vw;
+    padding-bottom: 2.8vw;
+  }
+
+  .about-section__container {
+    width: 89vw;
+  }
+
+  .about-section .text-h2 {
+    font-size: 4vw;
+    line-height: 1.15;
+  }
+
+  .about-section .text-h3 {
+    font-size: 2.6vw;
+    line-height: 1.2;
+  }
+
+  .about-section .text-p1 {
+    font-size: 1.75vw;
+    line-height: 1.4;
+  }
+
+  .about-section .text-p2 {
+    font-size: 1.55vw;
+    line-height: 1.4;
+  }
+
+  .about-section .text-p3 {
+    font-size: 1.35vw;
+    line-height: 1.4;
+  }
+
+  .about-section__title {
+    margin-bottom: 2.4vw;
+  }
+
+  .about-section__divider {
+    height: 0.0977vw;
+    margin-bottom: 2vw;
+  }
+
+  .about-section__grid {
+    grid-template-columns: 1fr;
+    gap: 1.6vw;
+  }
+
+  .about-section__main-card,
+  .about-section__stat-card {
+    border-radius: 1.6vw;
+    border-width: 0.0977vw;
+  }
+
+  .about-section__main-card {
+    min-height: auto;
+    padding: 3vw;
+  }
+
+  .about-section__brand {
+    margin-bottom: 1.2vw;
+  }
+
+  .about-section__subtitle {
+    max-width: 66vw;
+    margin-bottom: 1.4vw;
+  }
+
+  .about-section__text {
+    max-width: 72vw;
+  }
+
+  .about-section__stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2vw;
+  }
+
+  .about-section__stat-card {
+    min-height: 12vw;
+    padding: 1.8vw 1.4vw;
+  }
+
+  .about-section__stat-value {
+    margin-bottom: 0.8vw;
+  }
+
+  .about-section__stat-label {
+    gap: 0.2vw;
+  }
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+  .about-section {
+    padding-top: 6.4vw;
+    padding-bottom: 5.3333vw;
+  }
+
+  .about-section__container {
+    width: calc(100% - 8.5334vw);
+  }
+
+  .about-section .text-h2 {
+    font-size: 7.4667vw;
+    line-height: 1.15;
+  }
+
+  .about-section .text-h3 {
+    font-size: 5.6vw;
+    line-height: 1.2;
+  }
+
+  .about-section .text-p1,
+  .about-section .text-p2 {
+    font-size: 4vw;
+    line-height: 1.45;
+  }
+
+  .about-section .text-p3 {
+    font-size: 3.4667vw;
+    line-height: 1.35;
+  }
+
+  .about-section__title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .about-section__divider {
+    height: 0.2667vw;
+    margin-bottom: 3.7333vw;
+  }
+
+  .about-section__grid {
+    grid-template-columns: 1fr;
+    gap: 3.2vw;
+  }
+
+  .about-section__main-card,
+  .about-section__stat-card {
+    border-radius: 4.8vw;
+    border-width: 0.2667vw;
+  }
+
+  .about-section__main-card {
+    min-height: auto;
+    padding: 5.3333vw;
+  }
+
+  .about-section__brand {
+    margin-bottom: 3.2vw;
+  }
+
+  .about-section__subtitle {
+    max-width: 100%;
+    margin-bottom: 3.2vw;
+  }
+
+  .about-section__text {
+    max-width: 100%;
+  }
+
+  .about-section__stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.2vw;
+  }
+
+  .about-section__stat-card {
+    min-height: 27.7333vw;
+    padding: 4.2667vw 3.7333vw;
+  }
+
+  .about-section__stat-value {
+    margin-bottom: 2.1333vw;
+  }
+
+  .about-section__stat-label {
+    gap: 0.5333vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .about-section__container {
+    width: calc(100% - 6.4vw);
+  }
+
+  .about-section__main-card {
+    padding: 4.8vw;
+  }
+
+  .about-section__stats-grid {
+    gap: 2.6667vw;
+  }
+
+  .about-section__stat-card {
+    min-height: 29.3333vw;
+    padding: 4vw 3.2vw;
+    border-radius: 4.2667vw;
+  }
+}

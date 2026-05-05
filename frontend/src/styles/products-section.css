@@ -24,3 +24,47 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 1.25vw; /* 24px */
 }
+
+/* ===== PRODUCTS SECTION ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .products-section {
+    padding: 4vw 0;
+  }
+
+  .products-section__header {
+    margin-bottom: 2vw;
+  }
+
+  .products-section__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.6vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-section {
+    padding: 6.4vw 0;
+  }
+
+  .products-section__header {
+    align-items: flex-start;
+    gap: 2.1333vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .products-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.2vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .products-section {
+    padding: 5.3333vw 0;
+  }
+
+  .products-section__grid {
+    gap: 2.6667vw;
+  }
+}

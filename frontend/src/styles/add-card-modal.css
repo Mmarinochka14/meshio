@@ -82,3 +82,134 @@
   background: var(--color-purple);
   color: var(--color-white);
 }
+
+/* ===== ADD CARD MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .add-card-modal {
+    padding: 2vw;
+    backdrop-filter: blur(0.5vw);
+  }
+
+  .add-card-modal__card {
+    width: 48vw;
+    border-width: 0.0977vw;
+    border-radius: 1.6vw;
+    padding: 2.4vw;
+  }
+
+  .add-card-modal__title {
+    margin-bottom: 1.6vw;
+  }
+
+  .add-card-modal__form {
+    gap: 1.3vw;
+  }
+
+  .add-card-modal__row {
+    gap: 1.3vw;
+  }
+
+  .add-card-modal__field {
+    gap: 0.7vw;
+  }
+
+  .add-card-modal__input {
+    height: 4.8vw;
+    border-width: 0.0977vw;
+    border-radius: 1.2vw;
+    padding: 0 1.5vw;
+  }
+
+  .add-card-modal__actions {
+    gap: 1vw;
+    margin-top: 1vw;
+  }
+
+  .add-card-modal__secondary,
+  .add-card-modal__primary {
+    min-width: 12vw;
+    height: 4.6vw;
+    border-radius: 1.1vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .add-card-modal {
+    padding: 4.2667vw;
+    align-items: flex-end;
+    backdrop-filter: blur(1.6vw);
+  }
+
+  .add-card-modal__card {
+    width: 100%;
+    max-height: 86dvh;
+    overflow-y: auto;
+    border-width: 0.2667vw;
+    border-radius: 4.8vw;
+    padding: 4.8vw;
+  }
+
+  .add-card-modal__title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .add-card-modal__form {
+    gap: 3.2vw;
+  }
+
+  .add-card-modal__row {
+    grid-template-columns: 1fr;
+    gap: 3.2vw;
+  }
+
+  .add-card-modal__field {
+    gap: 1.8667vw;
+  }
+
+  .add-card-modal__input {
+    height: 12.8vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+    padding: 0 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .add-card-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+    margin-top: 2.6667vw;
+  }
+
+  .add-card-modal__secondary,
+  .add-card-modal__primary {
+    width: 100%;
+    min-width: 0;
+    height: 12.2667vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .add-card-modal__secondary {
+    border-width: 0.2667vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .add-card-modal {
+    padding: 3.2vw;
+  }
+
+  .add-card-modal__card {
+    border-radius: 4.2667vw;
+    padding: 4.2667vw;
+  }
+
+  .add-card-modal__input,
+  .add-card-modal__secondary,
+  .add-card-modal__primary {
+    height: 12vw;
+    border-radius: 3.4667vw;
+  }
+}

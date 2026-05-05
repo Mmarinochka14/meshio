@@ -59,3 +59,162 @@
   color: #d2d4dc;
   max-width: 21vw;
 }
+
+/* ===== TABLET ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .audience-section {
+    padding-top: 2.8vw;
+    padding-bottom: 2.8vw;
+  }
+
+  .audience-section__container {
+    width: 89vw;
+  }
+
+  .audience-section .text-h2 {
+    font-size: 4vw;
+    line-height: 1.15;
+  }
+
+  .audience-section .text-h3 {
+    font-size: 2.6vw;
+    line-height: 1.2;
+  }
+
+  .audience-section .text-p1,
+  .audience-section .text-p2 {
+    font-size: 1.55vw;
+    line-height: 1.4;
+  }
+
+  .audience-section .text-p3 {
+    font-size: 1.35vw;
+    line-height: 1.4;
+  }
+
+  .audience-section__title {
+    margin-bottom: 1.8vw;
+  }
+
+  .audience-section__grid {
+    gap: 1.6vw;
+  }
+
+  .audience-section__card {
+    min-height: 22vw;
+    border-radius: 1.6vw;
+    border-width: 0.0977vw;
+    padding: 3vw 2.4vw 2.6vw;
+  }
+
+  .audience-section__icon-wrap {
+    width: 9vw;
+    height: 9vw;
+    margin-bottom: 1.6vw;
+  }
+
+  .audience-section__icon {
+    width: 3.2vw;
+    height: 3.2vw;
+  }
+
+  .audience-section__card-title {
+    margin-bottom: 1vw;
+  }
+
+  .audience-section__text {
+    max-width: 34vw;
+  }
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+  .audience-section {
+    padding-top: 5.3333vw;
+    padding-bottom: 5.3333vw;
+  }
+
+  .audience-section__container {
+    width: calc(100% - 8.5334vw);
+  }
+
+  .audience-section .text-h2 {
+    font-size: 7.4667vw;
+    line-height: 1.15;
+  }
+
+  .audience-section .text-h3 {
+    font-size: 5.6vw;
+    line-height: 1.2;
+  }
+
+  .audience-section .text-p1,
+  .audience-section .text-p2 {
+    font-size: 4vw;
+    line-height: 1.45;
+  }
+
+  .audience-section .text-p3 {
+    font-size: 3.4667vw;
+    line-height: 1.35;
+  }
+
+  .audience-section__title {
+    margin-bottom: 4.2667vw;
+  }
+
+  .audience-section__grid {
+    grid-template-columns: 1fr;
+    gap: 3.2vw;
+  }
+
+  .audience-section__card {
+    min-height: auto;
+    border-radius: 4.8vw;
+    border-width: 0.2667vw;
+    padding: 6.4vw 5.3333vw;
+  }
+
+  .audience-section__icon-wrap {
+    width: 21.3333vw;
+    height: 21.3333vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .audience-section__icon {
+    width: 7.4667vw;
+    height: 7.4667vw;
+  }
+
+  .audience-section__card-title {
+    margin-bottom: 2.6667vw;
+  }
+
+  .audience-section__text {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .audience-section__container {
+    width: calc(100% - 6.4vw);
+  }
+
+  .audience-section__card {
+    border-radius: 4.2667vw;
+    padding: 5.8667vw 4.8vw;
+  }
+
+  .audience-section__icon-wrap {
+    width: 20vw;
+    height: 20vw;
+    margin-bottom: 3.7333vw;
+  }
+
+  .audience-section__icon {
+    width: 7.2vw;
+    height: 7.2vw;
+  }
+}

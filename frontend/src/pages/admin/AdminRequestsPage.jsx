@@ -97,10 +97,6 @@ export default function AdminRequestsPage() {
     <section className="admin-requests-page">
       <div className="admin__header">
         <h1 className="admin__title text-h2">Обращения пользователей</h1>
-        <div className="admin__subtitle text-p2">
-          Здесь администратор просматривает входящие обращения и отправляет
-          ответ.
-        </div>
       </div>
 
       <div className="admin__tabs">

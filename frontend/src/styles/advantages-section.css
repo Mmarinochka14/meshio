@@ -235,3 +235,64 @@
     font-size: 4vw;
   }
 }
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .advantages-section {
+    padding-top: 5vw;
+    padding-bottom: 5vw;
+  }
+
+  .advantages-section__container {
+    width: 89vw;
+  }
+
+  .advantages-section__title {
+    margin-bottom: 2.4vw;
+    font-size: 2.8vw;
+    line-height: 1.15;
+  }
+
+  .advantages-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2vw;
+  }
+
+  .advantages-section__card {
+    min-height: 24vw;
+    padding: 2.4vw;
+    border-radius: 1.6vw;
+  }
+
+  .advantages-section__top {
+    margin-bottom: 3vw;
+  }
+
+  .advantages-section__number {
+    font-size: 2.8vw;
+    line-height: 1;
+  }
+
+  .advantages-section__icon-wrap {
+    width: 6vw;
+    height: 6vw;
+  }
+
+  .advantages-section__icon {
+    width: 2.8vw;
+    height: 2.8vw;
+  }
+
+  .advantages-section__content {
+    gap: 1vw;
+  }
+
+  .advantages-section__card-title {
+    font-size: 1.8vw;
+    line-height: 1.2;
+  }
+
+  .advantages-section__text {
+    font-size: 1.4vw;
+    line-height: 1.45;
+  }
+}

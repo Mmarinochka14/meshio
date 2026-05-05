@@ -2,9 +2,9 @@ import Modal from "./Modal";
 import "../../styles/seller-start-modal.css";
 
 import profileIcon from "../../assets/icons/user.svg";
-import uploadIcon from "../../assets/icons/catalog.svg";
-import moderationIcon from "../../assets/icons/favorite.svg";
-import payoutIcon from "../../assets/icons/cart.svg";
+import uploadIcon from "../../assets/icons/upload.svg";
+import moderationIcon from "../../assets/icons/sertificate.svg";
+import payoutIcon from "../../assets/icons/money.svg";
 
 export default function SellerStartModal({
   isOpen,

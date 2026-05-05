@@ -68,10 +68,6 @@ export default function AdminUsersPage() {
     <section className="admin-users-page">
       <div className="admin__header">
         <h1 className="admin__title text-h2">Заявки продавцов</h1>
-        <div className="admin__subtitle text-p2">
-          Здесь администратор подтверждает или отклоняет заявки на роль
-          продавца.
-        </div>
       </div>
 
       {users.length === 0 ? (

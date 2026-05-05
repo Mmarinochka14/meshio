@@ -168,3 +168,152 @@
 .seller-model-card__delete:hover {
   background: rgba(216, 74, 74, 0.14);
 }
+
+/* ===== SELLER MODEL CARD ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .seller-model-card {
+    padding: 1.8vw;
+    border-radius: 1.6vw;
+    border-width: 0.0977vw;
+  }
+
+  .seller-model-card__image-wrap {
+    margin-bottom: 1.2vw;
+  }
+
+  .seller-model-card__status-row {
+    margin-bottom: 1vw;
+  }
+
+  .seller-model-card__status {
+    min-height: 3vw;
+    padding: 0 1.1vw;
+    border-width: 0.0977vw;
+  }
+
+  .seller-model-card__image {
+    height: 23vw;
+    border-radius: 1.2vw;
+  }
+
+  .seller-model-card__title {
+    margin-bottom: 1vw;
+  }
+
+  .seller-model-card__tags {
+    margin-bottom: 1.2vw;
+    border-radius: 1vw;
+    border-width: 0.0977vw;
+  }
+
+  .seller-model-card__tag {
+    padding: 0.8vw 1vw;
+    border-right-width: 0.0977vw;
+  }
+
+  .seller-model-card__actions,
+  .seller-model-card__actions--grid {
+    gap: 1vw;
+  }
+
+  .seller-model-card__edit,
+  .seller-model-card__secondary,
+  .seller-model-card__delete {
+    min-height: 4.6vw;
+    border-radius: 1.1vw;
+  }
+
+  .seller-model-card__secondary,
+  .seller-model-card__delete {
+    border-width: 0.0977vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .seller-model-card {
+    padding: 4.2667vw;
+    border-radius: 4.8vw;
+    border-width: 0.2667vw;
+  }
+
+  .seller-model-card__image-wrap {
+    margin-bottom: 3.2vw;
+  }
+
+  .seller-model-card__status-row {
+    margin-bottom: 2.1333vw;
+  }
+
+  .seller-model-card__status {
+    min-height: 7.4667vw;
+    padding: 0 2.6667vw;
+    border-width: 0.2667vw;
+  }
+
+  .seller-model-card__image {
+    height: 58.6667vw;
+    border-radius: 4.2667vw;
+  }
+
+  .seller-model-card__title {
+    margin-bottom: 2.1333vw;
+  }
+
+  .seller-model-card__tags {
+    margin-bottom: 3.2vw;
+    border-radius: 3.2vw;
+    border-width: 0.2667vw;
+  }
+
+  .seller-model-card__tag {
+    padding: 2.1333vw 2.6667vw;
+    border-right-width: 0.2667vw;
+  }
+
+  .seller-model-card__actions,
+  .seller-model-card__actions--grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+  }
+
+  .seller-model-card__edit,
+  .seller-model-card__secondary,
+  .seller-model-card__delete {
+    min-height: 12.2667vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .seller-model-card__secondary,
+  .seller-model-card__delete {
+    border-width: 0.2667vw;
+  }
+
+  .seller-model-card__edit:hover,
+  .seller-model-card__secondary:hover,
+  .seller-model-card__delete:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .seller-model-card {
+    padding: 3.7333vw;
+    border-radius: 4.2667vw;
+  }
+
+  .seller-model-card__image {
+    height: 52vw;
+    border-radius: 3.7333vw;
+  }
+
+  .seller-model-card__edit,
+  .seller-model-card__secondary,
+  .seller-model-card__delete {
+    min-height: 12vw;
+    border-radius: 3.4667vw;
+  }
+}
+

@@ -23,3 +23,50 @@
   background: var(--color-grey);
   color: var(--color-white);
 }
+
+@media (max-width: 1024px) {
+  .catalog-sort {
+    width: 100%;
+    align-items: center;
+    gap: 1.2vw;
+  }
+
+  .catalog-sort__label {
+    font-size: var(--font-p2);
+    line-height: 1.2;
+  }
+
+  .catalog-sort__select {
+    height: 4.8vw;
+    padding: 0 1.4vw;
+    border-radius: 1vw;
+    font-size: var(--font-p2);
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-sort {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2.1333vw;
+  }
+
+  .catalog-sort__label {
+    font-size: 3.8667vw;
+    line-height: 1.25;
+  }
+
+  .catalog-sort__select {
+    width: 100%;
+    height: 11.7333vw;
+    padding: 0 3.4667vw;
+    border-radius: 3.2vw;
+    border-width: 0.2667vw;
+    font-size: 3.8667vw;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent;
+  }
+}

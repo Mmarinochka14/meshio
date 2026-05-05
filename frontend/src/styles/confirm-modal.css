@@ -58,3 +58,101 @@
 .confirm-modal__primary.is-danger {
   background: #c74343;
 }
+
+/* ===== CONFIRM MODAL ADAPTIVE ===== */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .confirm-modal {
+    padding: 2vw;
+    backdrop-filter: blur(0.5vw);
+  }
+
+  .confirm-modal__card {
+    width: 44vw;
+    border-width: 0.0977vw;
+    border-radius: 1.6vw;
+    padding: 2.4vw;
+  }
+
+  .confirm-modal__title {
+    margin-bottom: 1vw;
+  }
+
+  .confirm-modal__description {
+    margin-bottom: 1.8vw;
+  }
+
+  .confirm-modal__actions {
+    gap: 1vw;
+  }
+
+  .confirm-modal__secondary,
+  .confirm-modal__primary {
+    min-width: 12vw;
+    height: 4.6vw;
+    border-radius: 1.1vw;
+  }
+
+  .confirm-modal__secondary {
+    border-width: 0.0977vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .confirm-modal {
+    padding: 4.2667vw;
+    align-items: center;
+    backdrop-filter: blur(1.6vw);
+  }
+
+  .confirm-modal__card {
+    width: 100%;
+    border-width: 0.2667vw;
+    border-radius: 4.8vw;
+    padding: 4.8vw;
+  }
+
+  .confirm-modal__title {
+    margin-bottom: 2.1333vw;
+  }
+
+  .confirm-modal__description {
+    margin-bottom: 4.2667vw;
+  }
+
+  .confirm-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.6667vw;
+  }
+
+  .confirm-modal__secondary,
+  .confirm-modal__primary {
+    width: 100%;
+    min-width: 0;
+    height: 12.2667vw;
+    border-radius: 3.7333vw;
+    font-size: 4vw;
+  }
+
+  .confirm-modal__secondary {
+    border-width: 0.2667vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .confirm-modal {
+    padding: 3.2vw;
+  }
+
+  .confirm-modal__card {
+    border-radius: 4.2667vw;
+    padding: 4.2667vw;
+  }
+
+  .confirm-modal__secondary,
+  .confirm-modal__primary {
+    height: 12vw;
+    border-radius: 3.4667vw;
+  }
+}

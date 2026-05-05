@@ -83,9 +83,6 @@ export default function AdminProductsPage() {
     <section className="admin-products-page">
       <div className="admin__header">
         <h1 className="admin__title text-h2">Модерация товаров</h1>
-        <div className="admin__subtitle text-p2">
-          Здесь администратор проверяет модели перед публикацией.
-        </div>
       </div>
 
       {products.length === 0 ? (
