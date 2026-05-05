@@ -26,3 +26,8 @@ backend/staticfiles/
 # --- IDE ---
 .vscode/
 .idea/
+
+
+# --- Backups ---
+backend/demo_backup.json
+meshio_backup_before_deploy/
