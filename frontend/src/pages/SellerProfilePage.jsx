@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-profile-page.css";
+import "../styles/profile-shared.css";
 
+import ConfirmModal from "../components/ConfirmModal";
 import SellerAnalyticsPanel from "../components/SellerAnalyticsPanel";
+import ProfileTabBanner from "../components/ProfileTabBanner";
+import ProfileMenuSection from "../components/ProfileMenuSection";
 
 import userIcon from "../assets/icons/user.svg";
 import analyticsIcon from "../assets/icons/analytics.svg";
@@ -15,8 +19,12 @@ import {
   meRequest,
   updateProfileRequest,
   changePasswordRequest,
+  deleteSellerAvatarRequest,
+  deleteSellerBannerRequest,
   updateSellerProfileRequest,
   getMySellerProfileRequest,
+  uploadSellerAvatarRequest,
+  uploadSellerBannerRequest,
 } from "../api/auth";
 
 function formatRuPhone(value) {
@@ -38,6 +46,7 @@ function formatRuPhone(value) {
   if (p2) out += ` ${p2}`;
   if (p3) out += `-${p3}`;
   if (p4) out += `-${p4}`;
+
   return out;
 }
 
@@ -74,8 +83,22 @@ export default function SellerProfilePage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isPwSaving, setIsPwSaving] = useState(false);
+  const [mediaUploading, setMediaUploading] = useState("");
   const [saveMsg, setSaveMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const avatarInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
+
+  const tabs = useMemo(
+    () => [
+      { key: "profile", label: "Профиль", icon: userIcon, section: "Основное" },
+      { key: "analytics", label: "Аналитика", icon: analyticsIcon, section: "Управление" },
+      { key: "notifications", label: "Уведомления", icon: notificationIcon, section: "Коммуникация" },
+      { key: "settings", label: "Настройки", icon: settingsIcon, section: "Коммуникация" },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -143,6 +166,10 @@ export default function SellerProfilePage() {
   }
 
   function handleLogout() {
+    setIsLogoutModalOpen(true);
+  }
+
+  function handleConfirmLogout() {
     logout();
     navigate("/");
   }
@@ -184,11 +211,13 @@ export default function SellerProfilePage() {
       );
     } catch (e) {
       const data = e?.response?.data;
+
       const msg =
         data?.email?.[0] ||
         data?.phone?.[0] ||
         data?.detail ||
         "Ошибка сохранения";
+
       setSaveMsg(msg);
     } finally {
       setIsSaving(false);
@@ -201,18 +230,72 @@ export default function SellerProfilePage() {
 
     try {
       await changePasswordRequest(pwForm.old_password, pwForm.new_password);
+
       setPwMsg("Пароль изменён");
-      setPwForm({ old_password: "", new_password: "" });
+      setPwForm({
+        old_password: "",
+        new_password: "",
+      });
     } catch (e) {
       const data = e?.response?.data;
+
       const msg =
         data?.old_password?.[0] ||
         data?.new_password?.[0] ||
         data?.detail ||
         "Ошибка смены пароля";
+
       setPwMsg(msg);
     } finally {
       setIsPwSaving(false);
+    }
+  }
+
+  async function handleSellerMediaUpload(type, file) {
+    if (!file) return;
+
+    setSaveMsg("");
+    setMediaUploading(type);
+
+    try {
+      const data =
+        type === "avatar"
+          ? await uploadSellerAvatarRequest(file)
+          : await uploadSellerBannerRequest(file);
+
+      setProfile((prev) => ({
+        ...prev,
+        seller_profile: data?.seller_profile || prev?.seller_profile,
+      }));
+      setSaveMsg(type === "avatar" ? "Аватар магазина обновлен" : "Баннер магазина обновлен");
+    } catch (e) {
+      setSaveMsg(e?.response?.data?.detail || "Не удалось загрузить изображение");
+    } finally {
+      setMediaUploading("");
+      if (type === "avatar" && avatarInputRef.current) avatarInputRef.current.value = "";
+      if (type === "banner" && bannerInputRef.current) bannerInputRef.current.value = "";
+    }
+  }
+
+  async function handleSellerMediaDelete(type) {
+    setSaveMsg("");
+    setMediaUploading(type);
+
+    try {
+      const data =
+        type === "avatar"
+          ? await deleteSellerAvatarRequest()
+          : await deleteSellerBannerRequest();
+
+      setProfile((prev) => ({
+        ...prev,
+        seller_profile: data?.seller_profile || prev?.seller_profile,
+      }));
+      setSaveMsg(type === "avatar" ? "Аватар магазина удален" : "Баннер магазина удален");
+    } catch (e) {
+      setSaveMsg(e?.response?.data?.detail || "Не удалось удалить изображение");
+    } finally {
+      setMediaUploading("");
     }
   }
 
@@ -223,6 +306,8 @@ export default function SellerProfilePage() {
 
   const userEmail = profile?.email || "email@example.com";
   const avatarInitial = getInitial(profile?.username || userName);
+  const storeAvatarUrl = profile?.seller_profile?.store_avatar_url || "";
+  const storeBannerUrl = profile?.seller_profile?.store_banner_url || "";
 
   return (
     <section className="seller-profile-page">
@@ -230,68 +315,57 @@ export default function SellerProfilePage() {
         <h1 className="seller-profile-page__title text-h2">Личный кабинет</h1>
         <div className="seller-profile-page__divider" />
 
+        <div className="seller-profile-page__mobile-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`seller-profile-page__mobile-tab ${
+                activeTab === tab.key ? "is-active" : ""
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="seller-profile-page__mobile-tab seller-profile-page__mobile-tab--logout"
+            onClick={handleLogout}
+          >
+            Выйти
+          </button>
+        </div>
+
         <div className="seller-profile-page__layout">
           <aside className="seller-profile-page__sidebar">
             <nav className="seller-profile-page__menu">
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "profile" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("profile")}
-              >
-                <img
-                  src={userIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Профиль</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "analytics" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("analytics")}
-              >
-                <img
-                  src={analyticsIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Аналитика</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "notifications" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("notifications")}
-              >
-                <img
-                  src={notificationIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Уведомления</span>
-              </button>
-
-              <button
-                type="button"
-                className={`seller-profile-page__menu-item ${
-                  activeTab === "settings" ? "is-active" : ""
-                }`}
-                onClick={() => setActiveTab("settings")}
-              >
-                <img
-                  src={settingsIcon}
-                  alt=""
-                  className="seller-profile-page__menu-icon"
-                />
-                <span className="text-p1">Настройки</span>
-              </button>
+              {Array.from(
+                new Map(tabs.map((tab) => [tab.section, tab.section])).values()
+              ).map((section) => (
+                <ProfileMenuSection key={section} label={section}>
+                  {tabs
+                    .filter((tab) => tab.section === section)
+                    .map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        className={`seller-profile-page__menu-item ${
+                          activeTab === tab.key ? "is-active" : ""
+                        }`}
+                        onClick={() => setActiveTab(tab.key)}
+                      >
+                        <img
+                          src={tab.icon}
+                          alt=""
+                          className="seller-profile-page__menu-icon"
+                        />
+                        <span className="text-p1">{tab.label}</span>
+                      </button>
+                    ))}
+                </ProfileMenuSection>
+              ))}
 
               <button
                 type="button"
@@ -315,8 +389,29 @@ export default function SellerProfilePage() {
               </div>
             ) : activeTab === "analytics" ? (
               <SellerAnalyticsPanel />
-            ) : activeTab !== "profile" ? (
+            ) : activeTab === "notifications" ? (
               <div className="seller-profile-page__card">
+                <ProfileTabBanner
+                  title="Уведомления"
+                  description="Управляйте предпочтениями уведомлений"
+                  icon={notificationIcon}
+                  gradient="gradient-4"
+                />
+                <div className="seller-profile-page__stub-title text-h3">
+                  Раздел в разработке
+                </div>
+                <div className="seller-profile-page__stub-text text-p2">
+                  Этот раздел доделаем следующим этапом.
+                </div>
+              </div>
+            ) : activeTab === "settings" ? (
+              <div className="seller-profile-page__card">
+                <ProfileTabBanner
+                  title="Настройки"
+                  description="Персонализируйте ваш магазин"
+                  icon={settingsIcon}
+                  gradient="gradient-5"
+                />
                 <div className="seller-profile-page__stub-title text-h3">
                   Раздел в разработке
                 </div>
@@ -326,18 +421,101 @@ export default function SellerProfilePage() {
               </div>
             ) : (
               <div className="seller-profile-page__card">
+                <ProfileTabBanner
+                  title="Ваш профиль"
+                  description="Управляйте информацией магазина"
+                  icon={userIcon}
+                  gradient="gradient-1"
+                />
+                <div
+                  className="seller-profile-page__banner"
+                  style={
+                    storeBannerUrl
+                      ? { backgroundImage: `url(${storeBannerUrl})` }
+                      : undefined
+                  }
+                >
+                  <div className="seller-profile-page__media-actions">
+                    <button
+                      type="button"
+                      className="seller-profile-page__media-btn text-p3"
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={mediaUploading === "banner"}
+                    >
+                      {mediaUploading === "banner" ? "Загружка..." : "Загрузить баннер"}
+                    </button>
+                    {storeBannerUrl ? (
+                      <button
+                        type="button"
+                        className="seller-profile-page__media-btn seller-profile-page__media-btn--ghost text-p3"
+                        onClick={() => handleSellerMediaDelete("banner")}
+                        disabled={mediaUploading === "banner"}
+                      >
+                        Удалить
+                      </button>
+                    ) : null}
+                    <input
+                      ref={bannerInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="seller-profile-page__file-input"
+                      onChange={(e) =>
+                        handleSellerMediaUpload("banner", e.target.files?.[0])
+                      }
+                    />
+                  </div>
+                </div>
+
                 <div className="seller-profile-page__head">
-                  <div className="seller-profile-page__avatar">
-                    {avatarInitial}
+                  <div className="seller-profile-page__avatar-wrap">
+                    <div className="seller-profile-page__avatar">
+                      {storeAvatarUrl ? (
+                        <img src={storeAvatarUrl} alt={userName} />
+                      ) : (
+                        avatarInitial
+                      )}
+                    </div>
+
+                    <div className="seller-profile-page__avatar-actions">
+                      <button
+                        type="button"
+                        className="seller-profile-page__avatar-btn text-p3"
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={mediaUploading === "avatar"}
+                      >
+                        {mediaUploading === "avatar" ? "..." : "Ава"}
+                      </button>
+                      {storeAvatarUrl ? (
+                        <button
+                          type="button"
+                          className="seller-profile-page__avatar-btn text-p3"
+                          onClick={() => handleSellerMediaDelete("avatar")}
+                          disabled={mediaUploading === "avatar"}
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="seller-profile-page__file-input"
+                        onChange={(e) =>
+                          handleSellerMediaUpload("avatar", e.target.files?.[0])
+                        }
+                      />
+                    </div>
                   </div>
 
                   <div className="seller-profile-page__head-info">
                     <div className="seller-profile-page__name text-h3">
                       {userName}
                     </div>
+
                     <div className="seller-profile-page__email text-p1">
                       {userEmail}
                     </div>
+
                     <div className="seller-profile-page__role text-p2">
                       Продавец
                     </div>
@@ -536,6 +714,16 @@ export default function SellerProfilePage() {
           </main>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        title="Выйти из аккаунта?"
+        description="Вы уверены, что хотите выйти из аккаунта продавца?"
+        confirmText="Выйти"
+        cancelText="Отмена"
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
     </section>
   );
 }
