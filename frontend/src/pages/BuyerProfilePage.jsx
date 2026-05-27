@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/buyer-profile-page.css";
+import "../styles/profile-shared.css";
 
 import downloadIcon from "../assets/icons/download.svg";
 import profileIcon from "../assets/icons/user.svg";
@@ -10,6 +11,9 @@ import notificationsIcon from "../assets/icons/notification.svg";
 import paymentsIcon from "../assets/icons/card.svg";
 import settingsIcon from "../assets/icons/settings.svg";
 import logoutIcon from "../assets/icons/logout.svg";
+
+import ProfileTabBanner from "../components/ProfileTabBanner";
+import ProfileMenuSection from "../components/ProfileMenuSection";
 
 import { getMySupportRequests } from "../api/support";
 
@@ -87,7 +91,6 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("profile");
-
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -152,31 +155,36 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
   const tabs = useMemo(
     () => [
-      { key: "profile", label: "Профиль", icon: profileIcon },
+      { key: "profile", label: "Профиль", icon: profileIcon, section: "Основное" },
       {
         key: "purchases",
         label: "История покупок",
         icon: purchasesIcon,
+        section: "Покупки",
       },
       {
         key: "support",
         label: "Поддержка",
         icon: supportIcon,
+        section: "Покупки",
       },
       {
         key: "notifications",
         label: "Уведомления",
         icon: notificationsIcon,
+        section: "Коммуникация",
       },
       {
         key: "payments",
         label: "Способы оплаты",
         icon: paymentsIcon,
+        section: "Коммуникация",
       },
       {
         key: "settings",
         label: "Настройки",
         icon: settingsIcon,
+        section: "Коммуникация",
       },
     ],
     [],
@@ -493,6 +501,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   }
 
   const userName = profile?.username || "Профиль";
+  const isSellerProfile = profile?.role === "seller";
   const userRole = profile?.role === "seller" ? "Продавец" : "Покупатель";
   const avatarInitial = getInitial(profile?.username);
   const avatarUrl = profile?.avatar_url || "";
@@ -503,34 +512,59 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
         <h1 className="buyer-profile-page__title text-h2">Личный кабинет</h1>
         <div className="buyer-profile-page__divider" />
 
+        <div className="buyer-profile-page__mobile-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`buyer-profile-page__mobile-tab ${
+                activeTab === tab.key ? "is-active" : ""
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="buyer-profile-page__layout">
           <aside className="buyer-profile-page__sidebar">
             <nav className="buyer-profile-page__menu">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`buyer-profile-page__menu-item ${
-                    activeTab === tab.key ? "is-active" : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  <img
-                    src={tab.icon}
-                    alt=""
-                    className="buyer-profile-page__menu-icon"
-                  />
-                  <span className="text-p2">{tab.label}</span>
-                </button>
+              {Array.from(
+                new Map(tabs.map((tab) => [tab.section, tab.section])).values()
+              ).map((section) => (
+                <ProfileMenuSection key={section} label={section}>
+                  {tabs
+                    .filter((tab) => tab.section === section)
+                    .map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        className={`buyer-profile-page__menu-item ${
+                          activeTab === tab.key ? "is-active" : ""
+                        }`}
+                        onClick={() => setActiveTab(tab.key)}
+                      >
+                        <img
+                          src={tab.icon}
+                          alt=""
+                          className="buyer-profile-page__menu-icon"
+                        />
+                        <span className="text-p2">{tab.label}</span>
+                      </button>
+                    ))}
+                </ProfileMenuSection>
               ))}
 
-              <button
-                type="button"
-                className="buyer-profile-page__menu-cta text-p2"
-                onClick={onOpenSellerModal}
-              >
-                Стать продавцом
-              </button>
+              {!isSellerProfile ? (
+                <button
+                  type="button"
+                  className="buyer-profile-page__menu-cta text-p2"
+                  onClick={onOpenSellerModal}
+                >
+                  Стать продавцом
+                </button>
+              ) : null}
 
               <button
                 type="button"
@@ -610,13 +644,15 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                           {userRole}
                         </div>
 
-                        <button
-                          type="button"
-                          className="buyer-profile-page__small-btn text-p2"
-                          onClick={onOpenSellerModal}
-                        >
-                          Стать продавцом
-                        </button>
+                        {!isSellerProfile ? (
+                          <button
+                            type="button"
+                            className="buyer-profile-page__small-btn text-p2"
+                            onClick={onOpenSellerModal}
+                          >
+                            Стать продавцом
+                          </button>
+                        ) : null}
                       </div>
                     </div>
 
@@ -790,9 +826,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
                 {activeTab === "purchases" && (
                   <div className="buyer-profile-page__card">
-                    <div className="text-h3 buyer-profile-page__card-title">
-                      История покупок
-                    </div>
+                    <ProfileTabBanner
+                      title="История покупок"
+                      description="Скачайте ваши приобретенные модели"
+                      icon={purchasesIcon}
+                      gradient="gradient-2"
+                    />
 
                     {purchasesLoading ? (
                       <div className="buyer-profile-page__muted text-p2">
@@ -859,9 +898,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
                 {activeTab === "support" && (
                   <div className="buyer-profile-page__card">
-                    <div className="text-h3 buyer-profile-page__card-title">
-                      Поддержка
-                    </div>
+                    <ProfileTabBanner
+                      title="Поддержка"
+                      description="Ваши обращения в техподдержку"
+                      icon={supportIcon}
+                      gradient="gradient-3"
+                    />
 
                     {supportLoading ? (
                       <div className="page-state">Загрузка…</div>
@@ -920,9 +962,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
                 {activeTab === "notifications" && (
                   <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
-                    <div className="text-h3 buyer-profile-page__card-title">
-                      Уведомления
-                    </div>
+                    <ProfileTabBanner
+                      title="Уведомления"
+                      description="Управляйте предпочтениями уведомлений"
+                      icon={notificationsIcon}
+                      gradient="gradient-4"
+                    />
 
                     <div className="buyer-profile-page__toggles">
                       <div className="buyer-profile-page__toggle-row">
@@ -992,9 +1037,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
                 {activeTab === "payments" && (
                   <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
-                    <div className="text-h3 buyer-profile-page__card-title">
-                      Способы оплаты
-                    </div>
+                    <ProfileTabBanner
+                      title="Способы оплаты"
+                      description="Добавляйте и управляйте способами оплаты"
+                      icon={paymentsIcon}
+                      gradient="gradient-1"
+                    />
 
                     <div className="buyer-profile-page__payment-list">
                       {paymentMethods.map((item) => (
@@ -1064,9 +1112,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
                 {activeTab === "settings" && (
                   <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
-                    <div className="text-h3 buyer-profile-page__card-title">
-                      Настройки
-                    </div>
+                    <ProfileTabBanner
+                      title="Настройки"
+                      description="Персонализируйте ваш кабинет"
+                      icon={settingsIcon}
+                      gradient="gradient-5"
+                    />
 
                     <div className="buyer-profile-page__toggles">
                       <div className="buyer-profile-page__toggle-row">

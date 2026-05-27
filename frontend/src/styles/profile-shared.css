@@ -1,0 +1,220 @@
+/* ===== PROFILE TAB BANNERS ===== */
+
+.profile-tab-banner {
+  min-height: 8.3333vw;
+  margin-bottom: 1.25vw;
+  border-radius: 0.8333vw;
+  padding: 1.5625vw;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-tab-banner__content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.profile-tab-banner__header {
+  display: flex;
+  align-items: center;
+  gap: 0.8333vw;
+  margin-bottom: 0.625vw;
+}
+
+.profile-tab-banner__icon {
+  width: 2.0833vw;
+  height: 2.0833vw;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.profile-tab-banner__title {
+  color: var(--color-white);
+  font-size: 1.5625vw;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-tab-banner__description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9375vw;
+  margin: 0;
+}
+
+.profile-tab-banner__decoration {
+  position: absolute;
+  right: -10%;
+  top: -20%;
+  width: 15vw;
+  height: 15vw;
+  border-radius: 50%;
+  opacity: 0.4;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Gradient variants */
+.profile-tab-banner--gradient-1 {
+  background: radial-gradient(
+      circle at 18% 35%,
+      rgba(126, 38, 234, 0.42),
+      transparent 24%
+    ),
+    linear-gradient(135deg, #1c1f2a 0%, #101116 48%, #221a35 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.profile-tab-banner--gradient-1 .profile-tab-banner__decoration {
+  background: radial-gradient(circle, rgba(126, 38, 234, 0.6), transparent);
+}
+
+.profile-tab-banner--gradient-2 {
+  background: linear-gradient(135deg, #1a2942 0%, #1a1c24 48%, #2a1f3a 100%);
+}
+
+.profile-tab-banner--gradient-2 .profile-tab-banner__decoration {
+  background: radial-gradient(circle, rgba(100, 150, 234, 0.5), transparent);
+}
+
+.profile-tab-banner--gradient-3 {
+  background: linear-gradient(135deg, #2a2a1f 0%, #1c1c1c 48%, #2a1f1f 100%);
+}
+
+.profile-tab-banner--gradient-3 .profile-tab-banner__decoration {
+  background: radial-gradient(circle, rgba(200, 150, 100, 0.4), transparent);
+}
+
+.profile-tab-banner--gradient-4 {
+  background: linear-gradient(135deg, #1a2a2a 0%, #0f1c1c 48%, #1a2a1f 100%);
+}
+
+.profile-tab-banner--gradient-4 .profile-tab-banner__decoration {
+  background: radial-gradient(circle, rgba(100, 200, 180, 0.4), transparent);
+}
+
+.profile-tab-banner--gradient-5 {
+  background: linear-gradient(135deg, #2a1a2a 0%, #1c1c1c 48%, #2a1a1c 100%);
+}
+
+.profile-tab-banner--gradient-5 .profile-tab-banner__decoration {
+  background: radial-gradient(circle, rgba(180, 100, 200, 0.4), transparent);
+}
+
+/* ===== PROFILE MENU SECTIONS ===== */
+
+.profile-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+  margin-bottom: 0.8333vw;
+}
+
+.profile-menu-section:last-child {
+  margin-bottom: 0;
+}
+
+.profile-menu-section__label {
+  color: var(--color-grey-super-light);
+  font-size: 0.7292vw;
+  text-transform: uppercase;
+  letter-spacing: 0.0521vw;
+  margin: 0;
+  padding: 0 1.0417vw;
+  margin-bottom: 0.2083vw;
+  opacity: 0.7;
+}
+
+.profile-menu-section__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+}
+
+/* ===== TABLET ===== */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .profile-tab-banner {
+    min-height: 12vw;
+    margin-bottom: 2vw;
+    border-radius: 1.2vw;
+    padding: 2.4vw;
+  }
+
+  .profile-tab-banner__header {
+    gap: 1.2vw;
+    margin-bottom: 0.8vw;
+  }
+
+  .profile-tab-banner__icon {
+    width: 3vw;
+    height: 3vw;
+  }
+
+  .profile-tab-banner__title {
+    font-size: 2.2vw;
+  }
+
+  .profile-tab-banner__description {
+    font-size: 1.4vw;
+  }
+
+  .profile-menu-section__label {
+    font-size: 1vw;
+    padding: 0 1.4vw;
+    margin-bottom: 0.4vw;
+  }
+
+  .profile-menu-section {
+    margin-bottom: 1.2vw;
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .profile-tab-banner {
+    min-height: 20vw;
+    margin-bottom: 3vw;
+    border-radius: 1.2vw;
+    padding: 3vw;
+  }
+
+  .profile-tab-banner__header {
+    gap: 1.2vw;
+    margin-bottom: 1vw;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-tab-banner__icon {
+    width: 6vw;
+    height: 6vw;
+  }
+
+  .profile-tab-banner__title {
+    font-size: 1.8vw;
+    font-weight: 600;
+  }
+
+  .profile-tab-banner__description {
+    font-size: 1.3vw;
+  }
+
+  .profile-menu-section__label {
+    font-size: 2.4vw;
+    padding: 0 1.2vw;
+    margin-bottom: 0.8vw;
+    margin-top: 1.2vw;
+  }
+
+  .profile-menu-section:first-child .profile-menu-section__label {
+    margin-top: 0;
+  }
+
+  .profile-menu-section {
+    margin-bottom: 0.8vw;
+  }
+}
