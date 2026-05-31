@@ -3,7 +3,7 @@
   min-height: 100vh;
   padding-top: 2.0833vw;
   padding-bottom: 5.2083vw;
-  background: #000;
+  background: var(--color-grey-dark);
 }
 
 .checkout-page__container {
@@ -37,8 +37,8 @@
   width: 31.25vw;
   padding: 1.6667vw;
   border-radius: 1.25vw;
-  background: linear-gradient(180deg, #0a0b12 0%, #10121b 100%);
-  border: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
   box-shadow: 0 1.25vw 3.125vw rgba(0, 0, 0, 0.35);
 }
 
@@ -76,7 +76,7 @@
   gap: 0.8333vw;
   padding: 0.7292vw;
   border-radius: 0.8333vw;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-grey-hover);
 }
 
 .checkout-page__item-media {
@@ -157,8 +157,8 @@
   min-height: 3.4375vw;
   padding: 0.625vw;
   border-radius: 0.7292vw;
-  border: 0.0521vw solid rgba(235, 235, 235, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-hover);
   color: var(--color-white);
   display: flex;
   flex-direction: column;
@@ -174,7 +174,7 @@
 
 .checkout-page__payment-btn:hover {
   transform: translateY(-0.0521vw);
-  border-color: rgba(147, 109, 251, 0.35);
+  border-color: var(--color-purple-light);
 }
 
 .checkout-page__payment-btn.is-active {
@@ -205,7 +205,7 @@
 .checkout-page__summary-row--total {
   margin-top: 0.3125vw;
   padding-top: 0.8333vw;
-  border-top: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  border-top: 0.0521vw solid var(--color-grey-light);
 }
 
 .checkout-page__agree {
@@ -259,7 +259,7 @@
 }
 
 .checkout-page__secondary-btn {
-  border: 0.0521vw solid rgba(235, 235, 235, 0.12);
+  border: 0.0521vw solid var(--color-grey-light);
   background: transparent;
   color: var(--color-white);
   text-decoration: none;

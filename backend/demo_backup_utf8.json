@@ -1,0 +1,2039 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 79,
+  "fields": {
+    "action_time": "2026-05-03T17:06:57.768Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "9",
+    "object_repr": "Матвей",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 80,
+  "fields": {
+    "action_time": "2026-05-03T17:07:01.487Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "8",
+    "object_repr": "Мотя",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 81,
+  "fields": {
+    "action_time": "2026-05-03T17:07:20.657Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "11",
+    "object_repr": "admin",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0420\\u043e\\u043b\\u044c\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 82,
+  "fields": {
+    "action_time": "2026-05-03T17:08:04.478Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "12",
+    "object_repr": "seller",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 83,
+  "fields": {
+    "action_time": "2026-05-03T17:08:35.753Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "13",
+    "object_repr": "buyer",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 84,
+  "fields": {
+    "action_time": "2026-05-03T17:08:57.914Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "11",
+    "object_repr": "admin",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"password\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 85,
+  "fields": {
+    "action_time": "2026-05-03T17:09:29.552Z",
+    "user": 11,
+    "content_type": 21,
+    "object_id": "2",
+    "object_repr": "admin@gmail.com - Плохо грузит",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 86,
+  "fields": {
+    "action_time": "2026-05-03T17:09:32.698Z",
+    "user": 11,
+    "content_type": 21,
+    "object_id": "1",
+    "object_repr": "motya@gmail.com - Плохо грузит",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 87,
+  "fields": {
+    "action_time": "2026-05-03T17:09:41.493Z",
+    "user": 11,
+    "content_type": 22,
+    "object_id": "4",
+    "object_repr": "omarina616@gmail.com",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 88,
+  "fields": {
+    "action_time": "2026-05-03T17:09:44.811Z",
+    "user": 11,
+    "content_type": 22,
+    "object_id": "3",
+    "object_repr": "mr.cylllka@bk.ru",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 89,
+  "fields": {
+    "action_time": "2026-05-03T17:09:47.708Z",
+    "user": 11,
+    "content_type": 22,
+    "object_id": "2",
+    "object_repr": "k.matvey04@gmail.com",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 90,
+  "fields": {
+    "action_time": "2026-05-03T17:09:50.565Z",
+    "user": 11,
+    "content_type": 22,
+    "object_id": "1",
+    "object_repr": "motya@gmail.com",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 91,
+  "fields": {
+    "action_time": "2026-05-03T17:17:49.634Z",
+    "user": 11,
+    "content_type": 6,
+    "object_id": "12",
+    "object_repr": "seller",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0421\\u0442\\u0430\\u0442\\u0443\\u0441 \\u043f\\u0440\\u043e\\u0434\\u0430\\u0432\\u0446\\u0430\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 92,
+  "fields": {
+    "action_time": "2026-05-03T17:21:08.465Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "21",
+    "object_repr": "Кофейный столик",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 93,
+  "fields": {
+    "action_time": "2026-05-05T15:28:48.583Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "30",
+    "object_repr": "cn",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 94,
+  "fields": {
+    "action_time": "2026-05-05T15:28:57.019Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "28",
+    "object_repr": "л",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 95,
+  "fields": {
+    "action_time": "2026-05-05T15:30:54.011Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "27",
+    "object_repr": "Машинка",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 96,
+  "fields": {
+    "action_time": "2026-05-05T15:31:16.253Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "26",
+    "object_repr": "Low-poly хлебушек",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0421\\u0442\\u0430\\u0442\\u0443\\u0441\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 97,
+  "fields": {
+    "action_time": "2026-05-05T15:31:26.413Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "25",
+    "object_repr": "Low-poly медведь",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 98,
+  "fields": {
+    "action_time": "2026-05-05T15:35:43.822Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "31",
+    "object_repr": "Каменная гора",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0421\\u0442\\u0430\\u0442\\u0443\\u0441\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 99,
+  "fields": {
+    "action_time": "2026-05-05T15:48:58.058Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "32",
+    "object_repr": "Милая кофейня",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 100,
+  "fields": {
+    "action_time": "2026-05-05T15:49:02.531Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "33",
+    "object_repr": "Медведь в стиле low-poly",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 101,
+  "fields": {
+    "action_time": "2026-05-05T15:53:33.451Z",
+    "user": 11,
+    "content_type": 9,
+    "object_id": "34",
+    "object_repr": "ари",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0421\\u0442\\u0430\\u0442\\u0443\\u0441\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 102,
+  "fields": {
+    "action_time": "2026-05-05T16:13:56.300Z",
+    "user": 11,
+    "content_type": 18,
+    "object_id": "4",
+    "object_repr": "seller -> ари",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "20yqrhmiuzcmhbi2bk7wc4fubbvq5mek",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pChWKAu3XsGMswMUjUlKe3KeHfbpAvd_vfef6uI61Li2mSOI6uLMkadfseE9JRpJ_zA6V411WmZx6R3RR-06VtleV0P9--gYCtbnTGA78gG6Qd7FnAgmZmCdJgcAXrJ4hMAOOo4YG9dIjRmgMzkN119viI8OOE:1wJaJN:vQYwnlITCggXfExeqadr_AIaALcTf0uD9fD2Pm9nh-Y",
+    "expire_date": "2026-05-17T17:08:57.963Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "ap0kv512npyffpyq0hpfo61oo6j7chd2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgQKlL956hmYEZqRpISrsy3l2bdKHb_977LzXiupRx7TyPU1ZnZY06_I6E6cF1I_mO9dZ0anWZJ9Kbonfa9bVlfl529--gYC_f-mgjsQcQciciwczBBkcUo-cEhEGMhcF7ECvRQxiAKEROzhgR8UG9PxekOFs:1wD4B5:CqcIQ8hjEVed1Z5wX3k3QrjL7wgZ77N-_FuMMVu7fcA",
+    "expire_date": "2026-04-29T17:37:27.230Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "djc53uos0gtbcf1hqtxp89i6i6hs036y",
+  "fields": {
+    "session_data": ".eJxVjDsOwyAQBe9CHSHYFb-U6XMGBCwEJxFIxq6s3D1CcpG0b2bewXzYt-r3kVe_ELsyyS6_WwzpldsE9Azt0XnqbVuXyKfCTzr4vVN-307376CGUWdtgkNRlDU6SG2TAIAohdMCC5WUpEVlrI4WDJIDNM6hsqTQQYFEhn2-uSE2nQ:1vvL1n:FPXnhU-BSFdU0KBouegCWj153LWY8uRDf-XQehoaFjU",
+    "expire_date": "2026-03-11T19:58:35.439Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "m2b1hz92o7xnyftexyygureibj7xet8l",
+  "fields": {
+    "session_data": ".eJxVjDsOwyAQBe9CHSHYFb-U6XMGBCwEJxFIxq6s3D1CcpG0b2bewXzYt-r3kVe_ELsyyS6_WwzpldsE9Azt0XnqbVuXyKfCTzr4vVN-307376CGUWdtgkNRlDU6SG2TAIAohdMCC5WUpEVlrI4WDJIDNM6hsqTQQYFEhn2-uSE2nQ:1w2t3H:d-d6YMXhBIC5ETNHuaSSdtRwhH0cdr7ermnf_EHNmiU",
+    "expire_date": "2026-04-01T15:43:19.751Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "ue00f2os64l3eqjyj9bzwoxng37hjd8b",
+  "fields": {
+    "session_data": ".eJxVjDsOwyAQBe9CHSHYFb-U6XMGBCwEJxFIxq6s3D1CcpG0b2bewXzYt-r3kVe_ELsyyS6_WwzpldsE9Azt0XnqbVuXyKfCTzr4vVN-307376CGUWdtgkNRlDU6SG2TAIAohdMCC5WUpEVlrI4WDJIDNM6hsqTQQYFEhn2-uSE2nQ:1w9lNh:ipfNrgDyg-Ni_mW2IAJfozAD2KeD1v5MgCFJ18ctAKY",
+    "expire_date": "2026-04-20T14:56:49.718Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "y12h8sfi6bgtw70rs9isvjbnurp5qgwt",
+  "fields": {
+    "session_data": ".eJxVjDsOwyAQBe9CHSHYFb-U6XMGBCwEJxFIxq6s3D1CcpG0b2bewXzYt-r3kVe_ELsyyS6_WwzpldsE9Azt0XnqbVuXyKfCTzr4vVN-307376CGUWdtgkNRlDU6SG2TAIAohdMCC5WUpEVlrI4WDJIDNM6hsqTQQYFEhn2-uSE2nQ:1vvJpL:hfmeSAlN8b7joK9C_W1QOLk3SFGdVEpJcR5mcGv9kbg",
+    "expire_date": "2026-03-11T18:41:39.391Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "5fbad7f5822499cd09661a96a7231db79096fe52",
+  "fields": {
+    "user": 11,
+    "created": "2026-05-03T17:25:26.740Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "8af2f2e402e151d1be3d2759113062e62e1097b3",
+  "fields": {
+    "user": 12,
+    "created": "2026-05-03T17:11:01.968Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "cf6593ab1319154ce6b8e32d59fab3e2acd7bd0a",
+  "fields": {
+    "user": 13,
+    "created": "2026-05-03T17:10:46.108Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "d3f8eac6429d61fcb41efb3f7cc58c4089dcf5f9",
+  "fields": {
+    "user": 14,
+    "created": "2026-05-05T18:02:08.051Z"
+  }
+},
+{
+  "model": "users.user",
+  "pk": 11,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$LRJUAd0JqvzJ7QhNch0lNP$6nABJEWfyM+7oS9Rfv5D9KlqYwzXtOQ9FAmn0r2lMec=",
+    "last_login": "2026-05-03T17:06:42Z",
+    "is_superuser": true,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-05-03T17:06:18Z",
+    "username": "admin",
+    "email": "admin@gmail.com",
+    "phone": null,
+    "middle_name": null,
+    "role": "admin",
+    "seller_status": "approved",
+    "avatar": "",
+    "avatar_storage_path": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 12,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$lE24pnuOS7WwygayNXQeoY$XLiGSljiPO+2AhQTeelNVuLyj2eGzKoBS4H6gK86Zfo=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-05-03T17:08:04Z",
+    "username": "seller",
+    "email": "seller@gmail.com",
+    "phone": "",
+    "middle_name": "",
+    "role": "seller",
+    "seller_status": "approved",
+    "avatar": "",
+    "avatar_storage_path": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 13,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$Xns8ZtCgbBkFrV23UliWk6$sFiwy26PD35z2+PxajMQHgP+pW3KWhbjDMBjrf32aVI=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "Иван",
+    "last_name": "Иванов",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-05-03T17:08:35.281Z",
+    "username": "buyer",
+    "email": "buyer@gmail.com",
+    "phone": "+7 (999) 999-99-99",
+    "middle_name": "Иванович",
+    "role": "buyer",
+    "seller_status": "not_requested",
+    "avatar": "",
+    "avatar_storage_path": "users/13/avatar/9a023fef3dec4f1b910f464ee8499b06.png",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 14,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$IcK5tPGBiExO4le7coZh6P$RKtfaY4c/XR12hhNULp26yyNyYNwACoxeLpWHZLMEno=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-05-05T18:02:07.686Z",
+    "username": "Марина",
+    "email": "omarina617@gmail.com",
+    "phone": null,
+    "middle_name": null,
+    "role": "seller",
+    "seller_status": "pending",
+    "avatar": "",
+    "avatar_storage_path": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.sellerprofile",
+  "pk": 2,
+  "fields": {
+    "user": 12,
+    "store_name": "seller store",
+    "store_description": "",
+    "store_avatar": "",
+    "store_avatar_storage_path": null,
+    "created_at": "2026-05-03T17:25:15.411Z",
+    "updated_at": "2026-05-05T18:16:07.368Z"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 1,
+  "fields": {
+    "name": "Персонажи",
+    "slug": "personazhi"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 2,
+  "fields": {
+    "name": "Животные",
+    "slug": "zhivotnye"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 3,
+  "fields": {
+    "name": "Техника",
+    "slug": "tehnika"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 4,
+  "fields": {
+    "name": "Окружение",
+    "slug": "okruzhenie"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 5,
+  "fields": {
+    "name": "Предметы",
+    "slug": "predmety"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 6,
+  "fields": {
+    "name": "Архитектура",
+    "slug": "arhitektura"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 7,
+  "fields": {
+    "name": "Транспорт",
+    "slug": "transport"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 8,
+  "fields": {
+    "name": "Другое",
+    "slug": "drugoe"
+  }
+},
+{
+  "model": "products.license",
+  "pk": 1,
+  "fields": {
+    "name": "Personal",
+    "description": "",
+    "commercial_use_allowed": false,
+    "resale_allowed": false,
+    "modification_allowed": true,
+    "attribution_required": false
+  }
+},
+{
+  "model": "products.product",
+  "pk": 23,
+  "fields": {
+    "seller": 12,
+    "category": 5,
+    "license": 1,
+    "title": "Кофейный столик",
+    "description": "",
+    "price": "100.00",
+    "search_title": "кофейный столик",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "mid_poly",
+    "topology_type": "quad",
+    "polygon_count": 10570,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/23/preview/56bf712cfc134ba6adaa4953ef4718ca.png",
+    "average_rating": "4.00",
+    "reviews_count": 1,
+    "views_count": 1,
+    "favorites_count": 1,
+    "sales_count": 1,
+    "created_at": "2026-05-03T17:24:05.842Z",
+    "updated_at": "2026-05-03T18:07:11.393Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 24,
+  "fields": {
+    "seller": 12,
+    "category": 5,
+    "license": 1,
+    "title": "Винтажный подсвечник",
+    "description": "",
+    "price": "500.00",
+    "search_title": "винтажный подсвечник",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "triangulated",
+    "polygon_count": 8346,
+    "has_uv": true,
+    "has_textures": false,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/24/preview/bd6190610eb54c40b5e75c39c0554e03.png",
+    "average_rating": "5.00",
+    "reviews_count": 1,
+    "views_count": 1,
+    "favorites_count": 1,
+    "sales_count": 1,
+    "created_at": "2026-05-03T17:30:29.776Z",
+    "updated_at": "2026-05-03T18:07:13.131Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 26,
+  "fields": {
+    "seller": 12,
+    "category": 8,
+    "license": null,
+    "title": "Low-poly хлебушек",
+    "description": "Милый low-poly хлебушек",
+    "price": "0.00",
+    "search_title": "low-poly хлебушек",
+    "search_description": "милый low-poly хлебушек",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "quad",
+    "polygon_count": 570,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": "",
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/26/preview/7177745ba0234f7bb8a6e1950d1ce2a9.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 0,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-03T17:59:29.312Z",
+    "updated_at": "2026-05-05T15:31:16.246Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 29,
+  "fields": {
+    "seller": 12,
+    "category": 3,
+    "license": 1,
+    "title": "Кофеварка low-poly",
+    "description": "Серая кофеварка low-poly",
+    "price": "0.00",
+    "search_title": "кофеварка low-poly",
+    "search_description": "серая кофеварка low-poly",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "triangulated",
+    "polygon_count": 300,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/29/preview/6e9f5b2ec25e4ca38c80afc644244ad9.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 6,
+    "favorites_count": 1,
+    "sales_count": 0,
+    "created_at": "2026-05-03T18:05:31.230Z",
+    "updated_at": "2026-05-03T18:06:53.040Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 31,
+  "fields": {
+    "seller": 12,
+    "category": 4,
+    "license": 1,
+    "title": "Каменная гора",
+    "description": "",
+    "price": "1000.00",
+    "search_title": "каменная гора",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "mid_poly",
+    "topology_type": "quad",
+    "polygon_count": 14996,
+    "has_uv": false,
+    "has_textures": false,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": "",
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/31/preview/6c85a500864843d8bd46ae804215fb64.png",
+    "average_rating": "3.00",
+    "reviews_count": 1,
+    "views_count": 1,
+    "favorites_count": 0,
+    "sales_count": 1,
+    "created_at": "2026-05-05T15:32:41.541Z",
+    "updated_at": "2026-05-05T15:47:31.531Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 34,
+  "fields": {
+    "seller": 12,
+    "category": 6,
+    "license": 1,
+    "title": "Статуя low-poly",
+    "description": "",
+    "price": "10.00",
+    "search_title": "статуя low-poly",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "quad",
+    "polygon_count": 2500,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": "",
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/34/preview/0504951cd8c14782b29dcbb8cc5776a7.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 4,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T15:50:56.239Z",
+    "updated_at": "2026-05-05T16:17:04.388Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 35,
+  "fields": {
+    "seller": 12,
+    "category": 6,
+    "license": 1,
+    "title": "Магазин",
+    "description": "Простой low-poly магазин с навесом",
+    "price": "100.00",
+    "search_title": "магазин",
+    "search_description": "простой low-poly магазин с навесом",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "quad",
+    "polygon_count": 281,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/35/preview/37db6ba46c764ae0a377af68a32e6851.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 0,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:21:00.473Z",
+    "updated_at": "2026-05-05T16:23:57.170Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 36,
+  "fields": {
+    "seller": 12,
+    "category": null,
+    "license": null,
+    "title": "Вирус",
+    "description": "",
+    "price": "0.00",
+    "search_title": "вирус",
+    "search_description": "",
+    "model_format": "fbx",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": null,
+    "topology_type": "quad",
+    "polygon_count": 0,
+    "has_uv": false,
+    "has_textures": false,
+    "texture_type": null,
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "archived",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/36/preview/ad4013d60f494e15a46a63671344608b.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 2,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:27:35.949Z",
+    "updated_at": "2026-05-05T16:41:54.983Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 37,
+  "fields": {
+    "seller": 12,
+    "category": 5,
+    "license": 1,
+    "title": "Столик необычной формы",
+    "description": "Стол для дизайна интерьера",
+    "price": "99.00",
+    "search_title": "столик необычной формы",
+    "search_description": "стол для дизайна интерьера",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "mid_poly",
+    "topology_type": "triangulated",
+    "polygon_count": 2602,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/37/preview/3be45fadca2740d6a050469f2e1faa07.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 3,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:31:01.839Z",
+    "updated_at": "2026-05-05T16:49:10.440Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 38,
+  "fields": {
+    "seller": 12,
+    "category": 1,
+    "license": null,
+    "title": "Персонаж яблоко",
+    "description": "Интересный персонаж",
+    "price": "1000.00",
+    "search_title": "персонаж яблоко",
+    "search_description": "интересный персонаж",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "mid_poly",
+    "topology_type": "quad",
+    "polygon_count": 8221,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/38/preview/e2a0f4cbaffa45419edcec4e18bfec17.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 1,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:34:34.426Z",
+    "updated_at": "2026-05-05T16:38:38.791Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 39,
+  "fields": {
+    "seller": 12,
+    "category": 8,
+    "license": 1,
+    "title": "Вирус",
+    "description": "Опасный реалистичный вирус",
+    "price": "499.00",
+    "search_title": "вирус",
+    "search_description": "опасный реалистичный вирус",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "high_poly",
+    "topology_type": "triangulated",
+    "polygon_count": 108537,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/39/preview/4fc266f22c8846f581f8c36d4dcd6a83.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 2,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:39:42.358Z",
+    "updated_at": "2026-05-05T16:44:00.944Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 40,
+  "fields": {
+    "seller": 12,
+    "category": null,
+    "license": null,
+    "title": "Тун тун сахур",
+    "description": "",
+    "price": "0.00",
+    "search_title": "тун тун сахур",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": null,
+    "topology_type": "quad",
+    "polygon_count": 0,
+    "has_uv": false,
+    "has_textures": false,
+    "texture_type": null,
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "rejected",
+    "moderation_comment": "Некачественная модель",
+    "main_preview": "",
+    "main_preview_storage_path": "products/40/preview/b22a31c3b007468d9b050f2876fa83df.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 1,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:50:09.739Z",
+    "updated_at": "2026-05-05T16:52:26.213Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 42,
+  "fields": {
+    "seller": 12,
+    "category": 1,
+    "license": null,
+    "title": "Милый бургер",
+    "description": "Милый бургер персонаж",
+    "price": "0.00",
+    "search_title": "милый бургер",
+    "search_description": "милый бургер персонаж",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "high_poly",
+    "topology_type": "quad",
+    "polygon_count": 85734,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/42/preview/60c95ba3210640fc83747996dfa98017.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 2,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T16:56:40.923Z",
+    "updated_at": "2026-05-05T16:59:27.626Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 44,
+  "fields": {
+    "seller": 12,
+    "category": 5,
+    "license": null,
+    "title": "Колба с зельем",
+    "description": "",
+    "price": "10.00",
+    "search_title": "колба с зельем",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "quad",
+    "polygon_count": 715,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/44/preview/43d3f16104a74d26a80eecfae39644a8.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 1,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T17:25:05.272Z",
+    "updated_at": "2026-05-05T17:27:55.664Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 45,
+  "fields": {
+    "seller": 12,
+    "category": 8,
+    "license": null,
+    "title": "Меч металлический",
+    "description": "",
+    "price": "100.00",
+    "search_title": "меч металлический",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "quad",
+    "polygon_count": 436,
+    "has_uv": true,
+    "has_textures": true,
+    "texture_type": "PBR",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "pending_review",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/45/preview/71a9dd80ff3a486ba972b6639db604f2.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 1,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T17:30:15.414Z",
+    "updated_at": "2026-05-05T17:33:04.953Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 48,
+  "fields": {
+    "seller": 12,
+    "category": null,
+    "license": null,
+    "title": "Low-poly яблочко",
+    "description": "",
+    "price": "0.00",
+    "search_title": "low-poly яблочко",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": "low_poly",
+    "topology_type": "triangulated",
+    "polygon_count": 115,
+    "has_uv": true,
+    "has_textures": false,
+    "texture_type": "Base color",
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "published",
+    "moderation_comment": "",
+    "main_preview": "",
+    "main_preview_storage_path": "products/48/preview/bdbb98ea35ca4c47b33596b6782487eb.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 2,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T17:40:07.113Z",
+    "updated_at": "2026-05-05T17:49:11.921Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 50,
+  "fields": {
+    "seller": 12,
+    "category": null,
+    "license": null,
+    "title": "Банан",
+    "description": "",
+    "price": "0.00",
+    "search_title": "банан",
+    "search_description": "",
+    "model_format": "glb",
+    "viewer_format": "glb",
+    "geometry_type": "polygonal",
+    "poly_style": null,
+    "topology_type": "quad",
+    "polygon_count": 0,
+    "has_uv": false,
+    "has_textures": false,
+    "texture_type": null,
+    "has_rigging": false,
+    "has_animation": false,
+    "animation_clips_count": 0,
+    "viewer_status": "ready",
+    "viewer_error": null,
+    "status": "draft",
+    "moderation_comment": null,
+    "main_preview": "",
+    "main_preview_storage_path": "products/50/preview/0c4f77251dd046d59eeb12418f461365.png",
+    "average_rating": "0.00",
+    "reviews_count": 0,
+    "views_count": 0,
+    "favorites_count": 0,
+    "sales_count": 0,
+    "created_at": "2026-05-05T17:56:59.025Z",
+    "updated_at": "2026-05-05T17:56:59.064Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 43,
+  "fields": {
+    "product": 23,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/23/model_source/93089913f1d4402086c54e4efb8242f5.glb",
+    "original_name": "cofeetable.glb",
+    "mime_type": "application/octet-stream",
+    "size": 6719676,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:24:06.670Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 44,
+  "fields": {
+    "product": 23,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/23/viewer_model/0b0cfce76a5a4748bfa9a3c93a54edff.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 7238920,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:24:46.990Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 45,
+  "fields": {
+    "product": 24,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/24/model_source/1d0728f539884bf49ba5f2a795945e76.glb",
+    "original_name": "candlest.glb",
+    "mime_type": "application/octet-stream",
+    "size": 5104768,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:33:28.680Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 46,
+  "fields": {
+    "product": 24,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/24/viewer_model/6579272107e74f2b8efc52830aea081d.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 5195816,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:33:48.148Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 49,
+  "fields": {
+    "product": 26,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/26/model_source/5b4f3758af3b4a999442d6564e92493e.glb",
+    "original_name": "bread.glb",
+    "mime_type": "application/octet-stream",
+    "size": 22204940,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:59:32.397Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 50,
+  "fields": {
+    "product": 26,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/26/viewer_model/51dfe803a1864dafb811c29687016d89.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 22220892,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T17:59:59.701Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 55,
+  "fields": {
+    "product": 29,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/29/model_source/d746b200c108444dafd61d9fe98e9880.glb",
+    "original_name": "mokacoffeepot.glb",
+    "mime_type": "application/octet-stream",
+    "size": 61836,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T18:05:31.462Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 56,
+  "fields": {
+    "product": 29,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/29/viewer_model/6b1d795e58e641e2bf14c1f88c77a6d6.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 97020,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-03T18:05:54.174Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 59,
+  "fields": {
+    "product": 31,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/31/model_source/e22d89beabe141c39f498761761f3051.glb",
+    "original_name": "stone.glb",
+    "mime_type": "application/octet-stream",
+    "size": 3186848,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T15:32:42.038Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 60,
+  "fields": {
+    "product": 31,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/31/viewer_model/17cf957fdc2544e399f7f19bb364c29e.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 3684404,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T15:33:50.348Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 65,
+  "fields": {
+    "product": 34,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/34/model_source/819b5bf5fdd3438a808cd1ccee1e6ef5.glb",
+    "original_name": "статуя.glb",
+    "mime_type": "application/octet-stream",
+    "size": 7923824,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T15:50:57.291Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 66,
+  "fields": {
+    "product": 34,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/34/viewer_model/c88564e149ba4b649c42a4a94a54bb6b.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 7954120,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T15:52:11.862Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 67,
+  "fields": {
+    "product": 35,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/35/model_source/7e3398def29c46098a1d6303cb9fdf0b.glb",
+    "original_name": "строение.glb",
+    "mime_type": "application/octet-stream",
+    "size": 37132,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:21:52.577Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 68,
+  "fields": {
+    "product": 35,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/35/viewer_model/2d57b80f85ff49b982b9f0aecb5ccf4c.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 50472,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:22:16.010Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 69,
+  "fields": {
+    "product": 36,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/36/model_source/2a85f347ea9f409aaf159cc3d220ea80.fbx",
+    "original_name": "вирус.fbx",
+    "mime_type": "application/octet-stream",
+    "size": 4077500,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:27:39.450Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 70,
+  "fields": {
+    "product": 36,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/36/viewer_model/5cf43938885a49fba756c7c327f16bcd.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 5911188,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:28:09.241Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 71,
+  "fields": {
+    "product": 37,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/37/model_source/fde391ff77a94a74a94883207c2316b5.glb",
+    "original_name": "tabble.glb",
+    "mime_type": "application/octet-stream",
+    "size": 57229712,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:31:07.294Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 72,
+  "fields": {
+    "product": 37,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/37/viewer_model/a9f48516933d4170ae71a678af6e597c.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 57290904,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:31:45.486Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 73,
+  "fields": {
+    "product": 38,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/38/model_source/39efc07344fe4d49ac8ae78086c013cd.glb",
+    "original_name": "pers.glb",
+    "mime_type": "application/octet-stream",
+    "size": 554036,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:34:39.369Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 74,
+  "fields": {
+    "product": 38,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/38/viewer_model/a0e96fbb9fcb482499af9861419f4a0b.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 595164,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:35:04.607Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 75,
+  "fields": {
+    "product": 39,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/39/model_source/eed0f5482da148aa8cd8f682044f5e8d.glb",
+    "original_name": "ВИРУС.glb",
+    "mime_type": "application/octet-stream",
+    "size": 9432084,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:39:43.352Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 76,
+  "fields": {
+    "product": 39,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/39/viewer_model/ddeaf5ac44a34b7cb4da876f10381667.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 9723220,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:40:11.267Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 77,
+  "fields": {
+    "product": 40,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/40/model_source/af69d5450c6447db893a2169254329c5.glb",
+    "original_name": "тунтун.glb",
+    "mime_type": "application/octet-stream",
+    "size": 5760348,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:50:10.468Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 78,
+  "fields": {
+    "product": 40,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/40/viewer_model/0af38a90762449d6beb49b80fbc1ed41.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 6034728,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:50:36.441Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 81,
+  "fields": {
+    "product": 42,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/42/model_source/d346d5abc2054abc9edd6f5c0eaef1be.glb",
+    "original_name": "бургер.glb",
+    "mime_type": "application/octet-stream",
+    "size": 4610672,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:56:41.644Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 82,
+  "fields": {
+    "product": 42,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/42/viewer_model/b5a171663d73471090c96210fc2ac407.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 6302852,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T16:57:18.960Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 85,
+  "fields": {
+    "product": 44,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/44/model_source/5401779056ec483f9e06f119e1f13d2f.glb",
+    "original_name": "колба.glb",
+    "mime_type": "application/octet-stream",
+    "size": 638808,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:25:09.457Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 86,
+  "fields": {
+    "product": 44,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/44/viewer_model/d42e9231d0d741699c282d473d340f83.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 682612,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:26:03.576Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 87,
+  "fields": {
+    "product": 45,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/45/model_source/82103e62fe9645c599059d3dfca93dff.glb",
+    "original_name": "weapon.glb",
+    "mime_type": "application/octet-stream",
+    "size": 1409916,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:30:18.990Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 88,
+  "fields": {
+    "product": 45,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/45/viewer_model/6032e905860b499e92c4445e84c914f7.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 1418908,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:30:35.198Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 93,
+  "fields": {
+    "product": 48,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/48/model_source/6614e69dbc004c85ac87494eb05e5e53.glb",
+    "original_name": "apple.glb",
+    "mime_type": "application/octet-stream",
+    "size": 14176,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:40:07.268Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 94,
+  "fields": {
+    "product": 48,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/48/viewer_model/295e8984705c4b84a99d600b3d011a21.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 19992,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:40:32.809Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 97,
+  "fields": {
+    "product": 50,
+    "file_type": "model_source",
+    "file": "",
+    "storage_path": "products/50/model_source/2d929b6a76694471a63de6b2ecac9ae3.glb",
+    "original_name": "banana.glb",
+    "mime_type": "application/octet-stream",
+    "size": 47468,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:56:59.136Z"
+  }
+},
+{
+  "model": "products.productfile",
+  "pk": 98,
+  "fields": {
+    "product": 50,
+    "file_type": "viewer_model",
+    "file": "",
+    "storage_path": "products/50/viewer_model/a04bac3236914f068aa65efa41e0b349.glb",
+    "original_name": "viewer_model.glb",
+    "mime_type": "application/octet-stream",
+    "size": 68772,
+    "is_primary": true,
+    "preset_slug": null,
+    "generated_from_prompt": null,
+    "sort_order": 0,
+    "created_at": "2026-05-05T17:57:18.068Z"
+  }
+},
+{
+  "model": "products.order",
+  "pk": 6,
+  "fields": {
+    "buyer": 13,
+    "total_price": "1600.00",
+    "status": "paid",
+    "payment_method": "sbp",
+    "payment_provider": "mock",
+    "external_payment_id": null,
+    "commission_percent": "10.00",
+    "platform_fee": "160.00",
+    "seller_amount": "1440.00",
+    "paid_at": "2026-05-05T18:07:00.253Z",
+    "created_at": "2026-05-05T18:07:00.247Z"
+  }
+},
+{
+  "model": "products.orderitem",
+  "pk": 6,
+  "fields": {
+    "order": 6,
+    "product": 24,
+    "price_at_purchase": "500.00",
+    "commission_percent": "10.00",
+    "platform_fee": "50.00",
+    "seller_amount": "450.00",
+    "created_at": "2026-05-05T18:07:00.253Z"
+  }
+},
+{
+  "model": "products.orderitem",
+  "pk": 7,
+  "fields": {
+    "order": 6,
+    "product": 23,
+    "price_at_purchase": "100.00",
+    "commission_percent": "10.00",
+    "platform_fee": "10.00",
+    "seller_amount": "90.00",
+    "created_at": "2026-05-05T18:07:00.253Z"
+  }
+},
+{
+  "model": "products.orderitem",
+  "pk": 8,
+  "fields": {
+    "order": 6,
+    "product": 31,
+    "price_at_purchase": "1000.00",
+    "commission_percent": "10.00",
+    "platform_fee": "100.00",
+    "seller_amount": "900.00",
+    "created_at": "2026-05-05T18:07:00.253Z"
+  }
+},
+{
+  "model": "products.favorite",
+  "pk": 13,
+  "fields": {
+    "user": 13,
+    "product": 23,
+    "created_at": "2026-05-05T15:35:51.769Z"
+  }
+},
+{
+  "model": "products.favorite",
+  "pk": 14,
+  "fields": {
+    "user": 13,
+    "product": 24,
+    "created_at": "2026-05-05T15:35:52.796Z"
+  }
+},
+{
+  "model": "products.favorite",
+  "pk": 16,
+  "fields": {
+    "user": 13,
+    "product": 29,
+    "created_at": "2026-05-05T15:35:59.306Z"
+  }
+},
+{
+  "model": "products.cart",
+  "pk": 2,
+  "fields": {
+    "user": 13,
+    "created_at": "2026-05-03T17:10:46.154Z",
+    "updated_at": "2026-05-03T17:10:46.154Z"
+  }
+},
+{
+  "model": "products.cartitem",
+  "pk": 17,
+  "fields": {
+    "cart": 2,
+    "product": 39,
+    "created_at": "2026-05-05T18:08:50.068Z"
+  }
+},
+{
+  "model": "products.review",
+  "pk": 5,
+  "fields": {
+    "user": 13,
+    "product": 24,
+    "rating": 5,
+    "text": "Замечательная модель! Безупречное качество!",
+    "created_at": "2026-05-05T18:07:40.654Z",
+    "updated_at": "2026-05-05T18:07:40.654Z"
+  }
+},
+{
+  "model": "products.review",
+  "pk": 6,
+  "fields": {
+    "user": 13,
+    "product": 23,
+    "rating": 4,
+    "text": "Текстуры хромают",
+    "created_at": "2026-05-05T18:07:52.818Z",
+    "updated_at": "2026-05-05T18:07:52.818Z"
+  }
+},
+{
+  "model": "products.review",
+  "pk": 7,
+  "fields": {
+    "user": 13,
+    "product": 31,
+    "rating": 3,
+    "text": "Не советую",
+    "created_at": "2026-05-05T18:07:59.721Z",
+    "updated_at": "2026-05-05T18:07:59.721Z"
+  }
+},
+{
+  "model": "products.contactrequest",
+  "pk": 3,
+  "fields": {
+    "name": "buyer",
+    "email": "buyer@gmail.com",
+    "subject": "Благодарность",
+    "message": "Спасибо Вам большое! Отличный сервис!",
+    "admin_reply": "Пожалуйста!",
+    "replied_at": "2026-05-05T17:59:36.242Z",
+    "user": 13,
+    "status": "done",
+    "created_at": "2026-05-05T17:59:11.754Z",
+    "updated_at": "2026-05-05T17:59:36.242Z"
+  }
+},
+{
+  "model": "products.contactrequest",
+  "pk": 4,
+  "fields": {
+    "name": "buyer",
+    "email": "buyer@gmail.com",
+    "subject": "Жалоба",
+    "message": "Все зависает и слетает...",
+    "admin_reply": "",
+    "replied_at": null,
+    "user": 13,
+    "status": "in_progress",
+    "created_at": "2026-05-05T17:59:57.602Z",
+    "updated_at": "2026-05-05T18:00:12.725Z"
+  }
+},
+{
+  "model": "products.contactrequest",
+  "pk": 5,
+  "fields": {
+    "name": "buyer",
+    "email": "buyer@gmail.com",
+    "subject": "Жалоба",
+    "message": "Все, я удаляю свой аккаунт...",
+    "admin_reply": null,
+    "replied_at": null,
+    "user": 13,
+    "status": "new",
+    "created_at": "2026-05-05T18:00:46.910Z",
+    "updated_at": "2026-05-05T18:00:46.910Z"
+  }
+}
+]

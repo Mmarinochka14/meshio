@@ -29,6 +29,33 @@
   margin-bottom: 1.25vw;
 }
 
+.confirm-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4167vw;
+  margin-bottom: 1.25vw;
+}
+
+.confirm-modal__label {
+  color: var(--color-grey-super-light);
+}
+
+.confirm-modal__textarea {
+  width: 100%;
+  min-height: 6.25vw;
+  resize: none;
+  border-radius: 0.625vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-dark);
+  color: var(--color-white);
+  padding: 0.8333vw;
+  outline: none;
+}
+
+.confirm-modal__textarea:focus {
+  border-color: var(--color-purple);
+}
+
 .confirm-modal__actions {
   display: flex;
   justify-content: flex-end;
@@ -52,11 +79,17 @@
 .confirm-modal__primary {
   border: none;
   background: var(--color-purple);
-  color: var(--color-white);
+  color: var(--color-on-purple);
 }
 
 .confirm-modal__primary.is-danger {
   background: #c74343;
+  color: var(--color-on-purple);
+}
+
+.confirm-modal__primary:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 /* ===== CONFIRM MODAL ADAPTIVE ===== */
@@ -80,6 +113,18 @@
 
   .confirm-modal__description {
     margin-bottom: 1.8vw;
+  }
+
+  .confirm-modal__field {
+    gap: 0.8vw;
+    margin-bottom: 1.8vw;
+  }
+
+  .confirm-modal__textarea {
+    min-height: 12vw;
+    border-width: 0.0977vw;
+    border-radius: 1.1vw;
+    padding: 1.5vw;
   }
 
   .confirm-modal__actions {
@@ -118,6 +163,19 @@
 
   .confirm-modal__description {
     margin-bottom: 4.2667vw;
+  }
+
+  .confirm-modal__field {
+    gap: 1.8667vw;
+    margin-bottom: 4.2667vw;
+  }
+
+  .confirm-modal__textarea {
+    min-height: 34.6667vw;
+    border-width: 0.2667vw;
+    border-radius: 3.7333vw;
+    padding: 3.7333vw;
+    font-size: 4vw;
   }
 
   .confirm-modal__actions {

@@ -19,7 +19,7 @@ import logoutIcon from "../assets/icons/logout.svg";
 
 import { getCartCount } from "../api/cart";
 import { getGuestCartCount, subscribeCart } from "./cart/cartStore";
-import { getMyFavorites } from "../api/products";
+import { getMyFavorites, getProducts } from "../api/products";
 import {
   getFavoriteIds,
   setFavoriteIds,
@@ -35,6 +35,17 @@ function areSameIds(firstIds, secondIds) {
   return first.every((id, index) => id === second[index]);
 }
 
+const SEARCH_CATEGORY_SUGGESTIONS = [
+  { label: "Все модели", path: "/catalog" },
+  { label: "Животные", path: "/catalog?category=zhivotnye" },
+  { label: "Архитектура", path: "/catalog?category=arhitektura" },
+  { label: "Персонажи", path: "/catalog?category=personazhi" },
+  { label: "Техника", path: "/catalog?category=tehnika" },
+  { label: "Окружение", path: "/catalog?category=okruzhenie" },
+  { label: "Предметы", path: "/catalog?category=predmety" },
+  { label: "Транспорт", path: "/catalog?category=transport" },
+];
+
 export default function Header({
   onLoginClick,
   onOpenSellerModal,
@@ -46,16 +57,65 @@ export default function Header({
   const [cartCount, setCartCount] = useState(0);
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+  const [searchProducts, setSearchProducts] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [favoritesPulse, setFavoritesPulse] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isCompactHeader, setIsCompactHeader] = useState(false);
 
   const favoritesReadyRef = useRef(false);
   const favoritesPulseTimerRef = useRef(null);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     const unsub = subscribe(() => forceUpdate((x) => x + 1));
     return unsub;
+  }, []);
+
+  useEffect(() => {
+    let frameId = 0;
+
+    function handleScroll() {
+      if (frameId) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        const scrollTop =
+          window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          document.body.scrollTop ||
+          0;
+
+        setIsCompactHeader(scrollTop > 12);
+        frameId = 0;
+      });
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    function handlePointerDown(event) {
+      if (!searchRef.current) return;
+      if (!searchRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
   useEffect(() => {
@@ -208,6 +268,39 @@ export default function Header({
     };
   }, []);
 
+  useEffect(() => {
+    const value = searchValue.trim();
+
+    if (value.length < 2) {
+      setSearchProducts([]);
+      return undefined;
+    }
+
+    let ignore = false;
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const data = await getProducts({ q: value, page: 1 });
+        if (ignore) return;
+        setSearchProducts(Array.isArray(data?.results) ? data.results.slice(0, 5) : []);
+      } catch {
+        if (!ignore) setSearchProducts([]);
+      }
+    }, 220);
+
+    return () => {
+      ignore = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchValue]);
+
+  const filteredSearchCategories = SEARCH_CATEGORY_SUGGESTIONS.filter((item) =>
+    item.label.toLowerCase().includes(searchValue.trim().toLowerCase()),
+  ).slice(0, searchValue.trim() ? 4 : 6);
+
+  const shouldShowSearchSuggestions =
+    isSearchFocused &&
+    (filteredSearchCategories.length > 0 || searchProducts.length > 0);
+
   function handleSearchSubmit(event) {
     event.preventDefault();
 
@@ -215,6 +308,7 @@ export default function Header({
     const normalized = value.toLowerCase();
 
     if (!value) {
+      setIsSearchFocused(false);
       navigate("/catalog");
       return;
     }
@@ -234,15 +328,23 @@ export default function Header({
       const slug = categoryMap[normalized];
 
       if (!slug) {
+        setIsSearchFocused(false);
         navigate("/catalog");
         return;
       }
 
+      setIsSearchFocused(false);
       navigate(`/catalog?category=${slug}`);
       return;
     }
 
+    setIsSearchFocused(false);
     navigate(`/catalog?q=${encodeURIComponent(value)}`);
+  }
+
+  function handleSearchSuggestion(path) {
+    setIsSearchFocused(false);
+    navigate(path);
   }
 
   function handleProfileClickPath() {
@@ -296,7 +398,7 @@ export default function Header({
 
   return (
     <>
-      <header className="header">
+      <header className={`header ${isCompactHeader ? "is-compact" : ""}`}>
         <div className="header__container">
           <div className="header__logo-side">
             <Link to="/" className="header__logo">
@@ -368,7 +470,11 @@ export default function Header({
                 />
               </Link>
 
-              <form className="header__search" onSubmit={handleSearchSubmit}>
+              <form
+                className="header__search"
+                onSubmit={handleSearchSubmit}
+                ref={searchRef}
+              >
                 <img src={searchIcon} alt="" className="header__search-icon" />
                 <input
                   type="text"
@@ -376,7 +482,48 @@ export default function Header({
                   className="header__search-input"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
                 />
+
+                {shouldShowSearchSuggestions ? (
+                  <div className="header__suggestions">
+                    {filteredSearchCategories.length > 0 ? (
+                      <div className="header__suggestions-group">
+                        {filteredSearchCategories.map((item) => (
+                          <button
+                            key={item.path}
+                            type="button"
+                            className="header__suggestion"
+                            onClick={() => handleSearchSuggestion(item.path)}
+                          >
+                            <span className="header__suggestion-type">Категория</span>
+                            <span className="header__suggestion-title">{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {searchProducts.length > 0 ? (
+                      <div className="header__suggestions-group">
+                        {searchProducts.map((product) => (
+                          <button
+                            key={product.id}
+                            type="button"
+                            className="header__suggestion"
+                            onClick={() =>
+                              handleSearchSuggestion(`/products/${product.id}`)
+                            }
+                          >
+                            <span className="header__suggestion-type">Модель</span>
+                            <span className="header__suggestion-title">
+                              {product.title}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </form>
 
               <button
@@ -393,6 +540,35 @@ export default function Header({
               </button>
 
               <div className="header__actions">
+                {authed ? (
+                  <Link
+                    to={handleProfileClickPath()}
+                    className="header__action header__action--profile"
+                    title={userName}
+                  >
+                    <img
+                      src={userIcon}
+                      alt=""
+                      className="header__action-icon"
+                    />
+                    <span className="header__action-label">Кабинет</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="header__action header__action--profile"
+                    title="Войти"
+                    onClick={onLoginClick}
+                  >
+                    <img
+                      src={loginIcon}
+                      alt=""
+                      className="header__action-icon"
+                    />
+                    <span className="header__action-label">Войти</span>
+                  </button>
+                )}
+
                 <Link to={handleModelsPath()} className="header__action">
                   <img
                     src={modelsIcon}

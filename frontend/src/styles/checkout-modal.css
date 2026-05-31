@@ -2,7 +2,7 @@
   width: 36vw;
   padding: 2.0833vw;
   border-radius: 1.6667vw;
-  border: 0.1vw solid #22242d;
+  border: 0.1vw solid var(--color-grey-light);
 }
 
 .checkout-modal {
@@ -187,7 +187,7 @@
 .checkout-modal__summary-row--total {
   margin-top: 0.3125vw;
   padding-top: 0.8333vw;
-  border-top: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  border-top: 0.0521vw solid var(--color-grey-light);
 }
 
 .checkout-modal__agree {

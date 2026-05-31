@@ -13,10 +13,11 @@ import HomePage from "../pages/HomePage";
 import MyModelsPage from "../pages/MyModelsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProductPage from "../pages/ProductPage";
-import SellerDashboardPage from "../pages/SellerDashboardPage";
+import PrivacyPage from "../pages/PrivacyPage";
 import SellerLayout from "../layouts/SellerLayout";
 import SellerProfilePage from "../pages/SellerProfilePage";
 import SellerModelsPage from "../pages/SellerModelsPage";
+import SellerStorePage from "../pages/SellerStorePage";
 
 import AdminLayout from "../pages/admin/AdminLayout";
 import AdminProductsPage from "../pages/admin/AdminProductsPage";
@@ -51,6 +52,15 @@ export default function AppRouter() {
           element={
             <MainLayout>
               <ProductPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/sellers/:id"
+          element={
+            <MainLayout>
+              <SellerStorePage />
             </MainLayout>
           }
         />
@@ -101,19 +111,19 @@ export default function AppRouter() {
         />
 
         <Route
-          path="/buyer/profile"
+          path="/privacy"
           element={
             <MainLayout>
-              <BuyerProfilePage />
+              <PrivacyPage />
             </MainLayout>
           }
         />
 
         <Route
-          path="/seller/dashboard"
+          path="/buyer/profile"
           element={
             <MainLayout>
-              <SellerDashboardPage />
+              <BuyerProfilePage />
             </MainLayout>
           }
         />

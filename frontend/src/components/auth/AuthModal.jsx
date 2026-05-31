@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "../modals/Modal";
 import "../../styles/auth-modal.css";
 
-import { loginRequest, registerRequest } from "../../api/auth";
+import {
+  confirmPasswordReset,
+  loginRequest,
+  registerRequest,
+  requestPasswordReset,
+} from "../../api/auth";
 
 export default function AuthModal({
   isOpen,
@@ -15,11 +20,19 @@ export default function AuthModal({
 
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [loginForm, setLoginForm] = useState({
     username: "",
     password: "",
   });
+
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetForm, setResetForm] = useState({
+    code: "",
+    password: "",
+  });
+  const codeInputRefs = useRef([]);
 
   const [registerForm, setRegisterForm] = useState({
     username: "",
@@ -33,6 +46,7 @@ export default function AuthModal({
     if (!isOpen) return;
 
     setError("");
+    setSuccess("");
 
     if (initialStep === "registerForm" && initialRole) {
       setStep("registerForm");
@@ -54,7 +68,10 @@ export default function AuthModal({
     setStep("login");
     setRole("");
     setError("");
+    setSuccess("");
     setLoginForm({ username: "", password: "" });
+    setResetEmail("");
+    setResetForm({ code: "", password: "" });
     setRegisterForm({
       username: "",
       email: "",
@@ -75,6 +92,78 @@ export default function AuthModal({
     } catch {
       setError("Неверный логин или пароль.");
     }
+  }
+
+  async function handlePasswordResetSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await requestPasswordReset(resetEmail);
+      setSuccess(
+        response?.debug_code
+          ? `Код для разработки: ${response.debug_code}`
+          : "Если email зарегистрирован, мы отправили код восстановления.",
+      );
+      setStep("resetCode");
+    } catch {
+      setError("Не удалось отправить код. Проверьте email и попробуйте ещё раз.");
+    }
+  }
+
+  async function handlePasswordResetConfirm(e) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      await confirmPasswordReset(resetEmail, resetForm.code, resetForm.password);
+      setSuccess("Пароль обновлён. Теперь можно войти.");
+      setLoginForm((prev) => ({ ...prev, username: "" }));
+      setResetForm({ code: "", password: "" });
+      setStep("login");
+    } catch (err) {
+      setError(
+        err?.response?.data?.non_field_errors?.[0] ||
+          err?.response?.data?.code?.[0] ||
+          err?.response?.data?.new_password?.[0] ||
+          "Код не подошёл или истёк.",
+      );
+    }
+  }
+
+  function setResetCode(nextCode) {
+    setResetForm((prev) => ({
+      ...prev,
+      code: nextCode.replace(/\D/g, "").slice(0, 6),
+    }));
+  }
+
+  function handleCodeCellChange(index, value) {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = resetForm.code.padEnd(6, " ").split("");
+    next[index] = digit || " ";
+    setResetCode(next.join("").replace(/\s/g, ""));
+
+    if (digit && index < 5) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleCodeCellKeyDown(index, event) {
+    if (event.key !== "Backspace") return;
+
+    if (resetForm.code[index]) return;
+    if (index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+  }
+
+  function handleCodePaste(event) {
+    event.preventDefault();
+    const pasted = event.clipboardData.getData("text");
+    setResetCode(pasted);
   }
 
   function handleRegisterContinue() {
@@ -154,7 +243,15 @@ export default function AuthModal({
             ) : null}
 
             <div className="auth-modal__row">
-              <button type="button" className="auth-modal__link text-p2">
+              <button
+                type="button"
+                className="auth-modal__link text-p2"
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  setStep("forgotPassword");
+                }}
+              >
                 Забыли пароль?
               </button>
             </div>
@@ -175,6 +272,133 @@ export default function AuthModal({
                 }}
               >
                 Зарегистрироваться
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {step === "forgotPassword" && (
+        <div className="auth-modal">
+          <h2 className="auth-modal__title text-h2">Восстановление пароля</h2>
+
+          <form
+            onSubmit={handlePasswordResetSubmit}
+            className="auth-modal__form"
+          >
+            <label className="auth-modal__field">
+              <span className="auth-modal__label text-p2">Email</span>
+              <input
+                type="email"
+                className="auth-modal__input text-p2"
+                placeholder="Введите email аккаунта"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+              />
+            </label>
+
+            {error ? (
+              <div className="auth-modal__error text-p2">{error}</div>
+            ) : null}
+
+            {success ? (
+              <div className="auth-modal__success text-p2">{success}</div>
+            ) : null}
+
+            <button type="submit" className="auth-modal__primary text-p2">
+              Отправить код
+            </button>
+
+            <div className="auth-modal__footer text-p2">
+              <button
+                type="button"
+                className="auth-modal__link"
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  setStep("login");
+                }}
+              >
+                Вернуться ко входу
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {step === "resetCode" && (
+        <div className="auth-modal">
+          <h2 className="auth-modal__title text-h2">Код восстановления</h2>
+
+          <form onSubmit={handlePasswordResetConfirm} className="auth-modal__form">
+            <div className="auth-modal__field">
+              <span className="auth-modal__label text-p2">Код из письма</span>
+              <div className="auth-modal__otp" onPaste={handleCodePaste}>
+                {Array.from({ length: 6 }, (_, index) => (
+                  <input
+                    key={index}
+                    ref={(node) => {
+                      codeInputRefs.current[index] = node;
+                    }}
+                    className="auth-modal__otp-cell text-p1"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={resetForm.code[index] || ""}
+                    onChange={(e) => handleCodeCellChange(index, e.target.value)}
+                    onKeyDown={(e) => handleCodeCellKeyDown(index, e)}
+                    aria-label={`Цифра ${index + 1}`}
+                    required
+                  />
+                ))}
+              </div>
+            </div>
+
+            <label className="auth-modal__field">
+              <span className="auth-modal__label text-p2">Новый пароль</span>
+              <input
+                type="password"
+                className="auth-modal__input text-p2"
+                placeholder="Введите новый пароль"
+                value={resetForm.password}
+                onChange={(e) =>
+                  setResetForm((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
+                minLength={8}
+                required
+              />
+            </label>
+
+            {error ? (
+              <div className="auth-modal__error text-p2">{error}</div>
+            ) : null}
+
+            {success ? (
+              <div className="auth-modal__success text-p2">{success}</div>
+            ) : null}
+
+            <button
+              type="submit"
+              className="auth-modal__primary text-p2"
+              disabled={resetForm.code.length !== 6 || resetForm.password.length < 8}
+            >
+              Сменить пароль
+            </button>
+
+            <div className="auth-modal__footer text-p2">
+              <button
+                type="button"
+                className="auth-modal__link"
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  setStep("forgotPassword");
+                }}
+              >
+                Отправить код ещё раз
               </button>
             </div>
           </form>

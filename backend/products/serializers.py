@@ -155,6 +155,7 @@ class GeneratedTextureSerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
+    seller_id = serializers.IntegerField(source='seller.id', read_only=True)
     seller_username = serializers.CharField(source='seller.username', read_only=True)
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
@@ -179,6 +180,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'favorites_count',
             'sales_count',
             'comments_count',
+            'seller_id',
             'seller_username',
             'category',
             'license',
@@ -216,7 +218,10 @@ class ProductListSerializer(serializers.ModelSerializer):
         return obj.comments.count()
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    seller_id = serializers.IntegerField(source='seller.id', read_only=True)
     seller_username = serializers.CharField(source='seller.username', read_only=True)
+    seller_average_rating = serializers.SerializerMethodField()
+    seller_reviews_count = serializers.SerializerMethodField()
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
     main_preview_url = serializers.SerializerMethodField()
@@ -256,7 +261,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'views_count',
             'favorites_count',
             'sales_count',
+            'seller_id',
             'seller_username',
+            'seller_average_rating',
+            'seller_reviews_count',
             'category',
             'license',
             'main_preview',
@@ -290,6 +298,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+
+    def get_seller_average_rating(self, obj):
+        products = obj.seller.products.filter(status='published', reviews_count__gt=0)
+        total_reviews = sum(product.reviews_count for product in products)
+        if total_reviews == 0:
+            return 0
+
+        weighted_total = sum(
+            float(product.average_rating) * product.reviews_count
+            for product in products
+        )
+        return round(weighted_total / total_reviews, 2)
+
+    def get_seller_reviews_count(self, obj):
+        return sum(
+            product.reviews_count
+            for product in obj.seller.products.filter(status='published')
+        )
 
     def get_viewer_url(self, obj):
         request = self.context.get('request')

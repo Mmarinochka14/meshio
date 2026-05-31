@@ -6,14 +6,6 @@ import boto3
 from botocore.client import Config
 from django.conf import settings
 
-import mimetypes
-import uuid
-from pathlib import Path
-
-import boto3
-from botocore.client import Config
-from django.conf import settings
-
 
 _S3_CLIENT = None
 

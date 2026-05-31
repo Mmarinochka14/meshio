@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { sendContactRequest } from "../../api/contacts";
 
 export default function ContactsFormSection() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    topic: "",
+    subject: "",
     message: "",
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -19,19 +22,28 @@ export default function ContactsFormSection() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    console.log("Contacts form submitted:", formData);
+    setStatusMessage("");
+    setErrorMessage("");
+    setIsSending(true);
 
-    setIsSubmitted(true);
-
-    setFormData({
-      name: "",
-      email: "",
-      topic: "",
-      message: "",
-    });
+    try {
+      const data = await sendContactRequest(formData);
+      setStatusMessage(data?.detail || "Сообщение отправлено.");
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      const detail = error?.response?.data?.detail;
+      setErrorMessage(detail || "Не удалось отправить сообщение.");
+    } finally {
+      setIsSending(false);
+    }
   }
 
   return (
@@ -86,10 +98,10 @@ export default function ContactsFormSection() {
               <span className="contacts-form__label text-p3">Тема</span>
               <input
                 type="text"
-                name="topic"
+                name="subject"
                 className="contacts-form__input text-p2"
                 placeholder="Например: вопрос по публикации модели"
-                value={formData.topic}
+                value={formData.subject}
                 onChange={handleChange}
                 required
               />
@@ -108,15 +120,24 @@ export default function ContactsFormSection() {
             </label>
 
             <div className="contacts-form__actions">
-              <button type="submit" className="contacts-form__submit text-p3">
-                Отправить сообщение
+              <button
+                type="submit"
+                className="contacts-form__submit text-p3"
+                disabled={isSending}
+              >
+                {isSending ? "Отправка..." : "Отправить сообщение"}
               </button>
             </div>
 
-            {isSubmitted ? (
+            {statusMessage ? (
               <div className="contacts-form__success text-p3">
-                Сообщение отправлено. Для предзащиты можно оставить этот
-                интерфейсный сценарий или потом подключить реальный backend.
+                {statusMessage}
+              </div>
+            ) : null}
+
+            {errorMessage ? (
+              <div className="contacts-form__error text-p3">
+                {errorMessage}
               </div>
             ) : null}
           </form>

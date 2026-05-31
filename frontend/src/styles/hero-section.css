@@ -26,12 +26,12 @@
 
 .hero__title {
   margin-bottom: 1.25vw;
-  color: var(--color-white);
+  color: var(--color-on-purple);
 }
 
 .hero__subtitle {
   margin-bottom: 2.0833vw;
-  color: var(--color-white);
+  color: var(--color-on-purple);
   max-width: 32vw;
 }
 
@@ -59,22 +59,30 @@
 }
 
 .hero__button--primary {
-  background: var(--color-purple);
-  color: var(--color-white);
+  background: linear-gradient(
+    90deg,
+    var(--color-purple) 0%,
+    var(--color-purple-light) 100%
+  );
+  color: var(--color-on-purple);
 }
 
 .hero__button--primary:hover {
-  background: var(--color-purple-hover);
+  background: linear-gradient(
+    90deg,
+    var(--color-purple-hover) 0%,
+    var(--color-purple-light) 100%
+  );
 }
 
 .hero__button--secondary {
   background: transparent;
-  color: var(--color-white);
-  border: 0.0521vw solid var(--color-white);
+  color: var(--color-on-purple);
+  border: 0.0521vw solid var(--color-on-purple);
 }
 
 .hero__button--secondary:hover {
-  background: rgba(235, 235, 235, 0.08);
+  background: color-mix(in srgb, var(--color-on-purple) 10%, transparent);
 }
 
 .hero__visual {
@@ -168,7 +176,7 @@
     margin-bottom: 2.9333vw;
     font-size: 5.8667vw;
     line-height: 1.1;
-    color: var(--color-white);
+    color: var(--color-on-purple);
   }
 
   .hero__title br {

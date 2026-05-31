@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
   addProductComment,
@@ -30,6 +30,7 @@ import {
 import ProductPageViewerPanel from "../components/ProductPageViewerPanel";
 import CheckoutModal from "../components/CheckoutModal";
 import PaymentSuccessModal from "../components/PaymentSuccessModal";
+import ProductsSection from "../components/ProductsSection";
 
 import heartIcon from "../assets/icons/favorite.svg";
 import cartIcon from "../assets/icons/cart.svg";
@@ -178,6 +179,7 @@ export default function ProductPage() {
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [commentSending, setCommentSending] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [successData, setSuccessData] = useState(null);
@@ -196,6 +198,14 @@ export default function ProductPage() {
   const displayViews = product?.views_count ?? 0;
   const displayComments = product?.comments_count ?? 0;
   const displayReviews = product?.reviews_count ?? 0;
+  const displaySellerRating = Number(
+    product?.seller_average_rating ?? product?.average_rating ?? 0,
+  ).toFixed(2);
+  const displaySellerReviews = product?.seller_reviews_count ?? displayReviews;
+  const descriptionText =
+    product?.description ||
+    "Описание пока не добавлено. Здесь будет текст о назначении модели, ее качестве, применении и особенностях.";
+  const shouldCollapseDescription = descriptionText.length > 180;
 
   const texturePromptSuggestions = [
     "розовый матовый пластик",
@@ -462,6 +472,11 @@ export default function ProductPage() {
 
   async function handleGenerateTexture() {
     try {
+      if (!isAuthenticated) {
+        openAuthModal("login");
+        return;
+      }
+
       if (!texturePrompt.trim()) {
         setError("Введите промпт для генерации текстуры.");
         return;
@@ -620,22 +635,49 @@ export default function ProductPage() {
 
                 {canUseBuyerActions ? (
                   <div className="product-page__action-stack">
-                    <button
-                      type="button"
-                      className="product-page__buy-btn text-p2"
-                      onClick={handlePrimaryAction}
-                    >
-                      <img
-                        src={cartIcon}
-                        alt=""
-                        className="product-page__buy-icon"
-                      />
-                      <span>
-                        {product.has_purchase || isFree
-                          ? "Скачать модель"
-                          : "Купить модель"}
-                      </span>
-                    </button>
+                    <div className="product-page__primary-row">
+                      <button
+                        type="button"
+                        className="product-page__buy-btn text-p2"
+                        onClick={handlePrimaryAction}
+                      >
+                        <img
+                          src={cartIcon}
+                          alt=""
+                          className="product-page__buy-icon"
+                        />
+                        <span>
+                          {product.has_purchase || isFree
+                            ? "Скачать модель"
+                            : "Купить модель"}
+                        </span>
+                      </button>
+
+                        <button
+                          type="button"
+                          className={`product-page__favorite-icon-btn ${
+                            isFavorite ? "is-active" : ""
+                          }`}
+                          onClick={handleFavoriteClick}
+                          disabled={isFavoriteLoading}
+                          aria-label={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                          title={
+                            isFavorite
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"
+                          }
+                        >
+                          <img
+                            src={heartIcon}
+                            alt=""
+                            className="product-page__favorite-icon"
+                          />
+                        </button>
+                      </div>
 
                     {!product.has_purchase && !isFree ? (
                       <div className="product-page__secondary-row">
@@ -660,66 +702,10 @@ export default function ProductPage() {
                                 : "Добавить в корзину"}
                           </span>
                         </button>
-
-                        <button
-                          type="button"
-                          className={`product-page__favorite-icon-btn ${
-                            isFavorite ? "is-active" : ""
-                          }`}
-                          onClick={handleFavoriteClick}
-                          disabled={isFavoriteLoading}
-                          aria-label={
-                            isFavorite
-                              ? "Удалить из избранного"
-                              : "Добавить в избранное"
-                          }
-                          title={
-                            isFavorite
-                              ? "Удалить из избранного"
-                              : "Добавить в избранное"
-                          }
-                        >
-                          <img
-                            src={heartIcon}
-                            alt=""
-                            className="product-page__favorite-icon"
-                          />
-                        </button>
                       </div>
-                    ) : (
-                      <div className="product-page__secondary-row product-page__secondary-row--single">
-                        <button
-                          type="button"
-                          className={`product-page__favorite-icon-btn ${
-                            isFavorite ? "is-active" : ""
-                          }`}
-                          onClick={handleFavoriteClick}
-                          disabled={isFavoriteLoading}
-                          aria-label={
-                            isFavorite
-                              ? "Удалить из избранного"
-                              : "Добавить в избранное"
-                          }
-                          title={
-                            isFavorite
-                              ? "Удалить из избранного"
-                              : "Добавить в избранное"
-                          }
-                        >
-                          <img
-                            src={heartIcon}
-                            alt=""
-                            className="product-page__favorite-icon"
-                          />
-                        </button>
-                      </div>
-                    )}
+                    ) : null}
                   </div>
-                ) : (
-                  <div className="product-page__error text-p2">
-                    Покупка, корзинаи избранное недоступны.
-                  </div>
-                )}
+                ) : null}
 
                 <div className="product-page__info-block">
                   <h3 className="product-page__subheading text-h4">
@@ -765,27 +751,58 @@ export default function ProductPage() {
                   <h3 className="product-page__subheading text-h4">
                     Описание модели
                   </h3>
-                  <div className="product-page__description-card text-p3">
-                    {product.description ||
-                      "Описание пока не добавлено. Здесь будет текст о назначении модели, её качестве, применении и особенностях."}
+                  <div
+                    className={`product-page__description-card text-p3 ${
+                      shouldCollapseDescription && !isDescriptionExpanded
+                        ? "is-collapsed"
+                        : ""
+                    }`}
+                  >
+                    {descriptionText}
                   </div>
+                  {shouldCollapseDescription ? (
+                    <button
+                      type="button"
+                      className="product-page__description-toggle text-p3"
+                      onClick={() =>
+                        setIsDescriptionExpanded((prev) => !prev)
+                      }
+                    >
+                      {isDescriptionExpanded ? "Свернуть" : "Показать полностью"}
+                    </button>
+                  ) : null}
                 </div>
 
                 <div className="product-page__info-block">
                   <h3 className="product-page__subheading text-h4">Автор</h3>
 
                   <div className="product-page__author-head">
-                    <div className="product-page__author-avatar">
+                    <Link
+                      to={
+                        product.seller_id
+                          ? `/sellers/${product.seller_id}`
+                          : "/catalog"
+                      }
+                      className="product-page__author-avatar product-page__author-avatar--link"
+                      aria-label="Открыть магазин продавца"
+                    >
                       {getInitial(product.seller_username)}
-                    </div>
+                    </Link>
 
                     <div className="product-page__author-main">
-                      <div className="product-page__author-name text-p2">
+                      <Link
+                        to={
+                          product.seller_id
+                            ? `/sellers/${product.seller_id}`
+                            : "/catalog"
+                        }
+                        className="product-page__author-name product-page__author-name--link text-p2"
+                      >
                         {product.seller_username || "NeonMesh Studio"}
-                      </div>
+                      </Link>
 
                       <div className="product-page__rating-inline">
-                        {renderStars(product.average_rating).map(
+                        {renderStars(displaySellerRating).map(
                           (icon, index) => (
                             <img
                               key={index}
@@ -795,7 +812,10 @@ export default function ProductPage() {
                             />
                           ),
                         )}
-                        <span className="text-p3">{displayRating}</span>
+                        <span className="text-p3">{displaySellerRating}</span>
+                        <span className="product-page__reviews-count text-p3">
+                          {displaySellerReviews} оценок
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -814,7 +834,7 @@ export default function ProductPage() {
             </aside>
           </div>
 
-          <div className="product-page__section-card">
+          <div id="comments" className="product-page__section-card">
             <h2 className="product-page__block-title text-h3">
               {comments.length} комментариев
             </h2>
@@ -881,6 +901,8 @@ export default function ProductPage() {
               )}
             </div>
           </div>
+
+          <ProductsSection title="Похожие модели" ordering="rating_desc" />
         </div>
       </section>
 

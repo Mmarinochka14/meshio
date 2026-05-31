@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/cart-page.css";
+import { buildMediaUrl } from "../api/url";
 
 import trashIcon from "../assets/icons/delete.svg";
 import cartIcon from "../assets/icons/cart.svg";
@@ -181,11 +182,7 @@ export default function CartPage() {
                     product.preview ||
                     "";
 
-                  const previewSrc = rawPreview
-                    ? rawPreview.startsWith("http")
-                      ? rawPreview
-                      : `http://127.0.0.1:8000${rawPreview}`
-                    : "";
+                  const previewSrc = buildMediaUrl(rawPreview);
 
                   const tags = [
                     product.model_format

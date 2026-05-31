@@ -80,7 +80,7 @@ export default function MainLayout({ children }) {
 
       <main>{content}</main>
 
-      <Footer onOpenSellerModal={openSellerModal} />
+      <Footer onOpenSellerModal={openSellerModal} user={user} />
 
       <AuthModal
         isOpen={isAuthOpen}

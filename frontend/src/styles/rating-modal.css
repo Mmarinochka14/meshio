@@ -2,7 +2,7 @@
   width: 34vw;
   padding: 2.0833vw;
   border-radius: 1.6667vw;
-  border: 0.1vw solid #22242d;
+  border: 0.1vw solid var(--color-grey-light);
 }
 
 .rating-modal {

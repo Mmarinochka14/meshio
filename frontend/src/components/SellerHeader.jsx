@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getUser, logout, subscribe } from "./auth/authStore";
 import ConfirmModal from "./ConfirmModal";
 import "../styles/seller-header.css";
@@ -14,17 +14,74 @@ import logoutIcon from "../assets/icons/logout.svg";
 import catalogIcon from "../assets/icons/catalog.svg";
 import notificationIcon from "../assets/icons/notification.svg";
 
+const SEARCH_SUGGESTIONS = [
+  { label: "Все модели", path: "/seller/models", type: "Раздел" },
+  { label: "Каталог", path: "/catalog", type: "Раздел" },
+  { label: "Персонажи", path: "/catalog?category=personazhi", type: "Категория" },
+  { label: "Техника", path: "/catalog?category=tehnika", type: "Категория" },
+  { label: "Окружение", path: "/catalog?category=okruzhenie", type: "Категория" },
+  { label: "Архитектура", path: "/catalog?category=arhitektura", type: "Категория" },
+];
+
 export default function SellerHeader({ onOpenUploadModal }) {
   const navigate = useNavigate();
 
   const [, forceUpdate] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isCompactHeader, setIsCompactHeader] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     const unsub = subscribe(() => forceUpdate((x) => x + 1));
     return unsub;
+  }, []);
+
+  useEffect(() => {
+    function handleDocumentClick(event) {
+      if (!searchRef.current) return;
+      if (!searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    return () => document.removeEventListener("mousedown", handleDocumentClick);
+  }, []);
+
+  useEffect(() => {
+    let frameId = 0;
+
+    function handleScroll() {
+      if (frameId) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        const scrollTop =
+          window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          document.body.scrollTop ||
+          0;
+
+        setIsCompactHeader(scrollTop > 12);
+        frameId = 0;
+      });
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -79,9 +136,19 @@ export default function SellerHeader({ onOpenUploadModal }) {
     navigate(`/seller/models?q=${encodeURIComponent(value)}`);
   }
 
+  const filteredSuggestions = SEARCH_SUGGESTIONS.filter((item) =>
+    item.label.toLowerCase().includes(searchValue.trim().toLowerCase()),
+  ).slice(0, searchValue.trim() ? 4 : 6);
+
+  function handleSuggestionClick(path) {
+    setIsSearchOpen(false);
+    setSearchValue("");
+    navigate(path);
+  }
+
   return (
     <>
-      <header className="seller-header">
+      <header className={`seller-header ${isCompactHeader ? "is-compact" : ""}`}>
         <div className="seller-header__container">
           <div className="seller-header__logo-side">
             <Link to="/" className="seller-header__logo">
@@ -144,6 +211,7 @@ export default function SellerHeader({ onOpenUploadModal }) {
               <form
                 className="seller-header__search"
                 onSubmit={handleSearchSubmit}
+                ref={searchRef}
               >
                 <img
                   src={searchIcon}
@@ -155,8 +223,27 @@ export default function SellerHeader({ onOpenUploadModal }) {
                   placeholder="Поиск"
                   className="seller-header__search-input"
                   value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                    setIsSearchOpen(true);
+                  }}
+                  onFocus={() => setIsSearchOpen(true)}
                 />
+                {isSearchOpen && filteredSuggestions.length > 0 ? (
+                  <div className="seller-header__suggestions">
+                    {filteredSuggestions.map((item) => (
+                      <button
+                        key={item.path}
+                        type="button"
+                        className="seller-header__suggestion"
+                        onClick={() => handleSuggestionClick(item.path)}
+                      >
+                        <span className="seller-header__suggestion-type">{item.type}</span>
+                        <span className="seller-header__suggestion-title">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </form>
 
               <button
@@ -173,6 +260,23 @@ export default function SellerHeader({ onOpenUploadModal }) {
               </button>
 
               <div className="seller-header__actions">
+                <NavLink
+                  to="/seller/profile"
+                  className={({ isActive }) =>
+                    `seller-header__action seller-header__action--profile ${
+                      isActive ? "is-active" : ""
+                    }`
+                  }
+                  title={userName}
+                >
+                  <img
+                    src={userIcon}
+                    alt=""
+                    className="seller-header__action-icon"
+                  />
+                  <span className="seller-header__action-label">Кабинет</span>
+                </NavLink>
+
                 <NavLink
                   to="/seller/models"
                   className={({ isActive }) =>

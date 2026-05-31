@@ -17,6 +17,7 @@ import {
   downloadProduct,
 } from "../api/products";
 import { addToCartRequest } from "../api/cart";
+import { buildMediaUrl } from "../api/url";
 import { addToGuestCart, isInGuestCart, subscribeCart } from "./cart/cartStore";
 import {
   addFavoriteId,
@@ -36,11 +37,6 @@ function renderStars(rating) {
   return Array.from({ length: 5 }, (_, index) =>
     index < normalized ? starIcon : starEmptyIcon,
   );
-}
-
-function normalizePreview(url) {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `http://127.0.0.1:8000${url}`;
 }
 
 function getInitialFavorite(product, isFavoriteProp, forceFavoriteActive) {
@@ -94,6 +90,7 @@ export default function ProductCard({
 
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [isCartLoading, setIsCartLoading] = useState(false);
+  const [isCartJustAdded, setIsCartJustAdded] = useState(false);
 
   const user = isAuthenticated() ? getUser() : null;
 
@@ -117,7 +114,7 @@ export default function ProductCard({
     poly_style,
   } = product || {};
 
-  const previewSrc = normalizePreview(main_preview_url);
+  const previewSrc = buildMediaUrl(main_preview_url);
   const isFree = Number(price || 0) === 0;
 
   const currentFavorite = forceFavoriteActive
@@ -289,12 +286,14 @@ export default function ProductCard({
       if (typeof onAddToCart === "function") {
         await onAddToCart(product);
         setLocalInCart(true);
+        setIsCartJustAdded(true);
         return;
       }
 
       if (!isAuthenticated()) {
         addToGuestCart(product.id);
         setLocalInCart(true);
+        setIsCartJustAdded(true);
         return;
       }
 
@@ -304,6 +303,7 @@ export default function ProductCard({
 
       await addToCartRequest(product.id);
       setLocalInCart(true);
+      setIsCartJustAdded(true);
     } catch (error) {
       console.error("Не удалось добавить товар в корзину", error);
     } finally {
@@ -311,12 +311,30 @@ export default function ProductCard({
     }
   }
 
+  useEffect(() => {
+    if (!isCartJustAdded) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setIsCartJustAdded(false);
+    }, 650);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isCartJustAdded]);
+
   return (
     <Link
       to={`/products/${id}`}
       className={`product-card ${readonlyMode ? "is-readonly" : ""}`}
     >
       <div className="product-card__media">
+        {isFree ? (
+          <div className="product-card__badges">
+            <span className="product-card__badge product-card__badge--free text-p3">
+              Free
+            </span>
+          </div>
+        ) : null}
+
         <div className="product-card__image">
           {previewSrc ? (
             <img src={previewSrc} alt={title || "3D модель"} />
@@ -415,7 +433,9 @@ export default function ProductCard({
               type="button"
               className={`product-card__cart-btn text-p2 ${
                 currentInCart && !isFree ? "product-card__cart-btn--active" : ""
-              } ${isFree ? "product-card__cart-btn--download" : ""}`}
+              } ${isFree ? "product-card__cart-btn--download" : ""} ${
+                isCartJustAdded ? "is-just-added" : ""
+              }`}
               onClick={handleMainActionClick}
               disabled={isCartLoading}
             >
@@ -442,7 +462,9 @@ export default function ProductCard({
                   currentInCart && !isFree
                     ? "product-card__mobile-main-btn--active"
                     : ""
-                } ${isFree ? "product-card__mobile-main-btn--download" : ""}`}
+                } ${isFree ? "product-card__mobile-main-btn--download" : ""} ${
+                  isCartJustAdded ? "is-just-added" : ""
+                }`}
                 onClick={handleMainActionClick}
                 disabled={isCartLoading}
                 aria-label={isFree ? "Скачать" : "Добавить в корзину"}

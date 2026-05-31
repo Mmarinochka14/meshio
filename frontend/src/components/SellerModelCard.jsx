@@ -1,4 +1,6 @@
 import "../styles/seller-model-card.css";
+import { buildMediaUrl } from "../api/url";
+import { useNavigate } from "react-router-dom";
 
 function getTagList(product) {
   const tags = [];
@@ -43,26 +45,37 @@ export default function SellerModelCard({
   onArchive,
   onSendToReview,
 }) {
+  const navigate = useNavigate();
   const rawPreview =
     product?.main_preview_url ||
     product?.preview_url ||
     product?.main_preview ||
     "";
 
-  const previewSrc = rawPreview
-    ? rawPreview.startsWith("http")
-      ? rawPreview
-      : `http://127.0.0.1:8000${rawPreview}`
-    : "";
+  const previewSrc = buildMediaUrl(rawPreview);
 
   const tags = getTagList(product);
   const displayTitle = product?.title || "Название модели";
   const status = product?.status || "";
   const statusLabel = getStatusLabel(status);
   const statusClass = getStatusClass(status);
+  const isPublished = status === "published" && product?.id;
+
+  function handleCardClick() {
+    if (isPublished) {
+      navigate(`/products/${product.id}`);
+    }
+  }
+
+  function stopCardNavigation(event) {
+    event.stopPropagation();
+  }
 
   return (
-    <article className="seller-model-card">
+    <article
+      className={`seller-model-card ${isPublished ? "is-clickable" : ""}`}
+      onClick={handleCardClick}
+    >
       <div className="seller-model-card__image-wrap">
         <div className="seller-model-card__status-row">
           <span className={`seller-model-card__status text-p3 ${statusClass}`}>
@@ -98,7 +111,10 @@ export default function SellerModelCard({
           <button
             type="button"
             className="seller-model-card__edit text-p2"
-            onClick={() => onEdit(product)}
+            onClick={(event) => {
+              stopCardNavigation(event);
+              onEdit(product);
+            }}
           >
             Редактировать
           </button>
@@ -107,7 +123,10 @@ export default function SellerModelCard({
             <button
               type="button"
               className="seller-model-card__secondary text-p2"
-              onClick={() => onArchive(product)}
+              onClick={(event) => {
+                stopCardNavigation(event);
+                onArchive(product);
+              }}
             >
               Снять с публикации
             </button>
@@ -119,7 +138,10 @@ export default function SellerModelCard({
             <button
               type="button"
               className="seller-model-card__secondary text-p2"
-              onClick={() => onSendToReview(product)}
+              onClick={(event) => {
+                stopCardNavigation(event);
+                onSendToReview(product);
+              }}
             >
               {status === "rejected"
                 ? "Отправить повторно"
@@ -133,7 +155,10 @@ export default function SellerModelCard({
             <button
               type="button"
               className="seller-model-card__delete text-p2"
-              onClick={() => onDelete(product)}
+              onClick={(event) => {
+                stopCardNavigation(event);
+                onDelete(product);
+              }}
             >
               Удалить
             </button>

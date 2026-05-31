@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: 2.5vw;
-  border: 0.1vw solid #22242d;
+  border: 0.1vw solid var(--color-grey-light);
 }
 
 .modal__panel {
@@ -43,7 +43,7 @@
   height: 40vw;
   padding: 2.5vw;
   border-radius: 1.6667vw;
-  border: 0.1vw solid #22242d;
+  border: 0.1vw solid var(--color-grey-light);
 }
 
 /* ===== MODAL ADAPTIVE ===== */

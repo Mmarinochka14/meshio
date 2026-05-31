@@ -8,6 +8,20 @@ import CatalogFilters from "../components/CatalogFilters";
 import CatalogSort from "../components/CatalogSort";
 import Pagination from "../components/Pagination";
 
+import allModelsImage from "../assets/images/category-all-models.png";
+import charactersImage from "../assets/images/category-characters.png";
+import animalsImage from "../assets/images/category-animals.png";
+import techImage from "../assets/images/category-tech.png";
+import environmentImage from "../assets/images/category-environment.png";
+
+const CATEGORY_CARDS = [
+  { slug: "", title: "Все модели", image: allModelsImage },
+  { slug: "personazhi", title: "Персонажи", image: charactersImage },
+  { slug: "zhivotnye", title: "Животные", image: animalsImage },
+  { slug: "tehnika", title: "Техника", image: techImage },
+  { slug: "okruzhenie", title: "Окружение", image: environmentImage },
+];
+
 function parseBool(val) {
   if (val === "true") return true;
   if (val === "false") return false;
@@ -60,6 +74,62 @@ function buildParamsFromSearchParams(sp) {
   params.page = page || 1;
 
   return params;
+}
+
+function findLabel(options, value) {
+  return options?.find((item) => item.value === value)?.label || value;
+}
+
+function buildActiveFilterChips(searchParams, meta) {
+  const chips = [];
+  const categories = meta?.categories || [];
+
+  searchParams.getAll("category").forEach((slug) => {
+    const category = categories.find((item) => item.slug === slug);
+    chips.push({
+      key: `category:${slug}`,
+      label: category?.name || slug,
+      remove: { key: "category", value: slug },
+    });
+  });
+
+  [
+    ["model_format", "Формат", meta?.formats],
+    ["poly_style", "Геометрия", meta?.poly_styles],
+    ["topology_type", "Топология", meta?.topology_types],
+  ].forEach(([key, label, options]) => {
+    const value = searchParams.get(key);
+    if (value) {
+      chips.push({
+        key,
+        label: `${label}: ${findLabel(options, value)}`,
+        remove: { key },
+      });
+    }
+  });
+
+  [
+    ["is_free", "Бесплатные"],
+    ["has_uv", "UV"],
+    ["has_textures", "Текстуры"],
+  ].forEach(([key, label]) => {
+    if (searchParams.get(key) === "true") {
+      chips.push({ key, label, remove: { key } });
+    }
+  });
+
+  const minPolygons = searchParams.get("min_polygons");
+  const maxPolygons = searchParams.get("max_polygons");
+
+  if (minPolygons || maxPolygons) {
+    chips.push({
+      key: "polygons",
+      label: `Полигоны: ${minPolygons || "0"}-${maxPolygons || "∞"}`,
+      remove: { keys: ["min_polygons", "max_polygons"] },
+    });
+  }
+
+  return chips;
 }
 
 export default function CatalogPage() {
@@ -172,6 +242,50 @@ export default function CatalogPage() {
   const results = Array.isArray(data?.results) ? data.results : [];
   const totalCount = data?.count || 0;
   const currentPage = Number(searchParams.get("page") || 1);
+  const activeFilterChips = useMemo(
+    () => buildActiveFilterChips(searchParams, filtersMeta),
+    [searchParams, filtersMeta],
+  );
+
+  function removeFilter(remove) {
+    const sp = new URLSearchParams(searchParams);
+
+    if (remove.keys) {
+      remove.keys.forEach((key) => sp.delete(key));
+    } else if (remove.value) {
+      const nextValues = sp
+        .getAll(remove.key)
+        .filter((value) => value !== remove.value);
+      sp.delete(remove.key);
+      nextValues.forEach((value) => sp.append(remove.key, value));
+    } else {
+      sp.delete(remove.key);
+    }
+
+    sp.delete("page");
+    setSearchParams(sp);
+  }
+
+  function toggleCategoryCard(slug) {
+    const sp = new URLSearchParams(searchParams);
+    sp.delete("page");
+
+    if (!slug) {
+      sp.delete("category");
+      setSearchParams(sp);
+      return;
+    }
+
+    const categories = sp.getAll("category");
+    const isActive = categories.includes(slug);
+    const nextCategories = isActive
+      ? categories.filter((item) => item !== slug)
+      : [...categories, slug];
+
+    sp.delete("category");
+    nextCategories.forEach((item) => sp.append("category", item));
+    setSearchParams(sp);
+  }
 
   return (
     <div className="catalog-page">
@@ -181,7 +295,60 @@ export default function CatalogPage() {
           <div className="catalog-page__divider" />
         </div>
 
+        <div className="catalog-page__categories">
+          {CATEGORY_CARDS.map((category) => {
+            const isActive = category.slug
+              ? searchParams.getAll("category").includes(category.slug)
+              : searchParams.getAll("category").length === 0;
+
+            return (
+              <button
+                key={category.title}
+                type="button"
+                className={`catalog-page__category-card ${
+                  isActive ? "is-active" : ""
+                }`}
+                onClick={() => toggleCategoryCard(category.slug)}
+              >
+                <span className="catalog-page__category-title text-p2">
+                  {category.title}
+                </span>
+                <img
+                  src={category.image}
+                  alt=""
+                  className="catalog-page__category-image"
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="catalog-page__promo">
+          <div className="catalog-page__promo-main">
+            <span className="catalog-page__promo-kicker text-p3">
+              Новые поступления
+            </span>
+            <h2 className="catalog-page__promo-title text-h3">
+              Свежие 3D-модели для быстрых прототипов
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            className="catalog-page__promo-action text-p2"
+            onClick={() => applyQuery({ ordering: "newest" })}
+          >
+            Смотреть новинки
+          </button>
+        </div>
+
         <div className="catalog-page__top-row">
+          <div className="catalog-page__summary text-p3">
+            {isLoading
+              ? "Ищем модели..."
+              : `${totalCount} ${totalCount === 1 ? "модель" : "моделей"}`}
+          </div>
+
           <div className="catalog-page__top-controls">
             <CatalogSort
               value={searchParams.get("ordering") || "newest"}
@@ -199,6 +366,34 @@ export default function CatalogPage() {
           </div>
         </div>
 
+        {activeFilterChips.length > 0 ? (
+          <div className="catalog-page__active-filters">
+            <span className="catalog-page__active-filters-label text-p3">
+              Активные фильтры
+            </span>
+
+            {activeFilterChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                className="catalog-page__filter-chip text-p3"
+                onClick={() => removeFilter(chip.remove)}
+              >
+                <span>{chip.label}</span>
+                <span className="catalog-page__filter-chip-x">×</span>
+              </button>
+            ))}
+
+            <button
+              type="button"
+              className="catalog-page__filter-reset text-p3"
+              onClick={() => setSearchParams({})}
+            >
+              Сбросить всё
+            </button>
+          </div>
+        ) : null}
+
         <div className="catalog-page__layout">
           <aside className="catalog-page__filters">
             <CatalogFilters
@@ -211,7 +406,11 @@ export default function CatalogPage() {
 
           <main className="catalog-page__content">
             {isLoading ? (
-              <div className="page-state">Загрузка…</div>
+              <div className="catalog-page__skeleton-grid">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <div key={index} className="catalog-page__skeleton-card" />
+                ))}
+              </div>
             ) : results.length === 0 ? (
               <div className="page-state">Ничего не найдено</div>
             ) : (

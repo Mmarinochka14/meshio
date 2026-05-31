@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../styles/admin.css";
 import apiClient from "../../api/client";
+import { buildMediaUrl } from "../../api/url";
 
 function getDisplayName(user) {
   const fullName = [user?.last_name, user?.first_name, user?.middle_name]
@@ -12,13 +13,29 @@ function getDisplayName(user) {
 }
 
 function normalizePreview(url) {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `http://127.0.0.1:8000${url}`;
+  return buildMediaUrl(url);
+}
+
+function formatSellerStatus(status) {
+  const map = {
+    pending: "На рассмотрении",
+    approved: "Одобрен",
+    rejected: "Отклонен",
+  };
+
+  return map[status] || "На рассмотрении";
+}
+
+function getStatusClass(status) {
+  if (status === "approved") return "is-published";
+  if (status === "rejected") return "is-rejected";
+  return "is-pending";
 }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     loadUsers();
@@ -41,22 +58,38 @@ export default function AdminUsersPage() {
   }
 
   async function handleApprove(userId) {
+    setStatusMessage("");
+
     try {
       await apiClient.patch(`/users/${userId}/approve-seller/`);
+      setUsers((prev) =>
+        prev.map((item) =>
+          item.id === userId ? { ...item, seller_status: "approved" } : item,
+        ),
+      );
+      setStatusMessage("Заявка продавца одобрена.");
       await loadUsers();
     } catch (e) {
       console.error("Не удалось одобрить заявку", e);
-      alert("Не удалось одобрить заявку");
+      setStatusMessage("Не удалось одобрить заявку.");
     }
   }
 
   async function handleReject(userId) {
+    setStatusMessage("");
+
     try {
       await apiClient.patch(`/users/${userId}/reject-seller/`);
+      setUsers((prev) =>
+        prev.map((item) =>
+          item.id === userId ? { ...item, seller_status: "rejected" } : item,
+        ),
+      );
+      setStatusMessage("Заявка продавца отклонена.");
       await loadUsers();
     } catch (e) {
       console.error("Не удалось отклонить заявку", e);
-      alert("Не удалось отклонить заявку");
+      setStatusMessage("Не удалось отклонить заявку.");
     }
   }
 
@@ -69,6 +102,12 @@ export default function AdminUsersPage() {
       <div className="admin__header">
         <h1 className="admin__title text-h2">Заявки продавцов</h1>
       </div>
+
+      {statusMessage ? (
+        <div className={`admin__notice ${statusMessage.startsWith("Не удалось") ? "admin__notice--error" : "admin__notice--success"} text-p2`}>
+          {statusMessage}
+        </div>
+      ) : null}
 
       {users.length === 0 ? (
         <div className="admin__empty">
@@ -85,6 +124,7 @@ export default function AdminUsersPage() {
             const avatarSrc = normalizePreview(
               user?.seller_profile?.store_avatar_url,
             );
+            const sellerStatus = user.seller_status || "pending";
 
             return (
               <article
@@ -103,6 +143,9 @@ export default function AdminUsersPage() {
                       Store
                     </div>
                   )}
+                  <div className={`admin__card-badge admin__status-badge text-p3 ${getStatusClass(sellerStatus)}`}>
+                    {formatSellerStatus(sellerStatus)}
+                  </div>
                 </div>
 
                 <div className="admin__card-body">
@@ -149,22 +192,32 @@ export default function AdminUsersPage() {
                     </div>
                   ) : null}
 
-                  <div className="admin__actions">
-                    <button
-                      type="button"
-                      className="admin__approve text-p2"
-                      onClick={() => handleApprove(user.id)}
-                    >
-                      Одобрить
-                    </button>
+                  <div
+                    className={`admin__actions ${
+                      sellerStatus === "approved" || sellerStatus === "rejected"
+                        ? "admin__actions--single"
+                        : ""
+                    }`}
+                  >
+                    {sellerStatus !== "approved" ? (
+                      <button
+                        type="button"
+                        className="admin__approve text-p2"
+                        onClick={() => handleApprove(user.id)}
+                      >
+                        Одобрить
+                      </button>
+                    ) : null}
 
-                    <button
-                      type="button"
-                      className="admin__reject text-p2"
-                      onClick={() => handleReject(user.id)}
-                    >
-                      Отклонить
-                    </button>
+                    {sellerStatus !== "rejected" ? (
+                      <button
+                        type="button"
+                        className="admin__reject text-p2"
+                        onClick={() => handleReject(user.id)}
+                      >
+                        Отклонить
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </article>

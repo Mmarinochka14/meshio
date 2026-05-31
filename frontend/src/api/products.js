@@ -15,6 +15,18 @@ export async function getProductById(productId) {
   return response.data;
 }
 
+export async function getPublicSellerProfile(sellerId) {
+  const response = await apiClient.get(`/users/seller/${sellerId}/`);
+  return response.data;
+}
+
+export async function getPublicSellerProducts(sellerId, params = {}) {
+  const response = await apiClient.get(`/users/seller/${sellerId}/products/`, {
+    params,
+  });
+  return response.data;
+}
+
 export async function getViewerUrl(productId) {
   const response = await apiClient.get(`/products/${productId}/viewer-url/`);
   return response.data;
@@ -47,27 +59,11 @@ export async function removeFromFavorites(productId) {
 }
 
 export async function generateTexture(productId, prompt) {
-  const token = localStorage.getItem("meshio_token");
-
-  const response = await fetch(
-    `http://127.0.0.1:8000/api/products/${productId}/generate-texture/`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify({ prompt }),
-    },
+  const response = await apiClient.post(
+    `/products/${productId}/generate-texture/`,
+    { prompt },
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data?.detail || "Не удалось сгенерировать текстуру.");
-  }
-
-  return data;
+  return response.data;
 }
 
 export async function getProductsByIds(productIds) {

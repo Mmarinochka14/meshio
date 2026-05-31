@@ -35,13 +35,13 @@
 .seller-profile-page__sidebar,
 .seller-profile-page__card {
   background: var(--color-grey);
-  border: 0.0521vw solid rgba(255, 255, 255, 0.05);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 1.0417vw;
 }
 
 .seller-profile-page__sidebar {
   position: sticky;
-  top: 1.6667vw;
+  top: 6vw;
   padding: 1.0417vw;
 }
 
@@ -88,11 +88,77 @@
   padding: 1.5625vw;
 }
 
+.seller-profile-page__banner {
+  min-height: 11.4583vw;
+  margin: -0.5208vw -0.5208vw 1.25vw;
+  border-radius: 0.8333vw;
+  background:
+    radial-gradient(circle at 18% 35%, rgba(126, 38, 234, 0.42), transparent 24%),
+    linear-gradient(135deg, var(--color-grey-hover) 0%, var(--color-grey) 48%, rgba(114, 34, 234, 0.2) 100%);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-profile-page__media-actions {
+  position: absolute;
+  right: 0.8333vw;
+  bottom: 0.8333vw;
+  display: flex;
+  gap: 0.5208vw;
+}
+
+.seller-profile-page__media-btn,
+.seller-profile-page__avatar-btn {
+  min-height: 2.0833vw;
+  border: none;
+  border-radius: 0.5208vw;
+  background: var(--color-purple);
+  color: var(--color-on-purple);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4167vw;
+}
+
+.seller-profile-page__media-btn {
+  padding: 0 0.8333vw;
+}
+
+.seller-profile-page__media-btn img,
+.seller-profile-page__avatar-btn img {
+  width: 0.8854vw;
+  height: 0.8854vw;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
+}
+
+.seller-profile-page__media-btn--ghost,
+.seller-profile-page__avatar-btn {
+  background: var(--color-grey-hover);
+  border: 0.0521vw solid var(--color-grey-light);
+  color: var(--color-white);
+}
+
+.seller-profile-page__media-btn:disabled,
+.seller-profile-page__avatar-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
 .seller-profile-page__head {
   display: flex;
   align-items: center;
   gap: 1.25vw;
   margin-bottom: 1.875vw;
+}
+
+.seller-profile-page__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .seller-profile-page__avatar {
@@ -111,6 +177,31 @@
   font-size: 2.0833vw;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.seller-profile-page__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.seller-profile-page__avatar-actions {
+  position: absolute;
+  left: 50%;
+  bottom: -0.625vw;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.3125vw;
+}
+
+.seller-profile-page__avatar-btn {
+  min-width: 7.2917vw;
+  padding: 0 0.625vw;
+}
+
+.seller-profile-page__file-input {
+  display: none;
 }
 
 .seller-profile-page__head-info {
@@ -130,14 +221,16 @@
 .seller-profile-page__rating-row {
   display: flex;
   align-items: center;
-  gap: 0.5208vw;
+  gap: 0.4167vw;
+  line-height: 1;
   margin-top: 0.2083vw;
 }
 
 .seller-profile-page__stars {
   color: var(--color-purple-light);
-  font-size: 1.67vw;
+  font-size: 1.3542vw;
   line-height: 1;
+  letter-spacing: 0;
 }
 
 .seller-profile-page__section-title {
@@ -216,6 +309,121 @@
   color: var(--color-white);
 }
 
+.seller-profile-page__settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8333vw;
+  margin-bottom: 1.6667vw;
+}
+
+.seller-profile-page__notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8333vw;
+  margin-bottom: 1.6667vw;
+}
+
+.seller-profile-page__notification {
+  width: 100%;
+  min-height: 4.6875vw;
+  padding: 0.8333vw 1.0417vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  border-radius: 0.625vw;
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25vw;
+  text-align: left;
+  cursor: pointer;
+}
+
+.seller-profile-page__notification.is-read {
+  border-color: var(--color-grey-light);
+  background: var(--color-grey-hover);
+  opacity: 0.76;
+}
+
+.seller-profile-page__notification-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2604vw;
+}
+
+.seller-profile-page__notification-title,
+.seller-profile-page__notification-text,
+.seller-profile-page__notification-date {
+  color: var(--color-white);
+}
+
+.seller-profile-page__notification-text,
+.seller-profile-page__notification-date {
+  opacity: 0.7;
+}
+
+.seller-profile-page__notification-date {
+  flex-shrink: 0;
+}
+
+.seller-profile-page__setting-row {
+  min-height: 4.6875vw;
+  padding: 0.8333vw 1.0417vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  border-radius: 0.625vw;
+  background: var(--color-grey-hover);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25vw;
+}
+
+.seller-profile-page__setting-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2604vw;
+}
+
+.seller-profile-page__setting-title {
+  color: var(--color-white);
+}
+
+.seller-profile-page__setting-description {
+  color: var(--color-white);
+  opacity: 0.62;
+}
+
+.seller-profile-page__switch {
+  width: 3.0208vw;
+  height: 1.5625vw;
+  padding: 0.2083vw;
+  border: none;
+  border-radius: 999vw;
+  background: var(--color-grey-light);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.seller-profile-page__switch.is-on {
+  background: var(--color-purple);
+}
+
+.seller-profile-page__switch-dot {
+  width: 1.1458vw;
+  height: 1.1458vw;
+  border-radius: 999vw;
+  background: var(--color-on-purple);
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.seller-profile-page__switch.is-on .seller-profile-page__switch-dot {
+  transform: translateX(1.4583vw);
+}
+
 .seller-profile-page__actions {
   display: flex;
   align-items: center;
@@ -246,7 +454,7 @@
 
 .seller-profile-page__save {
   background: var(--color-purple);
-  color: var(--color-white);
+  color: var(--color-on-purple);
   border: none;
 }
 
@@ -260,14 +468,8 @@
   cursor: default;
 }
 
-.seller-profile-page__state,
-.seller-profile-page__stub-title,
-.seller-profile-page__stub-text {
-  color: var(--color-white);
-}
-
-.seller-profile-page__stub-text {
-  margin-top: 0.625vw;
+.seller-profile-page__state {
+  color: var(--color-on-purple);
 }
 
 @media (max-width: 1024px) and (min-width: 769px) {
@@ -333,7 +535,7 @@
   }
 
   .seller-profile-page__sidebar {
-    top: 2vw;
+    top: 12vw;
     padding: 1.6vw;
   }
 
@@ -358,6 +560,24 @@
     padding: 2.4vw;
   }
 
+  .seller-profile-page__banner {
+    min-height: 16vw;
+    margin: -0.8vw -0.8vw 2vw;
+    border-radius: 1.4vw;
+  }
+
+  .seller-profile-page__media-actions {
+    right: 1.2vw;
+    bottom: 1.2vw;
+    gap: 0.8vw;
+  }
+
+  .seller-profile-page__media-btn,
+  .seller-profile-page__avatar-btn {
+    min-height: 3.2vw;
+    border-radius: 0.9vw;
+  }
+
   .seller-profile-page__head {
     gap: 1.8vw;
     margin-bottom: 2.6vw;
@@ -367,6 +587,10 @@
     width: 8.6vw;
     height: 8.6vw;
     font-size: 2.8vw;
+  }
+
+  .seller-profile-page__avatar-btn {
+    min-width: 3.4vw;
   }
 
   .seller-profile-page__head-info {
@@ -415,6 +639,45 @@
     gap: 0.7vw;
   }
 
+  .seller-profile-page__settings-list {
+    gap: 1.2vw;
+    margin-bottom: 2.2vw;
+  }
+
+  .seller-profile-page__notification-list {
+    gap: 1.2vw;
+    margin-bottom: 2.2vw;
+  }
+
+  .seller-profile-page__notification {
+    min-height: 7vw;
+    padding: 1.2vw 1.4vw;
+    border-radius: 1vw;
+    gap: 1.6vw;
+  }
+
+  .seller-profile-page__setting-row {
+    min-height: 7vw;
+    padding: 1.2vw 1.4vw;
+    border-radius: 1vw;
+    gap: 1.6vw;
+  }
+
+  .seller-profile-page__switch {
+    width: 5.2vw;
+    height: 2.8vw;
+    padding: 0.35vw;
+  }
+
+  .seller-profile-page__switch-dot {
+    width: 2.1vw;
+    height: 2.1vw;
+  }
+
+  .seller-profile-page__switch.is-on .seller-profile-page__switch-dot {
+    transform: translateX(2.4vw);
+  }
+
   .seller-profile-page__actions {
     gap: 1vw;
   }
@@ -427,9 +690,6 @@
     padding: 1vw 1.8vw;
   }
 
-  .seller-profile-page__stub-text {
-    margin-top: 1vw;
-  }
 }
 
 @media (max-width: 768px) {
@@ -482,12 +742,12 @@
   }
 
   .seller-profile-page__mobile-tabs {
-    width: calc(100% + 32px);
-    margin-left: -16px;
-    margin-bottom: 16px;
-    padding: 0 16px 4px;
+    width: calc(100% + 8.5333vw);
+    margin-left: -4.2667vw;
+    margin-bottom: 4.2667vw;
+    padding: 0 4.2667vw 1.0667vw;
     display: flex;
-    gap: 8px;
+    gap: 2.1333vw;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -500,13 +760,13 @@
 
   .seller-profile-page__mobile-tab {
     min-width: max-content;
-    min-height: 44px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 999px;
+    min-height: 11.7333vw;
+    border: 0.2667vw solid var(--color-grey-light);
+    border-radius: 999vw;
     background: var(--color-grey);
-    padding: 0 16px;
+    padding: 0 4.2667vw;
     color: var(--color-white);
-    font-size: 14px;
+    font-size: 3.7333vw;
     line-height: 1;
     white-space: nowrap;
     cursor: pointer;
@@ -515,7 +775,7 @@
   .seller-profile-page__mobile-tab.is-active {
     border-color: var(--color-purple);
     background: var(--color-purple);
-    box-shadow: 0 10px 24px rgba(114, 34, 234, 0.22);
+    box-shadow: 0 2.6667vw 6.4vw rgba(114, 34, 234, 0.22);
   }
 
   .seller-profile-page__mobile-tab--logout {
@@ -543,6 +803,25 @@
     padding: 18px;
   }
 
+  .seller-profile-page__banner {
+    min-height: 150px;
+    margin: -6px -6px 20px;
+    border-radius: 16px;
+  }
+
+  .seller-profile-page__media-actions {
+    right: 10px;
+    bottom: 10px;
+    gap: 8px;
+  }
+
+  .seller-profile-page__media-btn,
+  .seller-profile-page__avatar-btn {
+    min-height: 34px;
+    border-radius: 10px;
+    border-width: 1px;
+  }
+
   .seller-profile-page__head {
     align-items: center;
     gap: 14px;
@@ -553,6 +832,15 @@
     width: 72px;
     height: 72px;
     font-size: 26px;
+  }
+
+  .seller-profile-page__avatar-actions {
+    bottom: -8px;
+    gap: 5px;
+  }
+
+  .seller-profile-page__avatar-btn {
+    min-width: 38px;
   }
 
   .seller-profile-page__head-info {
@@ -614,6 +902,58 @@
     gap: 8px;
   }
 
+  .seller-profile-page__settings-list {
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .seller-profile-page__notification-list {
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .seller-profile-page__notification {
+    min-height: 72px;
+    padding: 12px 14px;
+    border-width: 1px;
+    border-radius: 14px;
+    gap: 14px;
+  }
+
+  .seller-profile-page__notification-main {
+    gap: 4px;
+  }
+
+  .seller-profile-page__notification-date {
+    display: none;
+  }
+
+  .seller-profile-page__setting-row {
+    min-height: 72px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    gap: 14px;
+  }
+
+  .seller-profile-page__setting-text {
+    gap: 4px;
+  }
+
+  .seller-profile-page__switch {
+    width: 48px;
+    height: 26px;
+    padding: 3px;
+  }
+
+  .seller-profile-page__switch-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  .seller-profile-page__switch.is-on .seller-profile-page__switch-dot {
+    transform: translateX(22px);
+  }
+
   .seller-profile-page__actions {
     width: 100%;
     flex-direction: column;
@@ -636,9 +976,6 @@
     padding: 18px;
   }
 
-  .seller-profile-page__stub-text {
-    margin-top: 10px;
-  }
 }
 
 @media (max-width: 390px) {

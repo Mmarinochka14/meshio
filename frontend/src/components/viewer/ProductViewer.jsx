@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { Bounds, OrbitControls } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -298,6 +298,29 @@ export default function ProductViewer({
   customOpacity = 1,
   customEmissive = "#000000",
 }) {
+  const [isLightTheme, setIsLightTheme] = useState(() =>
+    typeof document !== "undefined" ? document.body.classList.contains("theme-light") : false,
+  );
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+
+    const updateTheme = () => {
+      setIsLightTheme(document.body.classList.contains("theme-light"));
+    };
+
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    updateTheme();
+
+    return () => observer.disconnect();
+  }, []);
+
+  const viewerBackground = isLightTheme ? "#f7f6fc" : "#1f2025";
+
   if (!modelUrl) {
     return (
       <div className="product-viewer__state text-p2">
@@ -309,9 +332,9 @@ export default function ProductViewer({
   return (
     <div className="product-viewer">
       <Canvas shadows camera={{ position: [0, 1.5, 6], fov: 45 }}>
-        <Suspense fallback={<color attach="background" args={["#1f2025"]} />}>
-          <color attach="background" args={["#1f2025"]} />
-          <fog attach="fog" args={["#1f2025", 10, 26]} />
+        <Suspense fallback={<color attach="background" args={[viewerBackground]} />}>
+          <color attach="background" args={[viewerBackground]} />
+          <fog attach="fog" args={[viewerBackground, 10, 26]} />
 
           <ViewerLights viewMode={viewMode} />
 

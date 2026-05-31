@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/faq-section.css";
 
-export default function FAQSection() {
+export default function FAQSection({ variant = "home" }) {
   const [openId, setOpenId] = useState("q1");
 
   const items = [
@@ -33,9 +33,19 @@ export default function FAQSection() {
   ];
 
   return (
-    <section className="faq-section">
+    <section
+      className={`faq-section ${variant === "page" ? "faq-section--page" : ""}`}
+    >
       <div className="faq-section__container">
-        <h3 className="faq-section__title text-h3">Часто задаваемые вопросы</h3>
+        {variant === "page" ? (
+          <h1 className="faq-section__title text-h2">
+            Часто задаваемые вопросы
+          </h1>
+        ) : (
+          <h3 className="faq-section__title text-h3">
+            Часто задаваемые вопросы
+          </h3>
+        )}
 
         <div className="faq-section__divider" />
 

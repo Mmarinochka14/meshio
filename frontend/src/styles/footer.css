@@ -174,7 +174,7 @@
 @media (max-width: 768px) {
   .footer {
     padding-bottom: 4vw;
-    border-top: 0.2667vw solid #22242d;
+    border-top: 0.2667vw solid var(--color-grey-light);
   }
 
   .footer__container {
@@ -216,7 +216,8 @@
   .footer__link--button {
     font-size: 4vw;
     line-height: 1.4;
-    color: rgba(235, 235, 235, 0.82);
+    color: var(--color-white);
+    opacity: 0.82;
   }
 
   .footer__contacts {
@@ -245,7 +246,8 @@
   .footer__email {
     font-size: 4vw;
     line-height: 1.35;
-    color: rgba(235, 235, 235, 0.88);
+    color: var(--color-white);
+    opacity: 0.88;
   }
 
   .footer__bottom {
@@ -253,13 +255,14 @@
     padding-top: 6.1333vw;
     padding-bottom: 18vw;
     margin-top: 1.6vw;
-    border-top: 0.2667vw solid #22242d;
+    border-top: 0.2667vw solid var(--color-grey-light);
   }
 
   .footer__copyright {
     font-size: 3.4667vw;
     line-height: 1.35;
-    color: rgba(235, 235, 235, 0.88);
+    color: var(--color-white);
+    opacity: 0.88;
   }
 }
 

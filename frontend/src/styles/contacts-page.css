@@ -1,8 +1,8 @@
 .contacts-page {
   width: 100%;
-  padding-top: 2.0833vw;
+  padding-top: 2.8vw;
   padding-bottom: 5.2083vw;
-  background: #000;
+  background: var(--color-grey-dark);
 }
 
 .contacts-page__container {
@@ -18,7 +18,8 @@
 .contacts-page__divider {
   width: 100%;
   height: 0.0521vw;
-  background: rgba(235, 235, 235, 0.1);
+  background: var(--color-grey-light);
+  opacity: 0.6;
   margin-bottom: 2.0833vw;
 }
 
@@ -31,8 +32,8 @@
 
 .contacts-page__form-card,
 .contacts-page__info-card {
-  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
-  border: 0.0521vw solid #22242d;
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 1.25vw;
   padding: 1.6667vw;
 }
@@ -45,6 +46,12 @@
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 1.25vw;
+}
+
+.contacts-page__right .contacts-page__info-card:last-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .contacts-page__card-title,
@@ -66,16 +73,16 @@
 }
 
 .contacts-form__label {
-  color: rgba(235, 235, 235, 0.3);
+  color: var(--color-grey-super-light);
 }
 
 .contacts-form__input,
 .contacts-form__textarea,
 .contacts-page__subscribe-input {
   width: 100%;
-  border: none;
+  border: 0.0521vw solid var(--color-grey-light);
   outline: none;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-grey-soft);
   color: var(--color-white);
   border-radius: 0.8333vw;
 }
@@ -94,7 +101,7 @@
 .contacts-form__input::placeholder,
 .contacts-form__textarea::placeholder,
 .contacts-page__subscribe-input::placeholder {
-  color: rgba(235, 235, 235, 0.2);
+  color: var(--color-grey-super-light);
 }
 
 .contacts-form__submit,
@@ -102,7 +109,7 @@
   border: none;
   border-radius: 0.8333vw;
   background: linear-gradient(90deg, #7222ea 0%, #8c39ff 100%);
-  color: var(--color-white);
+  color: var(--color-on-purple);
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -164,8 +171,8 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1.0417vw;
-  align-items: end;
-  margin-top: 1.6667vw;
+  align-items: center;
+  margin-top: 1.25vw;
 }
 
 .contacts-page__subscribe-input {

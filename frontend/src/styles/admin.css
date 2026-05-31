@@ -1,7 +1,7 @@
 .admin {
   width: 75vw;
   margin: 0 auto;
-  padding-top: 1.6667vw;
+  padding-top: 2.8vw;
   padding-bottom: 3.3333vw;
 }
 
@@ -34,7 +34,7 @@
   min-height: 18vw;
   border-radius: 1.0417vw;
   border: 0.0521vw solid var(--color-grey-light);
-  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
+  background: var(--color-grey);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -52,13 +52,35 @@
   max-width: 28vw;
 }
 
+.admin__notice {
+  width: 100%;
+  margin-bottom: 1.25vw;
+  padding: 0.9375vw 1.0417vw;
+  border-radius: 0.625vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+}
+
+.admin__notice--error {
+  border-color: rgba(255, 95, 109, 0.34);
+  background: var(--color-danger-soft);
+  color: #ffbdc4;
+}
+
+.admin__notice--success {
+  border-color: rgba(126, 224, 168, 0.34);
+  background: rgba(39, 184, 111, 0.14);
+  color: #7ee0a8;
+}
+
 /* ===== CARDS / GRIDS ===== */
 
 .admin__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.0417vw;
-  align-items: start;
+  align-items: stretch;
 }
 
 .admin__grid--users {
@@ -66,10 +88,13 @@
 }
 
 .admin__card {
-  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
-  border: 0.0521vw solid #22242d;
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 1.0417vw;
   overflow: hidden;
+  min-height: 19.8vw;
+  display: flex;
+  flex-direction: column;
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
@@ -86,7 +111,7 @@
   position: relative;
   width: 100%;
   height: 11.9792vw;
-  background: #1c1e26;
+  background: var(--color-grey-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,6 +150,9 @@
 
 .admin__card-body {
   padding: 1.25vw;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin__card--compact .admin__card-body {
@@ -134,7 +162,7 @@
 .admin__card-title {
   color: var(--color-white);
   margin-bottom: 0.8333vw;
-  min-height: 2.5vw;
+  min-height: 2.35vw;
 }
 
 .admin__card--compact .admin__card-title {
@@ -146,7 +174,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.4167vw;
-  margin-bottom: 0.8333vw;
+  margin-bottom: 0.625vw;
 }
 
 .admin__card-meta {
@@ -167,13 +195,15 @@
 }
 
 .admin__comment {
-  margin-bottom: 1.0417vw;
-  padding: 0.7292vw 0.8333vw;
+  margin-bottom: 0.625vw;
+  padding: 0.5208vw 0.625vw;
   border-radius: 0.625vw;
-  background: #1f212b;
+  background: var(--color-grey-hover);
   color: var(--color-white);
   opacity: 0.9;
-  line-height: 1.45;
+  line-height: 1.35;
+  max-height: 2.8vw;
+  overflow: auto;
 }
 
 .admin__comment-label {
@@ -188,6 +218,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5208vw;
+  margin-top: auto;
+}
+
+.admin__actions--single {
+  grid-template-columns: 1fr;
 }
 
 .admin__approve,
@@ -205,7 +240,7 @@
 .admin__approve {
   border: none;
   background: var(--color-purple);
-  color: var(--color-white);
+  color: var(--color-on-purple);
 }
 
 .admin__approve:hover {
@@ -254,16 +289,20 @@
 /* ===== REQUESTS PAGE ===== */
 
 .admin__requests-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.0417vw;
+  align-items: stretch;
 }
 
 .admin__request-card {
-  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
-  border: 0.0521vw solid #22242d;
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 1.0417vw;
   padding: 1.25vw;
+  display: flex;
+  flex-direction: column;
+  min-height: 13.5417vw;
 }
 
 .admin__request-top {
@@ -297,6 +336,39 @@
   white-space: nowrap;
 }
 
+.admin__status-badge.is-published,
+.admin__status-badge.is-done {
+  background: rgba(39, 184, 111, 0.16);
+  border-color: rgba(126, 224, 168, 0.42);
+  color: #7ee0a8;
+}
+
+.admin__status-badge.is-pending,
+.admin__status-badge.is-new {
+  background: rgba(201, 162, 74, 0.16);
+  border-color: rgba(231, 190, 96, 0.42);
+  color: #f0d58d;
+}
+
+.admin__status-badge.is-in-progress {
+  background: rgba(147, 109, 251, 0.16);
+  border-color: rgba(147, 109, 251, 0.45);
+  color: #bda6ff;
+}
+
+.admin__status-badge.is-rejected {
+  background: rgba(216, 74, 74, 0.16);
+  border-color: rgba(255, 119, 119, 0.42);
+  color: #ffb0b0;
+}
+
+.admin__status-badge.is-draft,
+.admin__status-badge.is-archived {
+  background: rgba(147, 109, 251, 0.13);
+  border-color: rgba(147, 109, 251, 0.38);
+  color: var(--color-white);
+}
+
 .admin__request-meta {
   color: var(--color-white);
   opacity: 0.55;
@@ -306,10 +378,13 @@
 .admin__request-message {
   color: var(--color-white);
   line-height: 1.55;
-  background: #1f212b;
+  background: var(--color-grey-hover);
   border-radius: 0.625vw;
   padding: 0.9375vw 1.0417vw;
   margin-bottom: 0.9375vw;
+  min-height: 2.7083vw;
+  max-height: 4.6875vw;
+  overflow: auto;
 }
 
 .admin__request-actions,
@@ -317,6 +392,20 @@
   display: flex;
   gap: 0.625vw;
   flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.admin__request-actions .admin__approve,
+.admin__request-actions .admin__secondary,
+.admin__reply-actions .admin__approve,
+.admin__reply-actions .admin__secondary {
+  width: auto;
+  flex: 1 1 10vw;
+}
+
+.admin-users-page .admin__empty {
+  min-height: 10.4167vw;
+  justify-content: flex-start;
 }
 
 /* ===== TABS / STATUS ===== */
@@ -379,7 +468,7 @@
   margin-bottom: 0.9375vw;
   padding: 0.8333vw;
   border-radius: 0.625vw;
-  background: #1f212b;
+  background: var(--color-grey-hover);
 }
 
 .admin__reply-title {
@@ -533,6 +622,7 @@
   }
 
   .admin__requests-list {
+    grid-template-columns: 1fr;
     gap: 1.6vw;
   }
 
@@ -559,6 +649,8 @@
     border-radius: 1.2vw;
     padding: 1.3vw 1.5vw;
     margin-bottom: 1.3vw;
+    min-height: 4.6vw;
+    max-height: 9.2vw;
   }
 
   .admin__tabs {
@@ -674,6 +766,7 @@
   .admin__request-card {
     border-width: 0.2667vw;
     border-radius: 4.8vw;
+    min-height: auto;
   }
 
   .admin__card:hover {
@@ -740,6 +833,7 @@
   }
 
   .admin__requests-list {
+    grid-template-columns: 1fr;
     gap: 3.7333vw;
   }
 
@@ -768,12 +862,21 @@
     border-radius: 3.2vw;
     padding: 3.2vw;
     margin-bottom: 3.2vw;
+    min-height: 14vw;
+    max-height: none;
+  }
+
+  .admin__request-actions .admin__approve,
+  .admin__request-actions .admin__secondary,
+  .admin__reply-actions .admin__approve,
+  .admin__reply-actions .admin__secondary {
+    width: auto;
+    flex: 1 1 40%;
   }
 
   .admin__request-actions,
   .admin__reply-actions {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 2.6667vw;
   }
 

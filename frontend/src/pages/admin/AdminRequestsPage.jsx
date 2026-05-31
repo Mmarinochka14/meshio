@@ -15,6 +15,13 @@ function formatStatus(status) {
   return map[status] || status || "—";
 }
 
+function getStatusClass(status) {
+  if (status === "done") return "is-done";
+  if (status === "in_progress") return "is-in-progress";
+  if (status === "new") return "is-new";
+  return "";
+}
+
 function formatDate(value) {
   if (!value) return "—";
 
@@ -31,6 +38,7 @@ export default function AdminRequestsPage() {
   const [statusTab, setStatusTab] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [replyDraft, setReplyDraft] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     loadRequests();
@@ -61,31 +69,49 @@ export default function AdminRequestsPage() {
   }
 
   async function saveReply(item, nextStatus) {
+    setStatusMessage("");
+
     try {
       await updateAdminSupportRequest(item.id, {
         status: nextStatus,
         admin_reply: replyDraft,
       });
 
+      setRequests((prev) =>
+        prev.map((requestItem) =>
+          requestItem.id === item.id
+            ? { ...requestItem, status: nextStatus, admin_reply: replyDraft }
+            : requestItem,
+        ),
+      );
       setEditingId(null);
       setReplyDraft("");
       await loadRequests();
     } catch (e) {
       console.error("Не удалось сохранить ответ", e);
-      alert("Не удалось сохранить ответ");
+      setStatusMessage("Не удалось сохранить ответ.");
     }
   }
 
   async function quickChangeStatus(item, nextStatus) {
+    setStatusMessage("");
+
     try {
       await updateAdminSupportRequest(item.id, {
         status: nextStatus,
       });
 
+      setRequests((prev) =>
+        prev.map((requestItem) =>
+          requestItem.id === item.id
+            ? { ...requestItem, status: nextStatus }
+            : requestItem,
+        ),
+      );
       await loadRequests();
     } catch (e) {
       console.error("Не удалось обновить статус", e);
-      alert("Не удалось обновить статус");
+      setStatusMessage("Не удалось обновить статус.");
     }
   }
 
@@ -98,6 +124,12 @@ export default function AdminRequestsPage() {
       <div className="admin__header">
         <h1 className="admin__title text-h2">Обращения пользователей</h1>
       </div>
+
+      {statusMessage ? (
+        <div className="admin__notice admin__notice--error text-p2">
+          {statusMessage}
+        </div>
+      ) : null}
 
       <div className="admin__tabs">
         <button
@@ -154,7 +186,7 @@ export default function AdminRequestsPage() {
                     </div>
                   </div>
 
-                  <div className="admin__request-badge text-p3">
+                  <div className={`admin__request-badge admin__status-badge text-p3 ${getStatusClass(item.status)}`}>
                     {formatStatus(item.status)}
                   </div>
                 </div>

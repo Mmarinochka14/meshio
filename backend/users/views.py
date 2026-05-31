@@ -2,24 +2,31 @@ from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.conf import settings
 from django.http import Http404
 
 from core.object_storage import delete_file_from_storage, upload_file_to_storage
-from .models import SellerProfile, User
+from .models import SellerProfile, User, UserNotification, UserPreference
 from .permissions import IsAdminRole, IsApprovedSeller
 from .serializers import (
     AdminUserSerializer,
     SellerModerationSerializer,
     SellerProfileCreateUpdateSerializer,
     SellerProfileSerializer,
+    UserNotificationSerializer,
+    UserPreferenceSerializer,
     SellerAvatarUploadSerializer,
+    SellerBannerUploadSerializer,
     UserProfileUpdateSerializer,
     UserAvatarUploadSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     UserRegisterSerializer,
-ChangePasswordSerializer,
+    ChangePasswordSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
 )
+from .services import create_notification
 
 
 class RegisterView(generics.CreateAPIView):
@@ -82,6 +89,43 @@ class ProfileView(APIView):
             UserProfileSerializer(request.user, context={'request': request}).data,
             status=status.HTTP_200_OK
         )
+
+
+class UserPreferenceView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        preferences, _ = UserPreference.objects.get_or_create(user=request.user)
+        return Response(UserPreferenceSerializer(preferences).data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        preferences, _ = UserPreference.objects.get_or_create(user=request.user)
+        serializer = UserPreferenceSerializer(preferences, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MyNotificationsView(generics.ListAPIView):
+    serializer_class = UserNotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserNotification.objects.filter(user=self.request.user).order_by('-created_at')
+
+
+class MarkNotificationReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            notification = UserNotification.objects.get(id=pk, user=request.user)
+        except UserNotification.DoesNotExist:
+            return Response({'detail': 'Уведомление не найдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        return Response(UserNotificationSerializer(notification).data, status=status.HTTP_200_OK)
 
 class UploadUserAvatarView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -212,11 +256,11 @@ class DeleteSellerAvatarView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        old_storage_path = profile.store_avatar_storage_path
+        old_avatar_storage_path = profile.store_avatar_storage_path
 
         try:
-            if old_storage_path:
-                delete_file_from_storage(old_storage_path)
+            if old_avatar_storage_path:
+                delete_file_from_storage(old_avatar_storage_path)
         except Exception:
             pass
 
@@ -234,6 +278,90 @@ class DeleteSellerAvatarView(APIView):
             status=status.HTTP_200_OK
         )
 
+
+class UploadSellerBannerView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def post(self, request):
+        profile = SellerProfile.objects.filter(user=request.user).first()
+        if not profile:
+            return Response(
+                {'detail': 'Сначала создайте профиль магазина.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = SellerBannerUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        uploaded_file = serializer.validated_data['file']
+        old_storage_path = profile.store_banner_storage_path
+
+        try:
+            upload_result = upload_file_to_storage(
+                uploaded_file,
+                folder=f'stores/{request.user.id}/banner'
+            )
+        except Exception as e:
+            return Response(
+                {'detail': f'Ошибка загрузки баннера магазина: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        profile.store_banner_storage_path = upload_result['storage_path']
+        profile.save(update_fields=['store_banner_storage_path'])
+
+        try:
+            if old_storage_path:
+                delete_file_from_storage(old_storage_path)
+        except Exception:
+            pass
+
+        if profile.store_banner:
+            profile.store_banner.delete(save=False)
+
+        return Response(
+            {
+                'detail': 'Баннер магазина загружен.',
+                'store_banner_storage_path': profile.store_banner_storage_path,
+                'seller_profile': SellerProfileSerializer(profile, context={'request': request}).data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class DeleteSellerBannerView(APIView):
+    permission_classes = [IsApprovedSeller]
+
+    def delete(self, request):
+        profile = SellerProfile.objects.filter(user=request.user).first()
+        if not profile:
+            return Response(
+                {'detail': 'Профиль магазина не найден.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        old_storage_path = profile.store_banner_storage_path
+
+        try:
+            if old_storage_path:
+                delete_file_from_storage(old_storage_path)
+        except Exception:
+            pass
+
+        if profile.store_banner:
+            profile.store_banner.delete(save=False)
+
+        profile.store_banner_storage_path = None
+        profile.save(update_fields=['store_banner_storage_path'])
+
+        return Response(
+            {
+                'detail': 'Баннер магазина удалён.',
+                'seller_profile': SellerProfileSerializer(profile, context={'request': request}).data,
+            },
+            status=status.HTTP_200_OK
+        )
+
 class DeleteSellerProfileView(APIView):
     permission_classes = [IsApprovedSeller]
 
@@ -245,16 +373,21 @@ class DeleteSellerProfileView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        old_storage_path = profile.store_avatar_storage_path
+        old_avatar_storage_path = profile.store_avatar_storage_path
+        old_banner_storage_path = profile.store_banner_storage_path
 
         try:
-            if old_storage_path:
-                delete_file_from_storage(old_storage_path)
+            if old_avatar_storage_path:
+                delete_file_from_storage(old_avatar_storage_path)
+            if old_banner_storage_path:
+                delete_file_from_storage(old_banner_storage_path)
         except Exception:
             pass
 
         if profile.store_avatar:
             profile.store_avatar.delete(save=False)
+        if profile.store_banner:
+            profile.store_banner.delete(save=False)
 
         profile.delete()
 
@@ -342,9 +475,14 @@ class PublicSellerProfileView(APIView):
         )
 
         total_products = products.count()
+        total_reviews = sum(product.reviews_count for product in products)
         average_rating = round(
-            sum(product.average_rating for product in products) / total_products, 2
-        ) if total_products > 0 else 0
+            sum(
+                float(product.average_rating) * product.reviews_count
+                for product in products
+            ) / total_reviews,
+            2,
+        ) if total_reviews > 0 else 0
 
         return Response(
             {
@@ -352,6 +490,7 @@ class PublicSellerProfileView(APIView):
                 'stats': {
                     'total_products': total_products,
                     'average_rating': average_rating,
+                    'total_reviews': total_reviews,
                 },
             },
             status=status.HTTP_200_OK
@@ -420,6 +559,13 @@ class ApproveSellerView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        create_notification(
+            user,
+            'seller_status',
+            'Заявка продавца одобрена',
+            'Теперь вам доступны кабинет продавца, загрузка моделей и аналитика.',
+            '/seller/profile',
+        )
 
         return Response(
             {
@@ -449,6 +595,13 @@ class RejectSellerView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        create_notification(
+            user,
+            'seller_status',
+            'Заявка продавца отклонена',
+            'Проверьте данные профиля и попробуйте отправить заявку повторно.',
+            '/buyer/profile',
+        )
 
         return Response(
             {
@@ -474,4 +627,40 @@ class ChangePasswordView(APIView):
         return Response(
             {"detail": "Пароль обновлён."},
             status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        debug_code = serializer.save()
+
+        payload = {
+            "detail": "Если email зарегистрирован, мы отправили код восстановления пароля."
+        }
+
+        is_console_email = settings.EMAIL_BACKEND.endswith("console.EmailBackend")
+        if debug_code and (settings.DEBUG or is_console_email):
+            payload["debug_code"] = debug_code
+
+        return Response(
+            payload,
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"detail": "Пароль обновлён."},
+            status=status.HTTP_200_OK,
         )

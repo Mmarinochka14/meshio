@@ -98,9 +98,44 @@ export async function updateProfileRequest(payload) {
   return res.data;
 }
 
+export async function getPreferencesRequest() {
+  const res = await apiClient.get("/users/me/preferences/");
+  return res.data;
+}
+
+export async function updatePreferencesRequest(payload) {
+  const res = await apiClient.patch("/users/me/preferences/", payload);
+  const me = await meRequest();
+  return me?.preferences || res.data;
+}
+
+export async function getNotificationsRequest() {
+  const res = await apiClient.get("/users/me/notifications/");
+  return res.data;
+}
+
+export async function markNotificationReadRequest(id) {
+  const res = await apiClient.post(`/users/me/notifications/${id}/read/`);
+  return res.data;
+}
+
 export async function changePasswordRequest(old_password, new_password) {
   const res = await apiClient.post("/users/me/change-password/", {
     old_password,
+    new_password,
+  });
+  return res.data;
+}
+
+export async function requestPasswordReset(email) {
+  const res = await apiClient.post("/users/password-reset/", { email });
+  return res.data;
+}
+
+export async function confirmPasswordReset(email, code, new_password) {
+  const res = await apiClient.post("/users/password-reset/confirm/", {
+    email,
+    code,
     new_password,
   });
   return res.data;
@@ -113,5 +148,35 @@ export async function getMySellerProfileRequest() {
 
 export async function updateSellerProfileRequest(payload) {
   const res = await apiClient.patch("/users/seller/me/", payload);
+  return res.data;
+}
+
+export async function uploadSellerAvatarRequest(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await apiClient.post("/users/seller/me/upload-avatar/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+}
+
+export async function deleteSellerAvatarRequest() {
+  const res = await apiClient.delete("/users/seller/me/delete-avatar/");
+  return res.data;
+}
+
+export async function uploadSellerBannerRequest(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await apiClient.post("/users/seller/me/upload-banner/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+}
+
+export async function deleteSellerBannerRequest() {
+  const res = await apiClient.delete("/users/seller/me/delete-banner/");
   return res.data;
 }

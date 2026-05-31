@@ -24,8 +24,8 @@
   min-height: 15.2083vw;
   padding: 1.6667vw;
   border-radius: 0.8333vw;
-  background: linear-gradient(180deg, #15161a 0%, #101116 100%);
-  border: 0.0521vw solid #22242d;
+  background: var(--color-grey);
+  border: 0.0521vw solid var(--color-grey-light);
 }
 
 .advantages-section__top {

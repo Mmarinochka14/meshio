@@ -56,6 +56,15 @@
   margin-bottom: 1.25vw;
 }
 
+.seller-models-page__notice {
+  margin-bottom: 1.25vw;
+  padding: 0.9375vw 1.0417vw;
+  border-radius: 0.625vw;
+  border: 0.0521vw solid rgba(255, 95, 109, 0.34);
+  background: var(--color-danger-soft);
+  color: #ffbdc4;
+}
+
 .seller-models-page__tabs {
   display: flex;
   flex-wrap: wrap;
@@ -98,14 +107,14 @@
 
 .seller-models-page__sidebar {
   position: sticky;
-  top: 1.6667vw;
+  top: 6vw;
 }
 
 .seller-models-page__sidebar-state,
 .seller-models-page__content,
 .seller-models-page__empty {
   background: var(--color-grey);
-  border: 0.0521vw solid rgba(255, 255, 255, 0.05);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 1.0417vw;
 }
 
@@ -115,7 +124,9 @@
 }
 
 .seller-models-page__content {
-  padding: 1.25vw;
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
 }
 
 .seller-models-page__state {
@@ -206,7 +217,7 @@
   }
 
   .seller-models-page__sidebar {
-    top: 2vw;
+    top: 12vw;
   }
 
   .seller-models-page__content,

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/buyer-profile-page.css";
+import { buildMediaUrl } from "../api/url";
 
 import downloadIcon from "../assets/icons/download.svg";
 import profileIcon from "../assets/icons/user.svg";
@@ -28,6 +29,9 @@ import {
   meRequest,
   updateProfileRequest,
   changePasswordRequest,
+  getNotificationsRequest,
+  markNotificationReadRequest,
+  updatePreferencesRequest,
 } from "../api/auth";
 import { downloadProduct, getMyPurchasedProducts } from "../api/products";
 import apiClient from "../api/client";
@@ -72,8 +76,7 @@ function formatDate(value) {
 }
 
 function normalizePreview(url) {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `http://127.0.0.1:8000${url}`;
+  return buildMediaUrl(url);
 }
 
 function formatSupportStatus(status) {
@@ -104,6 +107,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [generalMsg, setGeneralMsg] = useState("");
 
   const [pwForm, setPwForm] = useState({
     old_password: "",
@@ -120,6 +124,8 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     search_preferences: false,
   });
   const [notificationsMsg, setNotificationsMsg] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   const [paymentMethods, setPaymentMethods] = useState([
     { id: "sbp", label: "СБП •• 5691", active: true, icon: sbpIcon },
@@ -201,6 +207,17 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
           email: data?.email || "",
           phone: data?.phone ? formatRuPhone(data.phone) : "",
         });
+
+        if (data?.preferences) {
+          setNotificationsForm({
+            sms_notifications: data.preferences.sms_notifications,
+            search_preferences: data.preferences.search_preferences,
+          });
+          setSettingsForm({
+            dark_theme: data.preferences.dark_theme,
+            compact_mode: data.preferences.compact_mode,
+          });
+        }
       } catch (e) {
         logout();
         navigate("/");
@@ -234,6 +251,33 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     }
 
     loadSupport();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "notifications") return;
+
+    let mounted = true;
+
+    async function loadNotifications() {
+      try {
+        setNotificationsLoading(true);
+        const data = await getNotificationsRequest();
+        const items = Array.isArray(data?.results) ? data.results : data;
+        if (!mounted) return;
+        setNotifications(Array.isArray(items) ? items : []);
+      } catch (e) {
+        if (!mounted) return;
+        setNotifications([]);
+      } finally {
+        if (mounted) setNotificationsLoading(false);
+      }
+    }
+
+    loadNotifications();
 
     return () => {
       mounted = false;
@@ -339,6 +383,8 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   }
 
   async function handleDownload(productId) {
+    setGeneralMsg("");
+
     try {
       const data = await downloadProduct(productId);
       const url = data?.download_url;
@@ -346,7 +392,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
         window.location.href = url;
       }
     } catch (e) {
-      alert("Не удалось скачать модель");
+      setGeneralMsg("Не удалось скачать модель.");
     }
   }
 
@@ -369,8 +415,18 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     setPaymentsMsg("");
   }
 
-  function handleSaveNotifications() {
+  async function handleSaveNotifications() {
     setNotificationsMsg("");
+    try {
+      const preferences = await updatePreferencesRequest(notificationsForm);
+      setNotificationsForm({
+        sms_notifications: preferences.sms_notifications,
+        search_preferences: preferences.search_preferences,
+      });
+      setNotificationsMsg("Настройки уведомлений сохранены");
+    } catch (e) {
+      setNotificationsMsg("Не удалось сохранить настройки уведомлений");
+    }
   }
 
   function toggleSettings(name) {
@@ -381,8 +437,41 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
     setSettingsMsg("");
   }
 
-  function handleSaveSettings() {
+  async function handleSaveSettings() {
     setSettingsMsg("");
+    try {
+      const preferences = await updatePreferencesRequest(settingsForm);
+      setSettingsForm({
+        dark_theme: preferences.dark_theme,
+        compact_mode: preferences.compact_mode,
+      });
+      setSettingsMsg("Настройки сохранены");
+    } catch (e) {
+      setSettingsMsg("Не удалось сохранить настройки");
+    }
+  }
+
+  async function handleReadNotification(item) {
+    try {
+      const updated = await markNotificationReadRequest(item.id);
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === item.id ? updated : notification,
+        ),
+      );
+    } catch (e) {
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === item.id
+            ? { ...notification, is_read: true }
+            : notification,
+        ),
+      );
+    }
+
+    if (item.link) {
+      navigate(item.link);
+    }
   }
 
   async function handleAvatarUpload(event) {
@@ -479,12 +568,14 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   }
 
   async function handleDeleteAccount() {
+    setGeneralMsg("");
+
     try {
       await apiClient.delete("/users/me/delete/");
       logout();
       navigate("/");
     } catch (e) {
-      alert(
+      setGeneralMsg(
         e?.response?.data?.detail ||
           "Удаление аккаунта пока не подключено на бэке",
       );
@@ -492,6 +583,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
   }
 
   const userName = profile?.username || "Профиль";
+  const isSellerProfile = profile?.role === "seller";
   const userRole = profile?.role === "seller" ? "Продавец" : "Покупатель";
   const avatarInitial = getInitial(profile?.username);
   const avatarUrl = profile?.avatar_url || "";
@@ -501,6 +593,12 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
       <div className="buyer-profile-page__container">
         <h1 className="buyer-profile-page__title text-h2">Личный кабинет</h1>
         <div className="buyer-profile-page__divider" />
+
+        {generalMsg ? (
+          <div className="buyer-profile-page__notice text-p2">
+            {generalMsg}
+          </div>
+        ) : null}
 
         <div className="buyer-profile-page__mobile-tabs">
           {tabs.map((tab) => (
@@ -538,13 +636,15 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                 </button>
               ))}
 
-              <button
-                type="button"
-                className="buyer-profile-page__menu-cta text-p2"
-                onClick={onOpenSellerModal}
-              >
-                Стать продавцом
-              </button>
+              {!isSellerProfile ? (
+                <button
+                  type="button"
+                  className="buyer-profile-page__menu-cta text-p2"
+                  onClick={onOpenSellerModal}
+                >
+                  Стать продавцом
+                </button>
+              ) : null}
 
               <button
                 type="button"
@@ -624,13 +724,15 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                           {userRole}
                         </div>
 
-                        <button
-                          type="button"
-                          className="buyer-profile-page__small-btn text-p2"
-                          onClick={onOpenSellerModal}
-                        >
-                          Стать продавцом
-                        </button>
+                        {!isSellerProfile ? (
+                          <button
+                            type="button"
+                            className="buyer-profile-page__small-btn text-p2"
+                            onClick={onOpenSellerModal}
+                          >
+                            Стать продавцом
+                          </button>
+                        ) : null}
                       </div>
                     </div>
 
@@ -936,6 +1038,41 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                   <div className="buyer-profile-page__card buyer-profile-page__card--narrow">
                     <div className="text-h3 buyer-profile-page__card-title">
                       Уведомления
+                    </div>
+
+                    <div className="buyer-profile-page__notification-list">
+                      {notificationsLoading ? (
+                        <div className="buyer-profile-page__muted text-p2">
+                          Загрузка уведомлений...
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="buyer-profile-page__muted text-p2">
+                          Новых уведомлений пока нет.
+                        </div>
+                      ) : (
+                        notifications.slice(0, 5).map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={`buyer-profile-page__notification ${
+                              item.is_read ? "is-read" : ""
+                            }`}
+                            onClick={() => handleReadNotification(item)}
+                          >
+                            <span className="buyer-profile-page__notification-main">
+                              <span className="buyer-profile-page__notification-title text-p2">
+                                {item.title}
+                              </span>
+                              <span className="buyer-profile-page__notification-text text-p3">
+                                {item.message || formatDate(item.created_at)}
+                              </span>
+                            </span>
+                            <span className="buyer-profile-page__notification-date text-p3">
+                              {formatDate(item.created_at)}
+                            </span>
+                          </button>
+                        ))
+                      )}
                     </div>
 
                     <div className="buyer-profile-page__toggles">

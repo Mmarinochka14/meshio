@@ -40,6 +40,34 @@
   opacity: 0.35;
 }
 
+.auth-modal__input--code {
+  letter-spacing: 0.32em;
+  text-align: center;
+}
+
+.auth-modal__otp {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5208vw;
+}
+
+.auth-modal__otp-cell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.625vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-hover);
+  color: var(--color-white);
+  text-align: center;
+  outline: none;
+  font-weight: 700;
+}
+
+.auth-modal__otp-cell:focus {
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 0.1042vw rgba(124, 38, 234, 0.28);
+}
+
 .auth-modal__row {
   display: flex;
   justify-content: flex-end;
@@ -170,6 +198,14 @@
   opacity: 0.75;
 }
 
+.auth-modal__error {
+  color: #ff8c8c;
+}
+
+.auth-modal__success {
+  color: #7ee0a8;
+}
+
 .auth-modal__success-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -238,6 +274,15 @@
 
   .auth-modal__code-cell {
     height: 6vw;
+    border-width: 0.0977vw;
+    border-radius: 1.2vw;
+  }
+
+  .auth-modal__otp {
+    gap: 0.8vw;
+  }
+
+  .auth-modal__otp-cell {
     border-width: 0.0977vw;
     border-radius: 1.2vw;
   }
@@ -322,6 +367,16 @@
 
   .auth-modal__code-cell {
     height: 12.8vw;
+    border-width: 0.2667vw;
+    border-radius: 3.2vw;
+    font-size: 5.3333vw;
+  }
+
+  .auth-modal__otp {
+    gap: 1.6vw;
+  }
+
+  .auth-modal__otp-cell {
     border-width: 0.2667vw;
     border-radius: 3.2vw;
     font-size: 5.3333vw;

@@ -68,7 +68,7 @@
 }
 
 .categories-section__card-title {
-  color: var(--color-white);
+  color: var(--color-on-purple);
   position: relative;
   z-index: 2;
 }
@@ -235,7 +235,7 @@
   }
 
   .categories-section__card-title {
-    color: var(--color-white);
+    color: var(--color-on-purple);
     font-size: 4.2667vw;
     line-height: 1.1;
     max-width: 26.6667vw;

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import "../styles/product-card.css";
+import { buildMediaUrl } from "../api/url";
 
 import downloadIcon from "../assets/icons/download.svg";
 import eyeIcon from "../assets/icons/eye.svg";
@@ -35,11 +36,7 @@ export default function MyModelCard({ product, onDownload, onRate }) {
     my_review,
   } = product;
 
-  const previewSrc = main_preview_url
-    ? main_preview_url.startsWith("http")
-      ? main_preview_url
-      : `http://127.0.0.1:8000${main_preview_url}`
-    : "";
+  const previewSrc = buildMediaUrl(main_preview_url);
 
   const tags = [
     model_format ? model_format.toUpperCase() : null,

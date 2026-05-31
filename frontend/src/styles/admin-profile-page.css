@@ -4,7 +4,7 @@
 
 .admin-account-page__title {
   color: var(--color-white);
-  margin-bottom: 0.8333vw;
+  margin-bottom: 1.0417vw;
 }
 
 .admin-account-page__divider {
@@ -12,7 +12,7 @@
   height: 0.0521vw;
   background: var(--color-grey-light);
   opacity: 0.6;
-  margin-bottom: 1.6667vw;
+  margin-bottom: 1.0417vw;
 }
 
 .admin-account-page__mobile-tabs {
@@ -28,12 +28,12 @@
 
 .admin-account-page__sidebar {
   position: sticky;
-  top: 1.6667vw;
+  top: 6vw;
 }
 
 .admin-account-page__menu {
   background: var(--color-grey);
-  border: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 0.8333vw;
   padding: 1.25vw;
   display: flex;
@@ -85,7 +85,7 @@
 .admin-account-page__card {
   width: 100%;
   background: var(--color-grey);
-  border: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  border: 0.0521vw solid var(--color-grey-light);
   border-radius: 0.8333vw;
   padding: 1.6667vw;
 }
@@ -148,8 +148,8 @@
 .admin-account-page__stat {
   min-height: 5.2083vw;
   border-radius: 0.8333vw;
-  background: linear-gradient(180deg, #1f212b 0%, #1a1c24 100%);
-  border: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  background: var(--color-grey-hover);
+  border: 0.0521vw solid var(--color-grey-light);
   padding: 1.0417vw;
   color: var(--color-white);
   text-decoration: none;
@@ -163,7 +163,7 @@
 
 .admin-account-page__stat:hover {
   transform: translateY(-0.0521vw);
-  border-color: rgba(147, 109, 251, 0.35);
+  border-color: var(--color-purple-light);
 }
 
 .admin-account-page__stat-value {
@@ -212,7 +212,7 @@
   height: 3.125vw;
   padding: 0 0.9375vw;
   border-radius: 0.8333vw;
-  border: 0.0521vw solid rgba(235, 235, 235, 0.12);
+  border: 0.0521vw solid var(--color-grey-light);
   background: var(--color-grey-dark);
   color: var(--color-white);
   outline: none;
@@ -257,7 +257,7 @@
 }
 
 .admin-account-page__secondary {
-  border: 0.0521vw solid rgba(235, 235, 235, 0.14);
+  border: 0.0521vw solid var(--color-grey-light);
   background: transparent;
 }
 
@@ -285,13 +285,13 @@
 .admin-account-page__notification-card {
   min-height: 6.25vw;
   border-radius: 0.8333vw;
-  background: linear-gradient(180deg, #1f212b 0%, #1a1c24 100%);
-  border: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  background: var(--color-grey-hover);
+  border: 0.0521vw solid var(--color-grey-light);
   padding: 1.25vw;
   color: var(--color-white);
   text-decoration: none;
   display: grid;
-  grid-template-columns: 2.9167vw 1fr 4.1667vw;
+  grid-template-columns: 2.9167vw 1fr;
   align-items: center;
   gap: 1.25vw;
   transition:
@@ -301,14 +301,14 @@
 
 .admin-account-page__notification-card:hover {
   transform: translateY(-0.0521vw);
-  border-color: rgba(147, 109, 251, 0.35);
+  border-color: var(--color-purple-light);
 }
 
 .admin-account-page__notification-icon-wrap {
   width: 2.9167vw;
   height: 2.9167vw;
   border-radius: 0.8333vw;
-  background: rgba(114, 34, 234, 0.14);
+  background: color-mix(in srgb, var(--color-purple) 16%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,7 +339,7 @@
   width: 4.1667vw;
   min-height: 4.1667vw;
   border-radius: 0.8333vw;
-  background: rgba(114, 34, 234, 0.16);
+  background: var(--color-purple);
   color: var(--color-white);
   display: inline-flex;
   align-items: center;
@@ -359,7 +359,7 @@
   justify-content: space-between;
   gap: 1.25vw;
   padding-bottom: 0.8333vw;
-  border-bottom: 0.0521vw solid rgba(235, 235, 235, 0.08);
+  border-bottom: 0.0521vw solid var(--color-grey-light);
 }
 
 .admin-account-page__info-row:last-child {
@@ -375,6 +375,90 @@
   color: var(--color-white);
   text-align: right;
   word-break: break-word;
+}
+
+.admin-account-page__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8333vw;
+}
+
+.admin-account-page__toggle-row {
+  min-height: 4.1667vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-hover);
+  border-radius: 0.8333vw;
+  padding: 1.0417vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25vw;
+}
+
+.admin-account-page__toggle-title,
+.admin-account-page__danger-title {
+  color: var(--color-white);
+}
+
+.admin-account-page__muted {
+  color: var(--color-white);
+  opacity: 0.7;
+}
+
+.admin-account-page__switch {
+  width: 2.6042vw;
+  height: 1.3542vw;
+  border-radius: 999vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  background: var(--color-grey-light);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-account-page__switch-dot {
+  width: 1.0938vw;
+  height: 1.0938vw;
+  border-radius: 50%;
+  background: var(--color-on-purple);
+  position: absolute;
+  top: 50%;
+  left: 0.1563vw;
+  transform: translateY(-50%);
+  transition: left 0.2s ease;
+}
+
+.admin-account-page__switch.is-on {
+  background: var(--color-purple);
+  border-color: var(--color-purple);
+}
+
+.admin-account-page__switch.is-on .admin-account-page__switch-dot {
+  left: 1.3021vw;
+}
+
+.admin-account-page__actions--left {
+  justify-content: flex-start;
+}
+
+.admin-account-page__danger-zone {
+  margin-top: 1.6667vw;
+  padding-top: 1.25vw;
+  border-top: 0.0521vw solid var(--color-grey-light);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625vw;
+}
+
+.admin-account-page__danger-btn {
+  height: 2.5521vw;
+  padding: 0 1.25vw;
+  border: 0.0521vw solid rgba(255, 95, 95, 0.45);
+  border-radius: 0.625vw;
+  background: rgba(255, 95, 95, 0.08);
+  color: #ff9d9d;
+  cursor: pointer;
 }
 
 /* ===== TABLET ===== */
@@ -394,7 +478,7 @@
   }
 
   .admin-account-page__sidebar {
-    top: 2vw;
+    top: 12vw;
   }
 
   .admin-account-page__menu {
@@ -481,7 +565,7 @@
 
   .admin-account-page__notification-card {
     min-height: 9vw;
-    grid-template-columns: 4.8vw 1fr 6vw;
+    grid-template-columns: 4.8vw 1fr;
     border-radius: 1.2vw;
     padding: 1.8vw;
     gap: 1.8vw;
@@ -502,11 +586,6 @@
     max-width: 52vw;
   }
 
-  .admin-account-page__notification-count {
-    width: 6vw;
-    min-height: 6vw;
-    border-radius: 1.2vw;
-  }
 }
 
 /* ===== MOBILE ===== */
@@ -543,7 +622,7 @@
   .admin-account-page__mobile-tab {
     min-width: max-content;
     min-height: 11.7333vw;
-    border: 0.2667vw solid rgba(255, 255, 255, 0.1);
+    border: 0.2667vw solid var(--color-grey-light);
     border-radius: 999vw;
     background: var(--color-grey);
     padding: 0 4.2667vw;

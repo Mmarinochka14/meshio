@@ -222,8 +222,15 @@ export default function MyModelsPage() {
         <div className="catalog-page__container">
           <div className="catalog-page__top">
             <h1 className="catalog-page__title text-h2">Мои модели</h1>
-            <p className="catalog-page__subtitle text-p2">
-              Купленные модели, доступные для повторного скачивания и оценки.
+          </div>
+
+          <div className="catalog-page__notice">
+            <span className="catalog-page__notice-kicker text-p3">
+              Личная библиотека
+            </span>
+            <p className="catalog-page__notice-text text-p2">
+              Здесь хранятся купленные модели. Их можно скачать повторно и
+              оценить после использования.
             </p>
           </div>
 

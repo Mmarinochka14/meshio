@@ -1,5 +1,4 @@
 from pathlib import Path
-import time
 from django.utils import timezone
 
 from django.core.files.base import ContentFile
@@ -18,6 +17,8 @@ from core.object_storage import (
 )
 from products.services.yandex_art import generate_texture_image
 from users.permissions import IsAdminRole, IsApprovedSeller, IsBuyer
+from users.models import UserPreference
+from users.services import create_notification
 
 from .models import (
     Cart,
@@ -65,7 +66,6 @@ from .serializers import (
     ReviewCreateUpdateSerializer,
     ReviewSerializer,
     SellerAnalyticsSerializer,
-    AdminContactRequestSerializer,
     AdminContactRequestSerializer,
     AdminContactRequestUpdateSerializer,
     CheckoutPaySerializer,
@@ -298,7 +298,7 @@ class GenerateTextureView(APIView):
 
         generated = GeneratedTexture.objects.create(
             product=product,
-            user=request.user,
+            user=request.user if request.user.is_authenticated else None,
             prompt=prompt,
             status="pending",
         )
@@ -599,20 +599,11 @@ class ProductDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_object(self):
-        t0 = time.perf_counter()
-
         obj = super().get_object()
-        t1 = time.perf_counter()
 
-        Product.objects.filter(pk=obj.pk).update(views_count=obj.views_count + 1)
-        t2 = time.perf_counter()
+        Product.objects.filter(pk=obj.pk).update(views_count=F("views_count") + 1)
 
         obj.refresh_from_db()
-        t3 = time.perf_counter()
-
-        print("DETAIL get object:", round(t1 - t0, 3))
-        print("DETAIL update views:", round(t2 - t1, 3))
-        print("DETAIL refresh:", round(t3 - t2, 3))
 
         return obj
 
@@ -834,6 +825,17 @@ class UploadProductFileView(APIView):
             product.save(update_fields=update_fields)
 
         if file_type == 'model_source':
+            preferences, _ = UserPreference.objects.get_or_create(user=request.user)
+            if (
+                preferences
+                and preferences.seller_auto_submit_to_review
+                and product.status in ['draft', 'rejected', 'archived']
+                and product.title
+            ):
+                product.status = 'pending_review'
+                product.moderation_comment = None
+                product.save(update_fields=['status', 'moderation_comment'])
+
             try:
                 prepare_product_viewer(product.id)
             except Exception as e:
@@ -961,6 +963,23 @@ class ProductModerationView(generics.UpdateAPIView):
     serializer_class = ProductModerationSerializer
     permission_classes = [IsAdminRole]
 
+    def perform_update(self, serializer):
+        product = serializer.save()
+        status_label = {
+            'published': 'опубликована',
+            'rejected': 'отклонена',
+            'archived': 'перенесена в архив',
+        }.get(product.status, 'обновлена')
+
+        create_notification(
+            product.seller,
+            'product_moderation',
+            f'Модель "{product.title}" {status_label}',
+            product.moderation_comment or 'Статус модели обновлён модератором.',
+            f'/seller/models',
+            preference_field='seller_moderation_updates',
+        )
+
 
 class ModerationQueueView(generics.ListAPIView):
     serializer_class = AdminProductSerializer
@@ -1043,6 +1062,14 @@ class PurchaseProductView(APIView):
 
         product.sales_count += 1
         product.save(update_fields=['sales_count'])
+        create_notification(
+            product.seller,
+            'sale',
+            f'Новая продажа: {product.title}',
+            f'Покупатель приобрёл модель за {product.price} ₽.',
+            '/seller/profile',
+            preference_field='seller_sales_updates',
+        )
 
         return Response(
             {'detail': 'Покупка успешно совершена.', 'order_id': order.id},
@@ -1216,6 +1243,14 @@ class ProductCheckoutPayView(APIView):
 
             Product.objects.filter(id=product.id).update(
                 sales_count=F("sales_count") + 1
+            )
+            create_notification(
+                product.seller,
+                'sale',
+                f'Новая продажа: {product.title}',
+                f'Покупатель приобрёл модель за {item["price"]} ₽.',
+                '/seller/profile',
+                preference_field='seller_sales_updates',
             )
 
         return Response(
@@ -1424,6 +1459,15 @@ class AddCommentView(APIView):
         serializer = CommentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         comment = serializer.save(user=request.user, product=product)
+        if product.seller_id != request.user.id:
+            create_notification(
+                product.seller,
+                'comment',
+                f'Новый комментарий к модели "{product.title}"',
+                comment.text,
+                f'/products/{product.id}#comments',
+                preference_field='seller_comments_updates',
+            )
 
         return Response(
             {
@@ -1825,6 +1869,13 @@ class AdminContactRequestUpdateView(generics.UpdateAPIView):
         if serializer.validated_data.get('admin_reply'):
             contact_request.replied_at = timezone.now()
             contact_request.save(update_fields=['replied_at', 'updated_at'])
+            create_notification(
+                contact_request.user,
+                'support',
+                'Поддержка ответила на обращение',
+                contact_request.subject,
+                '/buyer/profile',
+            )
 
         response_serializer = AdminContactRequestSerializer(
             contact_request,

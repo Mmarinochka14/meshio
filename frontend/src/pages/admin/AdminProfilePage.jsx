@@ -10,6 +10,7 @@ import {
   meRequest,
   updateProfileRequest,
   changePasswordRequest,
+  updatePreferencesRequest,
 } from "../../api/auth";
 import { getAdminSupportRequests } from "../../api/support";
 
@@ -76,6 +77,11 @@ export default function AdminProfilePage() {
 
   const [isPwSaving, setIsPwSaving] = useState(false);
   const [pwMsg, setPwMsg] = useState("");
+  const [settingsForm, setSettingsForm] = useState({
+    dark_theme: true,
+    compact_mode: false,
+  });
+  const [settingsMsg, setSettingsMsg] = useState("");
 
   const [stats, setStats] = useState({
     moderationCount: 0,
@@ -85,6 +91,7 @@ export default function AdminProfilePage() {
 
   const [statsLoading, setStatsLoading] = useState(true);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
 
   const tabs = useMemo(
     () => [
@@ -133,6 +140,13 @@ export default function AdminProfilePage() {
         email: data?.email || "",
         phone: data?.phone ? formatRuPhone(data.phone) : "",
       });
+
+      if (data?.preferences) {
+        setSettingsForm({
+          dark_theme: data.preferences.dark_theme,
+          compact_mode: data.preferences.compact_mode,
+        });
+      }
     } catch (e) {
       logout();
       navigate("/");
@@ -248,6 +262,38 @@ export default function AdminProfilePage() {
     }
   }
 
+  function toggleSettings(name) {
+    setSettingsForm((prev) => ({ ...prev, [name]: !prev[name] }));
+    setSettingsMsg("");
+  }
+
+  async function handleSaveSettings() {
+    setSettingsMsg("");
+
+    try {
+      const preferences = await updatePreferencesRequest(settingsForm);
+      setSettingsForm({
+        dark_theme: preferences.dark_theme,
+        compact_mode: preferences.compact_mode,
+      });
+      setSettingsMsg("Настройки сохранены");
+    } catch (e) {
+      setSettingsMsg("Не удалось сохранить настройки");
+    }
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      await apiClient.delete("/users/me/delete/");
+      logout();
+      navigate("/");
+    } catch (e) {
+      setSettingsMsg(
+        e?.response?.data?.detail || "Не удалось удалить аккаунт.",
+      );
+    }
+  }
+
   function handleConfirmLogout() {
     logout();
     navigate("/");
@@ -256,16 +302,6 @@ export default function AdminProfilePage() {
   const userName = profile?.username || "Администратор";
   const avatarInitial = getInitial(profile?.username);
 
-  const fullName = useMemo(() => {
-    const parts = [
-      profile?.last_name,
-      profile?.first_name,
-      profile?.middle_name,
-    ].filter(Boolean);
-
-    return parts.length > 0 ? parts.join(" ") : "Администратор Meshio";
-  }, [profile]);
-
   if (isLoading) {
     return <div className="admin__state text-p2">Загрузка...</div>;
   }
@@ -273,7 +309,7 @@ export default function AdminProfilePage() {
   return (
     <section className="admin-account-page">
       <h1 className="admin-account-page__title text-h2">
-        Личный кабинет администратора
+        Личный кабинет
       </h1>
 
       <div className="admin-account-page__divider" />
@@ -473,133 +509,6 @@ export default function AdminProfilePage() {
               {saveMsg ? (
                 <div className="admin-account-page__msg text-p2">{saveMsg}</div>
               ) : null}
-            </div>
-          )}
-
-          {activeTab === "notifications" && (
-            <div className="admin-account-page__card">
-              <div className="admin-account-page__card-title text-h3">
-                Уведомления
-              </div>
-
-              <div className="admin-account-page__notifications">
-                <Link
-                  to="/admin/products"
-                  className="admin-account-page__notification-card"
-                >
-                  <div className="admin-account-page__notification-icon-wrap">
-                    <img
-                      src={moderationIcon}
-                      alt=""
-                      className="admin-account-page__notification-icon"
-                    />
-                  </div>
-
-                  <div className="admin-account-page__notification-info">
-                    <div className="admin-account-page__notification-title text-p1">
-                      Товары на проверке
-                    </div>
-                    <div className="admin-account-page__notification-text text-p2">
-                      Модели, которые продавцы отправили на модерацию перед
-                      публикацией.
-                    </div>
-                  </div>
-
-                  <div className="admin-account-page__notification-count text-h2">
-                    {statsLoading ? "—" : stats.moderationCount}
-                  </div>
-                </Link>
-
-                <Link
-                  to="/admin/users"
-                  className="admin-account-page__notification-card"
-                >
-                  <div className="admin-account-page__notification-icon-wrap">
-                    <img
-                      src={sellersIcon}
-                      alt=""
-                      className="admin-account-page__notification-icon"
-                    />
-                  </div>
-
-                  <div className="admin-account-page__notification-info">
-                    <div className="admin-account-page__notification-title text-p1">
-                      Заявки продавцов
-                    </div>
-                    <div className="admin-account-page__notification-text text-p2">
-                      Пользователи, ожидающие подтверждения роли продавца.
-                    </div>
-                  </div>
-
-                  <div className="admin-account-page__notification-count text-h2">
-                    {statsLoading ? "—" : stats.sellerRequestsCount}
-                  </div>
-                </Link>
-
-                <Link
-                  to="/admin/requests"
-                  className="admin-account-page__notification-card"
-                >
-                  <div className="admin-account-page__notification-icon-wrap">
-                    <img
-                      src={requestsIcon}
-                      alt=""
-                      className="admin-account-page__notification-icon"
-                    />
-                  </div>
-
-                  <div className="admin-account-page__notification-info">
-                    <div className="admin-account-page__notification-title text-p1">
-                      Новые обращения
-                    </div>
-                    <div className="admin-account-page__notification-text text-p2">
-                      Сообщения пользователей, на которые нужно ответить.
-                    </div>
-                  </div>
-
-                  <div className="admin-account-page__notification-count text-h2">
-                    {statsLoading ? "—" : stats.newSupportCount}
-                  </div>
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "settings" && (
-            <div className="admin-account-page__card admin-account-page__card--narrow">
-              <div className="admin-account-page__card-title text-h3">
-                Настройки
-              </div>
-
-              <div className="admin-account-page__info-list">
-                <div className="admin-account-page__info-row text-p2">
-                  <span className="admin-account-page__info-label">Имя:</span>
-                  <span className="admin-account-page__info-value">
-                    {fullName}
-                  </span>
-                </div>
-
-                <div className="admin-account-page__info-row text-p2">
-                  <span className="admin-account-page__info-label">Роль:</span>
-                  <span className="admin-account-page__info-value">
-                    Администратор
-                  </span>
-                </div>
-
-                <div className="admin-account-page__info-row text-p2">
-                  <span className="admin-account-page__info-label">Логин:</span>
-                  <span className="admin-account-page__info-value">
-                    {profile?.username || "—"}
-                  </span>
-                </div>
-
-                <div className="admin-account-page__info-row text-p2">
-                  <span className="admin-account-page__info-label">Email:</span>
-                  <span className="admin-account-page__info-value">
-                    {profile?.email || "—"}
-                  </span>
-                </div>
-              </div>
 
               <div className="admin-account-page__section-title text-p1">
                 Смена пароля
@@ -653,6 +562,166 @@ export default function AdminProfilePage() {
               ) : null}
             </div>
           )}
+
+          {activeTab === "notifications" && (
+            <div className="admin-account-page__card">
+              <div className="admin-account-page__card-title text-h3">
+                Уведомления
+              </div>
+
+              <div className="admin-account-page__notifications">
+                <Link
+                  to="/admin/products"
+                  className="admin-account-page__notification-card"
+                >
+                  <div className="admin-account-page__notification-icon-wrap">
+                    <img
+                      src={moderationIcon}
+                      alt=""
+                      className="admin-account-page__notification-icon"
+                    />
+                  </div>
+
+                  <div className="admin-account-page__notification-info">
+                    <div className="admin-account-page__notification-title text-p1">
+                      Товары на проверке
+                    </div>
+                    <div className="admin-account-page__notification-text text-p2">
+                      Модели, которые продавцы отправили на модерацию перед
+                      публикацией.
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/admin/users"
+                  className="admin-account-page__notification-card"
+                >
+                  <div className="admin-account-page__notification-icon-wrap">
+                    <img
+                      src={sellersIcon}
+                      alt=""
+                      className="admin-account-page__notification-icon"
+                    />
+                  </div>
+
+                  <div className="admin-account-page__notification-info">
+                    <div className="admin-account-page__notification-title text-p1">
+                      Заявки продавцов
+                    </div>
+                    <div className="admin-account-page__notification-text text-p2">
+                      Пользователи, ожидающие подтверждения роли продавца.
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/admin/requests"
+                  className="admin-account-page__notification-card"
+                >
+                  <div className="admin-account-page__notification-icon-wrap">
+                    <img
+                      src={requestsIcon}
+                      alt=""
+                      className="admin-account-page__notification-icon"
+                    />
+                  </div>
+
+                  <div className="admin-account-page__notification-info">
+                    <div className="admin-account-page__notification-title text-p1">
+                      Новые обращения
+                    </div>
+                    <div className="admin-account-page__notification-text text-p2">
+                      Сообщения пользователей, на которые нужно ответить.
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="admin-account-page__card admin-account-page__card--narrow">
+              <div className="admin-account-page__card-title text-h3">
+                Настройки
+              </div>
+
+              <div className="admin-account-page__toggles">
+                <div className="admin-account-page__toggle-row">
+                  <div>
+                    <div className="admin-account-page__toggle-title text-p2">
+                      Темная тема
+                    </div>
+                    <div className="admin-account-page__muted text-p3">
+                      Основной режим интерфейса
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={`admin-account-page__switch ${
+                      settingsForm.dark_theme ? "is-on" : ""
+                    }`}
+                    onClick={() => toggleSettings("dark_theme")}
+                  >
+                    <span className="admin-account-page__switch-dot" />
+                  </button>
+                </div>
+
+                <div className="admin-account-page__toggle-row">
+                  <div>
+                    <div className="admin-account-page__toggle-title text-p2">
+                      Компактное отображение
+                    </div>
+                    <div className="admin-account-page__muted text-p3">
+                      Более плотное отображение рабочих блоков
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={`admin-account-page__switch ${
+                      settingsForm.compact_mode ? "is-on" : ""
+                    }`}
+                    onClick={() => toggleSettings("compact_mode")}
+                  >
+                    <span className="admin-account-page__switch-dot" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-account-page__actions admin-account-page__actions--left">
+                <button
+                  type="button"
+                  className="admin-account-page__save text-p2"
+                  onClick={handleSaveSettings}
+                >
+                  Сохранить настройки
+                </button>
+              </div>
+
+              {settingsMsg ? (
+                <div className="admin-account-page__msg text-p2">{settingsMsg}</div>
+              ) : null}
+
+              <div className="admin-account-page__danger-zone">
+                <div className="admin-account-page__danger-title text-p2">
+                  Опасная зона
+                </div>
+                <div className="admin-account-page__muted text-p3">
+                  Удаление аккаунта необратимо.
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-account-page__danger-btn text-p2"
+                  onClick={() => setIsDeleteAccountModalOpen(true)}
+                >
+                  Удалить аккаунт
+                </button>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -664,6 +733,17 @@ export default function AdminProfilePage() {
         cancelText="Отмена"
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleConfirmLogout}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteAccountModalOpen}
+        title="Удалить аккаунт?"
+        description="Это действие необратимо. Все данные аккаунта будут удалены."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        danger
+        onClose={() => setIsDeleteAccountModalOpen(false)}
+        onConfirm={handleDeleteAccount}
       />
     </section>
   );

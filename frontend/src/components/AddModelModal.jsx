@@ -87,6 +87,11 @@ function mapProductToForm(product) {
   };
 }
 
+function canPreviewLocally(file) {
+  if (!file?.name) return false;
+  return /\.(glb|gltf)$/i.test(file.name);
+}
+
 export default function AddModelModal({
   isOpen,
   onClose,
@@ -103,6 +108,7 @@ export default function AddModelModal({
   const [modelFile, setModelFile] = useState(null);
 
   const [previewLocalUrl, setPreviewLocalUrl] = useState("");
+  const [modelLocalUrl, setModelLocalUrl] = useState("");
   const [modelFileName, setModelFileName] = useState("");
 
   const [productId, setProductId] = useState(null);
@@ -132,10 +138,15 @@ export default function AddModelModal({
       URL.revokeObjectURL(previewLocalUrl);
     }
 
+    if (modelLocalUrl && modelLocalUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(modelLocalUrl);
+    }
+
     if (isEditMode && initialProduct) {
       setForm(mapProductToForm(initialProduct));
       setProductId(initialProduct.id || null);
       setPreviewLocalUrl(initialProduct.main_preview_url || "");
+      setModelLocalUrl("");
       setViewerUrl(initialProduct.viewer_url || "");
       setViewerStatus(
         initialProduct.viewer_status ||
@@ -145,6 +156,7 @@ export default function AddModelModal({
       setForm(INITIAL_FORM);
       setProductId(null);
       setPreviewLocalUrl("");
+      setModelLocalUrl("");
       setViewerUrl("");
       setViewerStatus("idle");
     }
@@ -157,6 +169,14 @@ export default function AddModelModal({
       }
     };
   }, [previewLocalUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (modelLocalUrl && modelLocalUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(modelLocalUrl);
+      }
+    };
+  }, [modelLocalUrl]);
 
   const categories = filtersMeta?.categories || [];
   const licenses = filtersMeta?.licenses || [];
@@ -202,7 +222,18 @@ export default function AddModelModal({
 
     setModelFile(file);
     setModelFileName(file.name);
-    setViewerStatus("idle");
+    if (modelLocalUrl && modelLocalUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(modelLocalUrl);
+    }
+
+    if (canPreviewLocally(file)) {
+      setModelLocalUrl(URL.createObjectURL(file));
+      setViewerStatus("ready");
+    } else {
+      setModelLocalUrl("");
+      setViewerStatus("idle");
+    }
+
     setViewerUrl("");
     setViewerError("");
     setErrorText("");
@@ -303,7 +334,6 @@ export default function AddModelModal({
         onSuccess();
       }
     } catch (e) {
-      console.log("CREATE/UPDATE ERROR DATA:", e?.response?.data);
       console.error(e);
 
       const data = e?.response?.data;
@@ -498,9 +528,9 @@ export default function AddModelModal({
               </div>
 
               <div className="add-model-modal__viewer-box">
-                {viewerUrl ? (
+                {modelLocalUrl || viewerUrl ? (
                   <ProductViewer
-                    modelUrl={viewerUrl}
+                    modelUrl={modelLocalUrl || viewerUrl}
                     viewMode="lighted"
                     generatedTextureUrl={null}
                     selectedMaterialPreset="original"

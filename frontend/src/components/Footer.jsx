@@ -5,7 +5,9 @@ import logo from "../assets/icons/logo.svg";
 import telegramIcon from "../assets/icons/telegram.svg";
 import vkIcon from "../assets/icons/vk.svg";
 
-export default function Footer({ onOpenSellerModal }) {
+export default function Footer({ onOpenSellerModal, user }) {
+  const isSeller = user?.role === "seller";
+
   return (
     <footer className="footer">
       <div className="footer__container">
@@ -28,13 +30,19 @@ export default function Footer({ onOpenSellerModal }) {
 
           <div className="footer__column">
             <h3 className="footer__title text-p1">Продавцам</h3>
-            <button
-              type="button"
-              className="footer__link footer__link--button text-p2"
-              onClick={onOpenSellerModal}
-            >
-              Стать продавцом
-            </button>
+            {isSeller ? (
+              <Link to="/seller/profile" className="footer__link text-p2">
+                Мой магазин
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="footer__link footer__link--button text-p2"
+                onClick={onOpenSellerModal}
+              >
+                Стать продавцом
+              </button>
+            )}
             <Link to="/seller/terms" className="footer__link text-p2">
               Условия сотрудничества
             </Link>

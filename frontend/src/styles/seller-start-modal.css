@@ -36,7 +36,7 @@
   padding: 1.6667vw;
   border-radius: 1.0417vw;
   background: var(--color-grey);
-  border: 0.1vw solid #22242d;
+  border: 0.1vw solid var(--color-grey-light);
 }
 
 .seller-start-modal__card-top {

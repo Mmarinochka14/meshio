@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { getUser, logout } from "./auth/authStore";
 import ConfirmModal from "./ConfirmModal";
@@ -14,6 +14,15 @@ import profileIcon from "../assets/icons/user.svg";
 import homeIcon from "../assets/icons/home.svg";
 import logoutIcon from "../assets/icons/logout.svg";
 
+const SEARCH_SUGGESTIONS = [
+  { label: "Все модели", path: "/catalog", type: "Категория" },
+  { label: "Животные", path: "/catalog?category=zhivotnye", type: "Категория" },
+  { label: "Архитектура", path: "/catalog?category=arhitektura", type: "Категория" },
+  { label: "Персонажи", path: "/catalog?category=personazhi", type: "Категория" },
+  { label: "Техника", path: "/catalog?category=tehnika", type: "Категория" },
+  { label: "Окружение", path: "/catalog?category=okruzhenie", type: "Категория" },
+];
+
 export default function AdminHeader() {
   const navigate = useNavigate();
   const user = getUser();
@@ -22,6 +31,9 @@ export default function AdminHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCompactHeader, setIsCompactHeader] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -33,6 +45,51 @@ export default function AdminHeader() {
       document.body.style.overflow = prevOverflow;
     };
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    let frameId = 0;
+
+    function handleScroll() {
+      if (frameId) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        const scrollTop =
+          window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          document.body.scrollTop ||
+          0;
+
+        setIsCompactHeader(scrollTop > 12);
+        frameId = 0;
+      });
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleDocumentClick(event) {
+      if (!searchRef.current) return;
+      if (!searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    return () => document.removeEventListener("mousedown", handleDocumentClick);
+  }, []);
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
@@ -86,9 +143,19 @@ export default function AdminHeader() {
     navigate(`/catalog?q=${encodeURIComponent(value)}`);
   }
 
+  const filteredSuggestions = SEARCH_SUGGESTIONS.filter((item) =>
+    item.label.toLowerCase().includes(searchValue.trim().toLowerCase()),
+  ).slice(0, searchValue.trim() ? 4 : 6);
+
+  function handleSuggestionClick(path) {
+    setIsSearchOpen(false);
+    setSearchValue("");
+    navigate(path);
+  }
+
   return (
     <>
-      <header className="admin-header">
+      <header className={`admin-header ${isCompactHeader ? "is-compact" : ""}`}>
         <div className="admin-header__container">
           <div className="admin-header__logo-side">
             <Link to="/" className="admin-header__logo">
@@ -147,6 +214,7 @@ export default function AdminHeader() {
               <form
                 className="admin-header__search"
                 onSubmit={handleSearchSubmit}
+                ref={searchRef}
               >
                 <img
                   src={searchIcon}
@@ -158,8 +226,27 @@ export default function AdminHeader() {
                   placeholder="Поиск"
                   className="admin-header__search-input"
                   value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                    setIsSearchOpen(true);
+                  }}
+                  onFocus={() => setIsSearchOpen(true)}
                 />
+                {isSearchOpen && filteredSuggestions.length > 0 ? (
+                  <div className="admin-header__suggestions">
+                    {filteredSuggestions.map((item) => (
+                      <button
+                        key={item.path}
+                        type="button"
+                        className="admin-header__suggestion"
+                        onClick={() => handleSuggestionClick(item.path)}
+                      >
+                        <span className="admin-header__suggestion-type">{item.type}</span>
+                        <span className="admin-header__suggestion-title">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </form>
 
               <button
@@ -176,6 +263,23 @@ export default function AdminHeader() {
               </button>
 
               <div className="admin-header__actions">
+                <NavLink
+                  to="/admin/profile"
+                  className={({ isActive }) =>
+                    `admin-header__action admin-header__action--profile ${
+                      isActive ? "is-active" : ""
+                    }`
+                  }
+                  title={userName}
+                >
+                  <img
+                    src={profileIcon}
+                    alt=""
+                    className="admin-header__action-icon"
+                  />
+                  <span className="admin-header__action-label">Кабинет</span>
+                </NavLink>
+
                 <NavLink
                   to="/admin/products"
                   className={({ isActive }) =>

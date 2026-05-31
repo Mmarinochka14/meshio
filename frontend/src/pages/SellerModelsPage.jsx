@@ -70,6 +70,7 @@ export default function SellerModelsPage() {
 
   const [products, setProducts] = useState([]);
   const [meta, setMeta] = useState(null);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
@@ -213,18 +214,22 @@ export default function SellerModelsPage() {
     const ok = window.confirm(`Снять с публикации модель "${product.title}"?`);
     if (!ok) return;
 
+    setStatusMessage("");
+
     try {
       await archiveProductRequest(product.id);
       await loadProductsManually();
     } catch (e) {
       console.error(e);
-      alert("Не удалось снять модель с публикации");
+      setStatusMessage("Не удалось снять модель с публикации.");
     }
   }
 
   async function handleDelete(product) {
     const ok = window.confirm(`Удалить модель "${product.title}"?`);
     if (!ok) return;
+
+    setStatusMessage("");
 
     try {
       await deleteProductRequest(product.id);
@@ -236,11 +241,13 @@ export default function SellerModelsPage() {
       }));
     } catch (e) {
       console.error(e);
-      alert("Не удалось удалить модель");
+      setStatusMessage("Не удалось удалить модель.");
     }
   }
 
   async function handleSendToReview(product) {
+    setStatusMessage("");
+
     try {
       await sendProductToReviewRequest(product.id);
       await loadProductsManually();
@@ -250,7 +257,7 @@ export default function SellerModelsPage() {
       const msg =
         e?.response?.data?.detail || "Не удалось отправить модель на модерацию";
 
-      alert(msg);
+      setStatusMessage(msg);
     }
   }
 
@@ -355,6 +362,12 @@ export default function SellerModelsPage() {
         </div>
 
         <div className="seller-models-page__divider" />
+
+        {statusMessage ? (
+          <div className="seller-models-page__notice text-p2">
+            {statusMessage}
+          </div>
+        ) : null}
 
         <div className="seller-models-page__tabs">
           <button

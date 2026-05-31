@@ -291,6 +291,8 @@ class GeneratedTexture(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
         related_name='generated_textures',
         verbose_name='Пользователь'
     )
@@ -321,7 +323,8 @@ class GeneratedTexture(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.product.title} - {self.user.username} - {self.created_at:%Y-%m-%d %H:%M}'
+        username = self.user.username if self.user else 'guest'
+        return f'{self.product.title} - {username} - {self.created_at:%Y-%m-%d %H:%M}'
 
 
 class Order(models.Model):

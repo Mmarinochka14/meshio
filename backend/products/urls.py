@@ -44,8 +44,6 @@ from .views import (
     AdminContactRequestsView,
     AdminContactRequestUpdateView,
     MyContactRequestsView,
-    AdminContactRequestsView,
-    AdminContactRequestUpdateView,
     CheckoutPreviewView,
     CheckoutPayView,
     ProductCheckoutPreviewView,
@@ -111,9 +109,7 @@ urlpatterns = [
     path('<int:pk>/checkout/pay/', ProductCheckoutPayView.as_view(), name='product-checkout-pay'),
 
     path('seller/analytics/', SellerAnalyticsView.as_view(), name='seller-analytics'),
-    path('admin/contact-requests/', AdminContactRequestsView.as_view(), name='admin-contact-requests'),
-    path('admin/contact-requests/<int:pk>/', AdminContactRequestUpdateView.as_view(), name='admin-contact-request-update'),
     path('files/<int:pk>/delete/', DeleteProductFileView.as_view(), name='product-file-delete'),
     path('comments/<int:pk>/delete/', DeleteCommentView.as_view(), name='delete-comment'),
-path('<int:pk>/generate-texture/', GenerateTextureView.as_view(), name='generate-texture'),
+    path('<int:pk>/generate-texture/', GenerateTextureView.as_view(), name='generate-texture'),
 ]

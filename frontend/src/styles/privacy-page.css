@@ -1,0 +1,74 @@
+.privacy-page {
+  min-height: 100vh;
+  padding: 2.8vw 0 4.1667vw;
+  background: var(--color-grey-dark);
+  color: var(--color-white);
+}
+
+.privacy-page__container {
+  width: min(64.5833vw, 1240px);
+  margin: 0 auto;
+}
+
+.privacy-page__header {
+  margin-bottom: 1.6667vw;
+}
+
+.privacy-page__title {
+  margin: 0 0 0.625vw;
+}
+
+.privacy-page__lead {
+  max-width: 42.7083vw;
+  margin: 0;
+  color: rgba(235, 235, 235, 0.78);
+  line-height: 1.55;
+}
+
+.privacy-page__content {
+  display: grid;
+  gap: 0.8333vw;
+}
+
+.privacy-page__block {
+  padding: 1.25vw;
+  border: 0.0521vw solid var(--color-grey-light);
+  border-radius: 0.8333vw;
+  background: var(--color-grey);
+}
+
+.privacy-page__heading {
+  margin: 0 0 0.625vw;
+}
+
+.privacy-page__block p {
+  margin: 0;
+  color: rgba(235, 235, 235, 0.82);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .privacy-page {
+    padding: 24px 0 48px;
+  }
+
+  .privacy-page__container {
+    width: calc(100% - 32px);
+  }
+
+  .privacy-page__header {
+    margin-bottom: 20px;
+  }
+
+  .privacy-page__lead {
+    max-width: none;
+  }
+
+  .privacy-page__content {
+    gap: 12px;
+  }
+
+  .privacy-page__block {
+    padding: 16px;
+  }
+}
