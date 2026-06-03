@@ -11,7 +11,7 @@ def env_bool(name, default=False):
     return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
 
 
-DEBUG = env_bool("DEBUG", True)
+DEBUG = env_bool("DEBUG", False)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-only-change-me")
 

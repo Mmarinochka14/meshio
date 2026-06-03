@@ -71,6 +71,121 @@ npm run build
 
 Файл `backend/.env.example` содержит пример всех переменных окружения, необходимых для запуска.
 
+## Production deployment
+
+### Systemd service for backend
+
+Создайте сервисный файл `meshio-backend.service` в `/etc/systemd/system/` с содержимым примерно:
+
+```ini
+[Unit]
+Description=Meshio Django backend
+After=network.target
+
+[Service]
+User=meshio
+Group=meshio
+WorkingDirectory=/home/meshio/meshio/backend
+EnvironmentFile=/home/meshio/meshio/backend/.env
+ExecStart=/home/meshio/meshio/backend/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000
+Restart=always
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Перезапуск и проверка:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable meshio-backend
+sudo systemctl start meshio-backend
+sudo systemctl status meshio-backend
+```
+
+### Nginx config example
+
+Пример конфигурации Nginx можно положить в `/etc/nginx/sites-available/meshio` и включить через `sites-enabled`.
+
+```nginx
+server {
+    listen 80;
+    server_name 85.209.150.154;
+
+    client_max_body_size 200M;
+
+    root /home/meshio/meshio/frontend/dist;
+    index index.html;
+
+    location /static/ {
+        alias /home/meshio/meshio/backend/staticfiles/;
+    }
+
+    location /media/ {
+        alias /home/meshio/meshio/backend/media/;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000/admin/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+Проверка и перезапуск Nginx:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+### Обновление проекта на сервере
+
+После изменения кода backend:
+
+```bash
+cd /home/meshio/meshio/backend
+source .venv/bin/activate
+git pull
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput
+sudo systemctl restart meshio-backend
+sudo systemctl restart nginx
+```
+
+После изменения frontend:
+
+```bash
+cd /home/meshio/meshio/frontend
+npm install --legacy-peer-deps
+npm run build
+sudo systemctl restart nginx
+```
+
+После изменения `.env`:
+
+```bash
+sudo systemctl restart meshio-backend
+```
+
 ### Git ignore
 
 В репозитории игнорируется:

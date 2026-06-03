@@ -1,0 +1,37 @@
+server {
+    listen 80;
+    server_name 85.209.150.154;
+
+    client_max_body_size 200M;
+
+    root /home/meshio/meshio/frontend/dist;
+    index index.html;
+
+    location /static/ {
+        alias /home/meshio/meshio/backend/staticfiles/;
+    }
+
+    location /media/ {
+        alias /home/meshio/meshio/backend/media/;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000/admin/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
