@@ -472,11 +472,6 @@ export default function ProductPage() {
 
   async function handleGenerateTexture() {
     try {
-      if (!isAuthenticated) {
-        openAuthModal("login");
-        return;
-      }
-
       if (!texturePrompt.trim()) {
         setError("Введите промпт для генерации текстуры.");
         return;

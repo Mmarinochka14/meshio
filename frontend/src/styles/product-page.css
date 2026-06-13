@@ -1997,3 +1997,301 @@
     font-size: 1.35vw;
   }
 }
+
+@media (max-width: 768px) {
+  .product-page {
+    padding-top: 3.2vw;
+    padding-bottom: calc(21vw + env(safe-area-inset-bottom));
+  }
+
+  .product-page__container {
+    width: 100%;
+    padding: 0 3.2vw;
+  }
+
+  .product-page__top-grid {
+    gap: 3.2vw;
+  }
+
+  .product-page__viewer-card,
+  .product-page__sidebar-card,
+  .product-page__section-card {
+    padding: 3.2vw;
+    border-radius: 3.2vw;
+  }
+
+  .product-page__viewer-card {
+    overflow: hidden;
+  }
+
+  .product-page__viewer-stage {
+    margin-bottom: 2.4vw;
+  }
+
+  .product-viewer,
+  .product-viewer__state {
+    height: clamp(220px, 58vw, 360px);
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__mode-switch {
+    margin-bottom: 3.2vw;
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__mode-pill {
+    height: 9.6vw;
+    font-size: 3.2vw;
+    font-weight: 700;
+  }
+
+  .product-page__generator-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 3.2vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__generator-head > div {
+    min-width: 0;
+  }
+
+  .product-page__section-title {
+    margin-bottom: 0.8vw;
+    font-size: 4.2667vw;
+    line-height: 1.15;
+  }
+
+  .product-page__section-text {
+    display: -webkit-box;
+    margin-bottom: 0;
+    font-size: 3.2vw;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-page__generator-head .product-page__small-secondary {
+    width: auto;
+    min-width: 24vw;
+    min-height: 8.5333vw;
+    padding: 0 3.2vw;
+    border-radius: 2.4vw;
+    flex-shrink: 0;
+    font-size: 3.2vw;
+  }
+
+  .product-page__material-panel {
+    gap: 2.4vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__material-card,
+  .product-page__texture-editor {
+    padding: 3.2vw;
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__material-card-title {
+    margin-bottom: 2.4vw;
+    font-size: 3.7333vw;
+    line-height: 1.2;
+  }
+
+  .product-page__material-card-note {
+    font-size: 3.2vw;
+  }
+
+  .product-page__material-card .product-page__prompt-suggestions,
+  .product-page__texture-editor .product-page__prompt-suggestions {
+    flex-wrap: nowrap;
+    gap: 1.6vw;
+    margin: 0 -3.2vw 3.2vw;
+    padding: 0 3.2vw 1.2vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .product-page__material-card .product-page__prompt-suggestions::-webkit-scrollbar,
+  .product-page__texture-editor .product-page__prompt-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-page__prompt-chip {
+    min-height: 7.4667vw;
+    padding: 0 3.2vw;
+    border-radius: 999vw;
+    font-size: 3.2vw;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .product-page__color-swatches {
+    gap: 2vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__color-dot {
+    width: 5.6vw;
+    height: 5.6vw;
+  }
+
+  .product-page__material-card-head {
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__material-properties {
+    gap: 2.4vw;
+  }
+
+  .product-page__material-controls {
+    gap: 2.4vw;
+    margin-bottom: 0;
+  }
+
+  .product-page__range-label,
+  .product-page__range-control span {
+    font-size: 3.2vw;
+    line-height: 1.25;
+  }
+
+  .product-page__info-tip {
+    width: 4.2667vw;
+    height: 4.2667vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__material-preview {
+    padding: 2.4vw;
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__material-sphere-viewer {
+    width: min(64vw, 240px);
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__texture-workspace {
+    gap: 2.4vw;
+  }
+
+  .product-page__prompt-box {
+    padding: 2.6667vw 3.2vw;
+    border-radius: 2.6667vw;
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__prompt-label {
+    margin-bottom: 1.6vw;
+    font-size: 3.2vw;
+  }
+
+  .product-page__prompt-input {
+    min-height: 20vw;
+    font-size: 3.4667vw;
+    line-height: 1.35;
+  }
+
+  .product-page__generator-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2vw;
+    margin-bottom: 0;
+  }
+
+  .product-page__small-primary,
+  .product-page__small-secondary {
+    width: 100%;
+    min-height: 9.6vw;
+    border-radius: 2.6667vw;
+    font-size: 3.4667vw;
+  }
+
+  .product-page__texture-card {
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__texture-card-title {
+    padding: 2.6667vw 3.2vw;
+    font-size: 3.4667vw;
+  }
+
+  .product-page__texture-card-body--result {
+    min-height: 38vw;
+    padding: 3.2vw;
+  }
+
+  .product-page__generated-texture-image {
+    max-width: min(58vw, 220px);
+    border-radius: 2.4vw;
+  }
+
+  .product-page__texture-card-actions {
+    padding: 2.4vw;
+  }
+
+  .product-page__download-icon {
+    width: 4vw;
+    height: 4vw;
+  }
+
+  .product-page__stats-line {
+    gap: 1.6vw;
+  }
+
+  .product-page__product-title {
+    font-size: 5.0667vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .product-page__container {
+    padding: 0 2.6667vw;
+  }
+
+  .product-page__viewer-card,
+  .product-page__sidebar-card,
+  .product-page__section-card {
+    padding: 2.9333vw;
+  }
+
+  .product-viewer,
+  .product-viewer__state {
+    height: 54vw;
+  }
+
+  .product-page__mode-pill {
+    height: 9.0667vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__section-title {
+    font-size: 4vw;
+  }
+
+  .product-page__section-text,
+  .product-page__material-card-note,
+  .product-page__range-label,
+  .product-page__range-control span {
+    font-size: 2.9333vw;
+  }
+
+  .product-page__generator-head .product-page__small-secondary {
+    min-width: 22vw;
+    min-height: 8vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__prompt-chip {
+    min-height: 6.9333vw;
+    padding: 0 2.6667vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__color-dot {
+    width: 5.0667vw;
+    height: 5.0667vw;
+  }
+}

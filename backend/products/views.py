@@ -280,7 +280,7 @@ def build_single_product_checkout_summary(product, user, request):
     }
 
 class GenerateTextureView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, pk):
         try:
