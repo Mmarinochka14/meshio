@@ -1918,3 +1918,41 @@ body.theme-light .admin__status-btn.is-active,
 body.theme-light .admin-account-page__save {
   color: var(--color-on-purple);
 }
+
+@media (max-width: 768px) {
+  .header__container {
+    padding-left: 3.2vw;
+    padding-right: 3.2vw;
+  }
+
+  .header__bottom-row {
+    grid-template-columns: 17.3333vw minmax(0, 1fr) 10.6667vw;
+    column-gap: 2vw;
+  }
+
+  .header__logo-mobile .header__logo-image {
+    width: 16vw;
+  }
+
+  .header__search {
+    min-width: 0;
+    height: 10.6667vw;
+    padding: 0 2.6667vw;
+    border-radius: 3.2vw;
+  }
+
+  .header__search-icon {
+    width: 4vw;
+    height: 4vw;
+  }
+
+  .header__search-input {
+    font-size: 3.2vw;
+  }
+
+  .header__burger {
+    width: 10.6667vw;
+    height: 10.6667vw;
+    border-radius: 3.2vw;
+  }
+}

@@ -2295,3 +2295,263 @@
     height: 5.0667vw;
   }
 }
+
+@media (max-width: 768px) {
+  .product-page,
+  .product-page * {
+    min-width: 0;
+  }
+
+  .product-page {
+    overflow-x: hidden;
+    padding-top: 2.6667vw;
+    padding-bottom: calc(20vw + env(safe-area-inset-bottom));
+  }
+
+  .product-page__container {
+    width: 100%;
+    max-width: 100vw;
+    padding: 0 2.6667vw;
+    overflow: hidden;
+  }
+
+  .product-page__top-grid {
+    gap: 3.2vw;
+  }
+
+  .product-page__viewer-card,
+  .product-page__sidebar-card,
+  .product-page__section-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 2.6667vw;
+    border-radius: 3.2vw;
+  }
+
+  .product-page__viewer-card {
+    background: transparent;
+    border-color: var(--color-grey-light);
+  }
+
+  .product-viewer,
+  .product-viewer__state {
+    height: 57vw;
+    min-height: 168px;
+    max-height: 230px;
+    border-radius: 2.6667vw;
+  }
+
+  .product-page__mode-switch {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .product-page__mode-pill {
+    width: 100%;
+    height: 8.8vw;
+    padding: 0 1.3333vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 2.6667vw;
+  }
+
+  .product-page__generator {
+    margin-top: 0;
+  }
+
+  .product-page__generator-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6vw;
+    margin-bottom: 2.1333vw;
+  }
+
+  .product-page__section-title {
+    margin-bottom: 0.5333vw;
+    font-size: 4vw;
+  }
+
+  .product-page__section-text {
+    font-size: 2.8vw;
+    line-height: 1.3;
+    -webkit-line-clamp: 2;
+  }
+
+  .product-page__generator-head .product-page__small-secondary {
+    justify-self: stretch;
+    min-width: 0;
+    min-height: 7.4667vw;
+    padding: 0 2.1333vw;
+    border-radius: 2.1333vw;
+    font-size: 2.6667vw;
+  }
+
+  .product-page__material-panel {
+    gap: 2.1333vw;
+  }
+
+  .product-page__material-card,
+  .product-page__texture-editor,
+  .product-page__texture-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 2.6667vw;
+    border-radius: 2.6667vw;
+    background: var(--color-grey-hover);
+  }
+
+  .product-page__material-card-title {
+    margin-bottom: 2.1333vw;
+    font-size: 3.4667vw;
+  }
+
+  .product-page__material-card-note {
+    display: none;
+  }
+
+  .product-page__material-card .product-page__prompt-suggestions,
+  .product-page__texture-editor .product-page__prompt-suggestions {
+    margin: 0 -2.6667vw 2.4vw;
+    padding: 0 2.6667vw 0.8vw;
+  }
+
+  .product-page__prompt-chip {
+    min-height: 7.2vw;
+    padding: 0 2.9333vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__color-swatches {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    gap: 2vw;
+    margin-bottom: 2.4vw;
+    scrollbar-width: none;
+  }
+
+  .product-page__color-swatches::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-page__color-dot {
+    width: 5.8667vw;
+    height: 5.8667vw;
+    flex: 0 0 auto;
+  }
+
+  .product-page__material-card-title--secondary {
+    margin-top: 2.4vw;
+  }
+
+  .product-page__material-card--wide {
+    padding-bottom: 2.6667vw;
+  }
+
+  .product-page__material-card-head {
+    margin-bottom: 2.1333vw;
+  }
+
+  .product-page__material-properties {
+    gap: 2.1333vw;
+  }
+
+  .product-page__range-control {
+    gap: 1.0667vw;
+  }
+
+  .product-page__range-label,
+  .product-page__range-control span {
+    font-size: 2.9333vw;
+  }
+
+  .product-page__range-control input[type="range"] {
+    height: 5.3333vw;
+  }
+
+  .product-page__info-tip {
+    display: none;
+  }
+
+  .product-page__material-preview {
+    display: none;
+  }
+
+  .product-page__prompt-box {
+    padding: 2.4vw 2.6667vw;
+    margin-bottom: 2.1333vw;
+    border-radius: 2.4vw;
+  }
+
+  .product-page__prompt-label {
+    margin-bottom: 1.3333vw;
+    font-size: 2.9333vw;
+  }
+
+  .product-page__prompt-input {
+    min-height: 18vw;
+    font-size: 3.2vw;
+  }
+
+  .product-page__generator-actions {
+    gap: 1.6vw;
+  }
+
+  .product-page__small-primary,
+  .product-page__small-secondary {
+    min-height: 8.8vw;
+    padding: 0 2.6667vw;
+    border-radius: 2.4vw;
+    font-size: 3.0667vw;
+  }
+
+  .product-page__texture-card {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .product-page__texture-workspace,
+  .product-page__material-panel,
+  .product-page__material-properties {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .product-page__texture-card-title {
+    padding: 2.4vw 2.6667vw;
+    font-size: 3.2vw;
+  }
+
+  .product-page__texture-card-body--result {
+    min-height: 34vw;
+    padding: 2.6667vw;
+  }
+
+  .product-page__generated-texture-image {
+    max-width: 52vw;
+  }
+
+  .product-page__texture-card-actions {
+    padding: 2.1333vw;
+  }
+
+  .product-page__sidebar-card {
+    padding: 3.2vw;
+  }
+
+  .product-page__stats-line {
+    margin-bottom: 2.4vw;
+  }
+
+  .product-page__product-title {
+    font-size: 5.0667vw;
+    line-height: 1.16;
+  }
+
+  .product-page__price {
+    margin-bottom: 3.2vw;
+  }
+}
