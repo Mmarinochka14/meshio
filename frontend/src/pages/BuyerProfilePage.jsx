@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/buyer-profile-page.css";
-import { buildMediaUrl } from "../api/url";
+import { buildMediaUrl, buildProductMediaProxyUrl } from "../api/url";
 
 import downloadIcon from "../assets/icons/download.svg";
 import profileIcon from "../assets/icons/user.svg";
@@ -75,7 +75,11 @@ function formatDate(value) {
   });
 }
 
-function normalizePreview(url) {
+function normalizePreview(url, productId = null) {
+  if (productId) {
+    return buildProductMediaProxyUrl(productId, "thumbnail");
+  }
+
   return buildMediaUrl(url);
 }
 
@@ -924,6 +928,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                           const product = item.product || {};
                           const previewSrc = normalizePreview(
                             product.thumbnail_url || product.main_preview_url,
+                            product.id,
                           );
 
                           return (

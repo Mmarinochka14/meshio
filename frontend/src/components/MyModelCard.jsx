@@ -40,10 +40,10 @@ export default function MyModelCard({ product, onDownload, onRate }) {
 
   const directPreviewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
   const proxyPreviewSrc = buildProductMediaProxyUrl(id, "thumbnail");
-  const [previewSrc, setPreviewSrc] = useState(directPreviewSrc || proxyPreviewSrc);
+  const [previewSrc, setPreviewSrc] = useState(proxyPreviewSrc || directPreviewSrc);
 
   useEffect(() => {
-    setPreviewSrc(directPreviewSrc || proxyPreviewSrc);
+    setPreviewSrc(proxyPreviewSrc || directPreviewSrc);
   }, [directPreviewSrc, proxyPreviewSrc]);
 
   const tags = [
@@ -68,8 +68,8 @@ export default function MyModelCard({ product, onDownload, onRate }) {
               loading="lazy"
               decoding="async"
               onError={() => {
-                if (previewSrc !== proxyPreviewSrc) {
-                  setPreviewSrc(proxyPreviewSrc);
+                if (previewSrc !== directPreviewSrc) {
+                  setPreviewSrc(directPreviewSrc);
                 }
               }}
             />

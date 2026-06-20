@@ -117,7 +117,7 @@ export default function ProductCard({
 
   const directPreviewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
   const proxyPreviewSrc = buildProductMediaProxyUrl(id, "thumbnail");
-  const [previewSrc, setPreviewSrc] = useState(directPreviewSrc || proxyPreviewSrc);
+  const [previewSrc, setPreviewSrc] = useState(proxyPreviewSrc || directPreviewSrc);
   const isFree = Number(price || 0) === 0;
 
   const currentFavorite = forceFavoriteActive
@@ -149,7 +149,7 @@ export default function ProductCard({
   }, [product?.id, product?.is_in_cart, isInCart]);
 
   useEffect(() => {
-    setPreviewSrc(directPreviewSrc || proxyPreviewSrc);
+    setPreviewSrc(proxyPreviewSrc || directPreviewSrc);
   }, [directPreviewSrc, proxyPreviewSrc]);
 
   useEffect(() => {
@@ -350,8 +350,8 @@ export default function ProductCard({
               loading="lazy"
               decoding="async"
               onError={() => {
-                if (previewSrc !== proxyPreviewSrc) {
-                  setPreviewSrc(proxyPreviewSrc);
+                if (previewSrc !== directPreviewSrc) {
+                  setPreviewSrc(directPreviewSrc);
                 }
               }}
             />
