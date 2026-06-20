@@ -47,6 +47,7 @@ export default function SellerModelCard({
 }) {
   const navigate = useNavigate();
   const rawPreview =
+    product?.thumbnail_url ||
     product?.main_preview_url ||
     product?.preview_url ||
     product?.main_preview ||
@@ -85,7 +86,12 @@ export default function SellerModelCard({
 
         <div className="seller-model-card__image">
           {previewSrc ? (
-            <img src={previewSrc} alt={displayTitle} />
+            <img
+              src={previewSrc}
+              alt={displayTitle}
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <span className="seller-model-card__placeholder text-p3">
               Preview

@@ -10,6 +10,7 @@ from core.object_storage import (
     upload_file_to_storage,
 )
 from products.models import Product, ProductFile
+from .thumbnails import upload_product_thumbnail
 from .blender_runner import run_blender_preprocessing
 
 
@@ -188,6 +189,12 @@ def prepare_product_viewer(product_id: int) -> None:
 
                 product.main_preview_storage_path = upload_result['storage_path']
                 update_fields.append('main_preview_storage_path')
+
+                with result['preview_png_path'].open('rb') as f:
+                    thumbnail_result = upload_product_thumbnail(f, product.id)
+
+                product.main_thumbnail_storage_path = thumbnail_result['storage_path']
+                update_fields.append('main_thumbnail_storage_path')
 
             product.save(update_fields=update_fields)
 

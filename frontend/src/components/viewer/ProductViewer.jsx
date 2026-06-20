@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Bounds, OrbitControls } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
@@ -188,11 +188,38 @@ function AnimatedGlbModel({
   customMetalness,
   customOpacity,
   customEmissive,
+  onError,
 }) {
-  const gltf = useLoader(GLTFLoader, url);
+  const [gltf, setGltf] = useState(null);
   const mixerRef = useRef(null);
 
+  useEffect(() => {
+    let isMounted = true;
+    const loader = new GLTFLoader();
+
+    setGltf(null);
+
+    loader.load(
+      url,
+      (loadedGltf) => {
+        if (isMounted) setGltf(loadedGltf);
+      },
+      undefined,
+      (error) => {
+        if (!isMounted) return;
+        console.error("Failed to load GLB model:", error);
+        onError?.(error);
+      },
+    );
+
+    return () => {
+      isMounted = false;
+    };
+  }, [url, onError]);
+
   const prepared = useMemo(() => {
+    if (!gltf?.scene) return null;
+
     return buildPreparedScene(
       gltf.scene,
       viewMode,
@@ -205,7 +232,7 @@ function AnimatedGlbModel({
       customEmissive,
     );
   }, [
-    gltf.scene,
+    gltf?.scene,
     viewMode,
     generatedTextureUrl,
     selectedMaterialPreset,
@@ -217,6 +244,8 @@ function AnimatedGlbModel({
   ]);
 
   useEffect(() => {
+    if (!gltf || !prepared) return undefined;
+
     if (gltf.animations?.length) {
       const mixer = new AnimationMixer(prepared);
       mixerRef.current = mixer;
@@ -242,13 +271,15 @@ function AnimatedGlbModel({
         }
       });
     };
-  }, [gltf.animations, prepared]);
+  }, [gltf, prepared]);
 
   useFrame((_, delta) => {
     if (mixerRef.current) {
       mixerRef.current.update(delta);
     }
   });
+
+  if (!prepared) return null;
 
   return <primitive object={prepared} />;
 }
@@ -298,6 +329,12 @@ export default function ProductViewer({
   customOpacity = 1,
   customEmissive = "#000000",
 }) {
+  const [modelError, setModelError] = useState(null);
+
+  useEffect(() => {
+    setModelError(null);
+  }, [modelUrl]);
+
   const [isLightTheme, setIsLightTheme] = useState(() =>
     typeof document !== "undefined" ? document.body.classList.contains("theme-light") : false,
   );
@@ -329,6 +366,14 @@ export default function ProductViewer({
     );
   }
 
+  if (modelError) {
+    return (
+      <div className="product-viewer__state product-viewer__state--error text-p2">
+        Не удалось загрузить 3D-модель. Остальная страница доступна.
+      </div>
+    );
+  }
+
   return (
     <div className="product-viewer">
       <Canvas shadows camera={{ position: [0, 1.5, 6], fov: 45 }}>
@@ -349,6 +394,7 @@ export default function ProductViewer({
               customMetalness={customMetalness}
               customOpacity={customOpacity}
               customEmissive={customEmissive}
+              onError={setModelError}
             />
           </Bounds>
 

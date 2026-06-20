@@ -923,7 +923,7 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                         {purchases.map((item) => {
                           const product = item.product || {};
                           const previewSrc = normalizePreview(
-                            product.main_preview_url,
+                            product.thumbnail_url || product.main_preview_url,
                           );
 
                           return (
@@ -938,6 +938,8 @@ export default function BuyerProfilePage({ onOpenSellerModal }) {
                                       src={previewSrc}
                                       alt={product.title || "Модель"}
                                       className="buyer-profile-page__purchase-thumb-image"
+                                      loading="lazy"
+                                      decoding="async"
                                     />
                                   ) : null}
                                 </div>

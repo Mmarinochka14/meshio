@@ -46,6 +46,30 @@ def get_first_product_file(product, file_types, primary_first=True):
     return qs.order_by('sort_order', '-created_at').first()
 
 
+def build_product_preview_url(product, request=None):
+    if product.main_preview_storage_path:
+        return create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
+
+    if product.main_preview and request:
+        return request.build_absolute_uri(product.main_preview.url)
+
+    if product.main_preview:
+        return product.main_preview.url
+
+    preview_file = get_first_product_file(product, ['preview'])
+    if preview_file:
+        return build_public_file_url(preview_file, request=request)
+
+    return None
+
+
+def build_product_thumbnail_url(product, request=None):
+    if product.main_thumbnail_storage_path:
+        return create_signed_file_url(product.main_thumbnail_storage_path, expires_in=3600)
+
+    return build_product_preview_url(product, request=request)
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -160,6 +184,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
     main_preview_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
 
@@ -186,27 +211,18 @@ class ProductListSerializer(serializers.ModelSerializer):
             'license',
             'main_preview',
             'main_preview_url',
+            'thumbnail_url',
             'is_favorite',
             'created_at',
         ]
 
     def get_main_preview_url(self, obj):
         request = self.context.get('request')
+        return build_product_preview_url(obj, request=request)
 
-        if obj.main_preview_storage_path:
-            return create_signed_file_url(obj.main_preview_storage_path, expires_in=3600)
-
-        if obj.main_preview and request:
-            return request.build_absolute_uri(obj.main_preview.url)
-
-        if obj.main_preview:
-            return obj.main_preview.url
-
-        preview_file = get_first_product_file(obj, ['preview'])
-        if preview_file:
-            return build_public_file_url(preview_file, request=request)
-
-        return None
+    def get_thumbnail_url(self, obj):
+        request = self.context.get('request')
+        return build_product_thumbnail_url(obj, request=request)
 
     def get_is_favorite(self, obj):
         request = self.context.get('request')
@@ -225,6 +241,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     license = LicenseSerializer(read_only=True)
     main_preview_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
     viewer_url = serializers.SerializerMethodField()
     uv_preview_url = serializers.SerializerMethodField()
     wireframe_preview_url = serializers.SerializerMethodField()
@@ -269,6 +286,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'license',
             'main_preview',
             'main_preview_url',
+            'thumbnail_url',
             'viewer_url',
             'uv_preview_url',
             'wireframe_preview_url',
@@ -280,21 +298,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_main_preview_url(self, obj):
         request = self.context.get('request')
+        return build_product_preview_url(obj, request=request)
 
-        if obj.main_preview_storage_path:
-            return create_signed_file_url(obj.main_preview_storage_path, expires_in=3600)
-
-        if obj.main_preview and request:
-            return request.build_absolute_uri(obj.main_preview.url)
-
-        if obj.main_preview:
-            return obj.main_preview.url
-
-        preview_file = get_first_product_file(obj, ['preview'])
-        if preview_file:
-            return build_public_file_url(preview_file, request=request)
-
-        return None
+    def get_thumbnail_url(self, obj):
+        request = self.context.get('request')
+        return build_product_thumbnail_url(obj, request=request)
 
     def get_comments_count(self, obj):
         return obj.comments.count()

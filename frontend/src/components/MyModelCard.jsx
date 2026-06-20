@@ -28,6 +28,7 @@ export default function MyModelCard({ product, onDownload, onRate }) {
     average_rating,
     views_count,
     comments_count,
+    thumbnail_url,
     main_preview_url,
     model_format,
     has_uv,
@@ -36,7 +37,7 @@ export default function MyModelCard({ product, onDownload, onRate }) {
     my_review,
   } = product;
 
-  const previewSrc = buildMediaUrl(main_preview_url);
+  const previewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
 
   const tags = [
     model_format ? model_format.toUpperCase() : null,
@@ -54,7 +55,12 @@ export default function MyModelCard({ product, onDownload, onRate }) {
       <div className="product-card__media">
         <div className="product-card__image">
           {previewSrc ? (
-            <img src={previewSrc} alt={title} />
+            <img
+              src={previewSrc}
+              alt={title}
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <span className="product-card__placeholder text-p3">Preview</span>
           )}

@@ -77,6 +77,7 @@ from .services.unisender import (
     subscribe_email_to_unisender,
 )
 from .services.viewer_preprocessing import prepare_product_viewer
+from .services.thumbnails import upload_product_thumbnail
 
 
 def build_product_file_url(request, product_file):
@@ -642,6 +643,8 @@ class ProductDeleteView(generics.DestroyAPIView):
         try:
             if product.main_preview_storage_path:
                 delete_file_from_storage(product.main_preview_storage_path)
+            if product.main_thumbnail_storage_path:
+                delete_file_from_storage(product.main_thumbnail_storage_path)
         except Exception:
             pass
 
@@ -896,12 +899,14 @@ class UploadProductPreviewView(APIView):
         uploaded_file = serializer.validated_data['file']
 
         old_storage_path = product.main_preview_storage_path
+        old_thumbnail_storage_path = product.main_thumbnail_storage_path
 
         try:
             upload_result = upload_file_to_storage(
                 uploaded_file,
                 folder=f'products/{product.id}/preview'
             )
+            thumbnail_result = upload_product_thumbnail(uploaded_file, product.id)
         except Exception as e:
             return Response(
                 {'detail': f'Ошибка загрузки превью в storage: {str(e)}'},
@@ -909,11 +914,14 @@ class UploadProductPreviewView(APIView):
             )
 
         product.main_preview_storage_path = upload_result['storage_path']
-        product.save(update_fields=['main_preview_storage_path'])
+        product.main_thumbnail_storage_path = thumbnail_result['storage_path']
+        product.save(update_fields=['main_preview_storage_path', 'main_thumbnail_storage_path'])
 
         try:
             if old_storage_path:
                 delete_file_from_storage(old_storage_path)
+            if old_thumbnail_storage_path:
+                delete_file_from_storage(old_thumbnail_storage_path)
         except Exception:
             pass
 
@@ -921,12 +929,15 @@ class UploadProductPreviewView(APIView):
             product.main_preview.delete(save=False)
 
         preview_url = create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
+        thumbnail_url = create_signed_file_url(product.main_thumbnail_storage_path, expires_in=3600)
 
         return Response(
             {
                 'detail': 'Превью загружено в storage.',
                 'main_preview_storage_path': product.main_preview_storage_path,
+                'main_thumbnail_storage_path': product.main_thumbnail_storage_path,
                 'preview_url': preview_url,
+                'thumbnail_url': thumbnail_url,
             },
             status=status.HTTP_200_OK
         )
@@ -942,10 +953,13 @@ class DeleteProductPreviewView(APIView):
             return Response({'detail': 'Товар не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         old_storage_path = product.main_preview_storage_path
+        old_thumbnail_storage_path = product.main_thumbnail_storage_path
 
         try:
             if old_storage_path:
                 delete_file_from_storage(old_storage_path)
+            if old_thumbnail_storage_path:
+                delete_file_from_storage(old_thumbnail_storage_path)
         except Exception:
             pass
 
@@ -953,7 +967,8 @@ class DeleteProductPreviewView(APIView):
             product.main_preview.delete(save=False)
 
         product.main_preview_storage_path = None
-        product.save(update_fields=['main_preview_storage_path'])
+        product.main_thumbnail_storage_path = None
+        product.save(update_fields=['main_preview_storage_path', 'main_thumbnail_storage_path'])
 
         return Response({'detail': 'Превью удалено.'}, status=status.HTTP_200_OK)
 
@@ -2000,11 +2015,17 @@ class SellerAnalyticsView(APIView):
         top_products = []
         for product in top_products_qs:
             preview_url = None
+            thumbnail_url = None
 
             if product.main_preview_storage_path:
                 preview_url = create_signed_file_url(product.main_preview_storage_path, expires_in=3600)
             elif product.main_preview:
                 preview_url = request.build_absolute_uri(product.main_preview.url)
+
+            if product.main_thumbnail_storage_path:
+                thumbnail_url = create_signed_file_url(product.main_thumbnail_storage_path, expires_in=3600)
+            else:
+                thumbnail_url = preview_url
 
             top_products.append({
                 'id': product.id,
@@ -2016,6 +2037,7 @@ class SellerAnalyticsView(APIView):
                 'reviews_count': product.reviews_count,
                 'average_rating': product.average_rating,
                 'main_preview_url': preview_url,
+                'thumbnail_url': thumbnail_url,
             })
 
         data = {

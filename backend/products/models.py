@@ -151,6 +151,13 @@ class Product(models.Model):
         verbose_name='Путь превью в Object Storage'
     )
 
+    main_thumbnail_storage_path = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Thumbnail path in Object Storage'
+    )
+
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, verbose_name='Средний рейтинг')
     reviews_count = models.PositiveIntegerField(default=0, verbose_name='Количество отзывов')
     views_count = models.PositiveIntegerField(default=0, verbose_name='Количество просмотров')

@@ -107,6 +107,7 @@ export default function ProductCard({
     average_rating,
     views_count,
     comments_count,
+    thumbnail_url,
     main_preview_url,
     model_format,
     has_uv,
@@ -114,7 +115,7 @@ export default function ProductCard({
     poly_style,
   } = product || {};
 
-  const previewSrc = buildMediaUrl(main_preview_url);
+  const previewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
   const isFree = Number(price || 0) === 0;
 
   const currentFavorite = forceFavoriteActive
@@ -337,7 +338,12 @@ export default function ProductCard({
 
         <div className="product-card__image">
           {previewSrc ? (
-            <img src={previewSrc} alt={title || "3D модель"} />
+            <img
+              src={previewSrc}
+              alt={title || "3D модель"}
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <span className="product-card__placeholder text-p3">Preview</span>
           )}

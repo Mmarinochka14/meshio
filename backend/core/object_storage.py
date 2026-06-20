@@ -9,6 +9,12 @@ from django.conf import settings
 
 _S3_CLIENT = None
 
+CONTENT_TYPE_OVERRIDES = {
+    ".glb": "model/gltf-binary",
+    ".gltf": "model/gltf+json",
+    ".webp": "image/webp",
+}
+
 
 def get_s3_client():
     global _S3_CLIENT
@@ -52,8 +58,10 @@ def upload_file_to_storage(file_obj, folder: str):
     bucket = get_bucket_name()
 
     storage_path = build_storage_path(folder, file_obj.name)
+    ext = Path(file_obj.name).suffix.lower()
     content_type = (
         getattr(file_obj, "content_type", None)
+        or CONTENT_TYPE_OVERRIDES.get(ext)
         or mimetypes.guess_type(file_obj.name)[0]
         or "application/octet-stream"
     )

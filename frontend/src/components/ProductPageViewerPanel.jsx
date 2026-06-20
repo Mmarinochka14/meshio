@@ -1,8 +1,10 @@
+import { Component, lazy, Suspense, useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
-import ProductViewer from "./viewer/ProductViewer";
 import downloadIcon from "../assets/icons/download.svg";
+
+const ProductViewer = lazy(() => import("./viewer/ProductViewer"));
 
 const materialPresets = [
   { key: "original", label: "Исходный" },
@@ -47,6 +49,35 @@ const materialHints = {
   opacity:
     "Прозрачность показывает, насколько материал пропускает свет. Низкое значение делает объект стекляннее.",
 };
+
+class ViewerErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  componentDidCatch(error) {
+    console.error("3D viewer failed:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
 
 function InfoTooltip({ text }) {
   return (
@@ -186,6 +217,7 @@ export default function ProductPageViewerPanel({
   onResetMaterial,
 }) {
   const isPbrMode = viewMode === "lighted";
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   function activateCustomMaterial() {
     if (selectedMaterialPreset === "original") {
@@ -237,17 +269,50 @@ export default function ProductPageViewerPanel({
   return (
     <div className="product-page__viewer-card">
       <div className="product-page__viewer-stage">
-        <ProductViewer
-          modelUrl={viewerUrl}
-          viewMode={viewMode}
-          generatedTextureUrl={generatedTextureUrl}
-          selectedMaterialPreset={selectedMaterialPreset}
-          customMaterialColor={customMaterialColor}
-          customRoughness={customRoughness}
-          customMetalness={customMetalness}
-          customOpacity={customOpacity}
-          customEmissive={customEmissive}
-        />
+        {!viewerUrl ? (
+          <div className="product-viewer__state text-p2">
+            Файл модели недоступен
+          </div>
+        ) : !isViewerOpen ? (
+          <div className="product-viewer__state product-viewer__state--start">
+            <button
+              type="button"
+              className="product-page__small-primary text-p3"
+              onClick={() => setIsViewerOpen(true)}
+            >
+              Открыть 3D-просмотр
+            </button>
+          </div>
+        ) : (
+          <ViewerErrorBoundary
+            resetKey={viewerUrl}
+            fallback={
+              <div className="product-viewer__state product-viewer__state--error text-p2">
+                Не удалось загрузить 3D-модель. Остальная страница доступна.
+              </div>
+            }
+          >
+            <Suspense
+              fallback={
+                <div className="product-viewer__state text-p2">
+                  Загрузка 3D-просмотра...
+                </div>
+              }
+            >
+              <ProductViewer
+                modelUrl={viewerUrl}
+                viewMode={viewMode}
+                generatedTextureUrl={generatedTextureUrl}
+                selectedMaterialPreset={selectedMaterialPreset}
+                customMaterialColor={customMaterialColor}
+                customRoughness={customRoughness}
+                customMetalness={customMetalness}
+                customOpacity={customOpacity}
+                customEmissive={customEmissive}
+              />
+            </Suspense>
+          </ViewerErrorBoundary>
+        )}
       </div>
 
       <div className="product-page__mode-switch">

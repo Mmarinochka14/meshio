@@ -66,6 +66,18 @@
   border-radius: 0.625vw;
 }
 
+.product-viewer__state--start,
+.product-viewer__state--error {
+  flex-direction: column;
+  gap: 0.625vw;
+  text-align: center;
+}
+
+.product-viewer__state--error {
+  color: #ffb4b4;
+  padding: 1.25vw;
+}
+
 .product-page__mode-switch {
   width: fit-content;
   display: flex;

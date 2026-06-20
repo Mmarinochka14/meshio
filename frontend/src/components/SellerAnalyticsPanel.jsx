@@ -171,8 +171,13 @@ export default function SellerAnalyticsPanel() {
                   className="seller-analytics-panel__top-item"
                 >
                   <div className="seller-analytics-panel__top-preview">
-                    {product.main_preview_url ? (
-                      <img src={product.main_preview_url} alt={product.title} />
+                    {product.thumbnail_url || product.main_preview_url ? (
+                      <img
+                        src={product.thumbnail_url || product.main_preview_url}
+                        alt={product.title}
+                        loading="lazy"
+                        decoding="async"
+                      />
                     ) : (
                       <span className="text-p3">Preview</span>
                     )}

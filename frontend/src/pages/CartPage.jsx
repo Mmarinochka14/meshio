@@ -177,6 +177,7 @@ export default function CartPage() {
                   const product = item.product;
 
                   const rawPreview =
+                    product.thumbnail_url ||
                     product.main_preview_url ||
                     product.preview_url ||
                     product.preview ||
@@ -207,7 +208,12 @@ export default function CartPage() {
                         className="cart-page__item-media"
                       >
                         {previewSrc ? (
-                          <img src={previewSrc} alt={product.title} />
+                          <img
+                            src={previewSrc}
+                            alt={product.title}
+                            loading="lazy"
+                            decoding="async"
+                          />
                         ) : (
                           <div className="cart-page__item-placeholder text-p3">
                             Preview
