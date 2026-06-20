@@ -22,6 +22,7 @@ from .views import (
     ProductFiltersView,
     ProductListView,
     ProductModerationView,
+    ProductMediaProxyView,
     ProductReviewsView,
     ProductUpdateView,
     ProductUVPreviewUrlView,
@@ -92,6 +93,7 @@ urlpatterns = [
     path('<int:pk>/delete-preview/', DeleteProductPreviewView.as_view(), name='product-delete-preview'),
 
     path('<int:pk>/viewer-url/', ProductViewerUrlView.as_view(), name='product-viewer-url'),
+    path('<int:pk>/media/<str:media_kind>/', ProductMediaProxyView.as_view(), name='product-media-proxy'),
     path('<int:pk>/uv-preview-url/', ProductUVPreviewUrlView.as_view(), name='product-uv-preview-url'),
     path('<int:pk>/download/', ProductDownloadView.as_view(), name='product-download'),
 

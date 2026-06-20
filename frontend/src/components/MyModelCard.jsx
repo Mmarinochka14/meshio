@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import "../styles/product-card.css";
-import { buildMediaUrl } from "../api/url";
+import { buildMediaUrl, buildProductMediaProxyUrl } from "../api/url";
 
 import downloadIcon from "../assets/icons/download.svg";
 import eyeIcon from "../assets/icons/eye.svg";
@@ -37,7 +38,13 @@ export default function MyModelCard({ product, onDownload, onRate }) {
     my_review,
   } = product;
 
-  const previewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
+  const directPreviewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
+  const proxyPreviewSrc = buildProductMediaProxyUrl(id, "thumbnail");
+  const [previewSrc, setPreviewSrc] = useState(directPreviewSrc || proxyPreviewSrc);
+
+  useEffect(() => {
+    setPreviewSrc(directPreviewSrc || proxyPreviewSrc);
+  }, [directPreviewSrc, proxyPreviewSrc]);
 
   const tags = [
     model_format ? model_format.toUpperCase() : null,
@@ -60,6 +67,11 @@ export default function MyModelCard({ product, onDownload, onRate }) {
               alt={title}
               loading="lazy"
               decoding="async"
+              onError={() => {
+                if (previewSrc !== proxyPreviewSrc) {
+                  setPreviewSrc(proxyPreviewSrc);
+                }
+              }}
             />
           ) : (
             <span className="product-card__placeholder text-p3">Preview</span>

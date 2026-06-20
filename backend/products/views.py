@@ -2,6 +2,7 @@ from pathlib import Path
 from django.utils import timezone
 
 from django.core.files.base import ContentFile
+from django.http import Http404, StreamingHttpResponse
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import transaction
@@ -13,6 +14,8 @@ from rest_framework.views import APIView
 from core.object_storage import (
     create_signed_file_url,
     delete_file_from_storage,
+    get_bucket_name,
+    get_s3_client,
     upload_file_to_storage,
 )
 from products.services.yandex_art import generate_texture_image
@@ -88,6 +91,58 @@ def build_product_file_url(request, product_file):
         return request.build_absolute_uri(product_file.file.url)
 
     return None
+
+
+def iter_s3_body(body, chunk_size=1024 * 256):
+    while True:
+        chunk = body.read(chunk_size)
+        if not chunk:
+            break
+        yield chunk
+
+
+def get_public_product_media_storage_path(product, media_kind):
+    if media_kind == "thumbnail":
+        return product.main_thumbnail_storage_path or product.main_preview_storage_path
+
+    if media_kind == "preview":
+        return product.main_preview_storage_path
+
+    if media_kind == "viewer":
+        product_file = get_product_file(product, ['viewer_model'], primary_first=True)
+        return product_file.storage_path if product_file else None
+
+    return None
+
+
+class ProductMediaProxyView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk, media_kind):
+        try:
+            product = Product.objects.get(id=pk, status='published')
+        except Product.DoesNotExist:
+            raise Http404
+
+        storage_path = get_public_product_media_storage_path(product, media_kind)
+        if not storage_path:
+            raise Http404
+
+        client = get_s3_client()
+        response = client.get_object(Bucket=get_bucket_name(), Key=storage_path)
+        content_type = response.get("ContentType") or "application/octet-stream"
+        body = response["Body"]
+
+        streaming_response = StreamingHttpResponse(
+            iter_s3_body(body),
+            content_type=content_type,
+        )
+
+        if response.get("ContentLength") is not None:
+            streaming_response["Content-Length"] = str(response["ContentLength"])
+
+        streaming_response["Cache-Control"] = "public, max-age=300"
+        return streaming_response
 
 
 def get_product_file(product, file_types, primary_first=True):

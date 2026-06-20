@@ -17,7 +17,7 @@ import {
   downloadProduct,
 } from "../api/products";
 import { addToCartRequest } from "../api/cart";
-import { buildMediaUrl } from "../api/url";
+import { buildMediaUrl, buildProductMediaProxyUrl } from "../api/url";
 import { addToGuestCart, isInGuestCart, subscribeCart } from "./cart/cartStore";
 import {
   addFavoriteId,
@@ -115,7 +115,9 @@ export default function ProductCard({
     poly_style,
   } = product || {};
 
-  const previewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
+  const directPreviewSrc = buildMediaUrl(thumbnail_url || main_preview_url);
+  const proxyPreviewSrc = buildProductMediaProxyUrl(id, "thumbnail");
+  const [previewSrc, setPreviewSrc] = useState(directPreviewSrc || proxyPreviewSrc);
   const isFree = Number(price || 0) === 0;
 
   const currentFavorite = forceFavoriteActive
@@ -145,6 +147,10 @@ export default function ProductCard({
   useEffect(() => {
     setLocalInCart(getInitialCart(product, isInCart));
   }, [product?.id, product?.is_in_cart, isInCart]);
+
+  useEffect(() => {
+    setPreviewSrc(directPreviewSrc || proxyPreviewSrc);
+  }, [directPreviewSrc, proxyPreviewSrc]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -343,6 +349,11 @@ export default function ProductCard({
               alt={title || "3D модель"}
               loading="lazy"
               decoding="async"
+              onError={() => {
+                if (previewSrc !== proxyPreviewSrc) {
+                  setPreviewSrc(proxyPreviewSrc);
+                }
+              }}
             />
           ) : (
             <span className="product-card__placeholder text-p3">Preview</span>

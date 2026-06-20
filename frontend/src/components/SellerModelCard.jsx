@@ -1,5 +1,6 @@
 import "../styles/seller-model-card.css";
-import { buildMediaUrl } from "../api/url";
+import { buildMediaUrl, buildProductMediaProxyUrl } from "../api/url";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function getTagList(product) {
@@ -53,7 +54,13 @@ export default function SellerModelCard({
     product?.main_preview ||
     "";
 
-  const previewSrc = buildMediaUrl(rawPreview);
+  const directPreviewSrc = buildMediaUrl(rawPreview);
+  const proxyPreviewSrc = buildProductMediaProxyUrl(product?.id, "thumbnail");
+  const [previewSrc, setPreviewSrc] = useState(directPreviewSrc || proxyPreviewSrc);
+
+  useEffect(() => {
+    setPreviewSrc(directPreviewSrc || proxyPreviewSrc);
+  }, [directPreviewSrc, proxyPreviewSrc]);
 
   const tags = getTagList(product);
   const displayTitle = product?.title || "Название модели";
@@ -91,6 +98,11 @@ export default function SellerModelCard({
               alt={displayTitle}
               loading="lazy"
               decoding="async"
+              onError={() => {
+                if (previewSrc !== proxyPreviewSrc) {
+                  setPreviewSrc(proxyPreviewSrc);
+                }
+              }}
             />
           ) : (
             <span className="seller-model-card__placeholder text-p3">

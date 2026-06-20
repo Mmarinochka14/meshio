@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useState } from "react";
+import { Component, lazy, Suspense } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
@@ -217,7 +217,6 @@ export default function ProductPageViewerPanel({
   onResetMaterial,
 }) {
   const isPbrMode = viewMode === "lighted";
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   function activateCustomMaterial() {
     if (selectedMaterialPreset === "original") {
@@ -272,16 +271,6 @@ export default function ProductPageViewerPanel({
         {!viewerUrl ? (
           <div className="product-viewer__state text-p2">
             Файл модели недоступен
-          </div>
-        ) : !isViewerOpen ? (
-          <div className="product-viewer__state product-viewer__state--start">
-            <button
-              type="button"
-              className="product-page__small-primary text-p3"
-              onClick={() => setIsViewerOpen(true)}
-            >
-              Открыть 3D-просмотр
-            </button>
           </div>
         ) : (
           <ViewerErrorBoundary
@@ -589,3 +578,4 @@ export default function ProductPageViewerPanel({
     </div>
   );
 }
+

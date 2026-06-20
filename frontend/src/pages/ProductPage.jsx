@@ -40,6 +40,7 @@ import starIcon from "../assets/icons/star.svg";
 import starEmptyIcon from "../assets/icons/star-empty.svg";
 
 import "../styles/product-page.css";
+import { buildProductMediaProxyUrl } from "../api/url";
 
 const MATERIAL_PRESET_VALUES = {
   original: {
@@ -237,7 +238,9 @@ export default function ProductPage() {
         } else {
           setIsFavorite(false);
         }
-        setViewerUrl(detail?.viewer_url || "");
+        setViewerUrl(
+          detail?.id ? buildProductMediaProxyUrl(detail.id, "viewer") : "",
+        );
       } catch (err) {
         if (!mounted) return;
         setError(err?.response?.data?.detail || "Не удалось загрузить товар.");

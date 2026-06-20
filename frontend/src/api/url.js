@@ -14,3 +14,10 @@ export function buildMediaUrl(url) {
 
   return `${base}${path}`;
 }
+
+export function buildProductMediaProxyUrl(productId, kind) {
+  if (!productId || !kind) return "";
+
+  const base = API_BASE_URL.replace(/\/$/, "");
+  return `${base}/products/${productId}/media/${kind}/`;
+}
