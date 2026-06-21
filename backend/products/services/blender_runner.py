@@ -1,8 +1,33 @@
+import shutil
 import subprocess
 from pathlib import Path
 
+from django.conf import settings
 
-BLENDER_EXECUTABLE = r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe"
+
+def resolve_blender_executable() -> str:
+    configured = str(settings.BLENDER_EXECUTABLE).strip()
+    if not configured:
+        configured = "blender"
+
+    configured_path = Path(configured)
+    if configured_path.is_file():
+        return str(configured_path)
+
+    discovered = shutil.which(configured)
+    if discovered:
+        return discovered
+
+    windows_default = Path(
+        r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe"
+    )
+    if configured == "blender" and windows_default.is_file():
+        return str(windows_default)
+
+    raise RuntimeError(
+        "Blender executable was not found. Install Blender on the backend server "
+        "and set BLENDER_EXECUTABLE in backend/.env (usually 'blender' on Linux)."
+    )
 
 
 def run_blender_preprocessing(
@@ -33,7 +58,7 @@ def run_blender_preprocessing(
         output_preview_png_path.parent.mkdir(parents=True, exist_ok=True)
 
     command = [
-        BLENDER_EXECUTABLE,
+        resolve_blender_executable(),
         "--background",
         "--python",
         str(blender_script_path),
@@ -53,6 +78,7 @@ def run_blender_preprocessing(
         capture_output=True,
         text=True,
         check=False,
+        timeout=settings.BLENDER_PROCESS_TIMEOUT,
     )
 
     if result.returncode != 0:

@@ -1,4 +1,5 @@
 import base64
+import sys
 from io import BytesIO
 from unittest.mock import Mock, patch
 
@@ -10,6 +11,7 @@ from products.services.yandex_art import (
     create_procedural_texture,
     generate_texture_image,
 )
+from products.services.blender_runner import resolve_blender_executable
 
 
 def make_png_base64():
@@ -68,5 +70,24 @@ class TextureGenerationRoutingTests(SimpleTestCase):
         self.assertEqual(payload["modelUri"], "art://test-folder/yandex-art/latest")
         self.assertIn("цветочные обои", payload["messages"][0]["text"])
         self.assertEqual(Image.open(BytesIO(image_bytes)).size, (1024, 1024))
+
+
+class BlenderExecutableTests(SimpleTestCase):
+    @override_settings(BLENDER_EXECUTABLE=sys.executable)
+    def test_explicit_blender_executable_path_is_used(self):
+        self.assertEqual(resolve_blender_executable(), sys.executable)
+
+    @override_settings(BLENDER_EXECUTABLE="server-blender")
+    @patch("products.services.blender_runner.shutil.which")
+    def test_blender_is_discovered_from_server_path(self, which):
+        which.return_value = "/usr/bin/server-blender"
+
+        self.assertEqual(resolve_blender_executable(), "/usr/bin/server-blender")
+
+    @override_settings(BLENDER_EXECUTABLE="missing-blender")
+    @patch("products.services.blender_runner.shutil.which", return_value=None)
+    def test_missing_blender_has_actionable_error(self, _which):
+        with self.assertRaisesRegex(RuntimeError, "BLENDER_EXECUTABLE"):
+            resolve_blender_executable()
 
 # Create your tests here.

@@ -487,6 +487,7 @@ export default function ProductPage() {
       setGeneratedTextureUrl(data.image_url || data.preview_url || "");
 
       setSelectedMaterialPreset("custom");
+      setViewMode("lighted");
     } catch (err) {
       setError(err?.message || "Не удалось сгенерировать текстуру.");
     } finally {
