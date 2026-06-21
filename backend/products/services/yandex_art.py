@@ -120,14 +120,13 @@ def build_texture_prompt(user_prompt: str) -> str:
     normalized_prompt = normalize_user_prompt(user_prompt)
 
     return (
-        "Create a raw flat square seamless texture image, not a preview render. "
-        "The image must be a 2D surface photographed straight from above and fill every pixel edge to edge. "
-        "No object, no sphere, no material ball, no 3D render, no product photo, no studio background, "
-        "no perspective, no shadows, no highlights, no centered subject, no gray backdrop, no border, "
-        "no text, no logo, no watermark. Absolutely forbidden: a round ball or sample sphere. "
-        "It must look like a plain texture file that can be wrapped directly on a 3D mesh. "
-        "ВАЖНО: не рисуй шар, сферу, образец материала, предмет или фон; нужна плоская бесшовная картинка-поверхность. "
-        f"Texture surface: {normalized_prompt}"
+        "Создай квадратный бесшовный двумерный паттерн по описанию ниже. "
+        "Это готовый цифровой тайл: равномерный рисунок заполняет каждый пиксель от края до края. "
+        "Плоское фронтальное изображение с одинаковым масштабом деталей по всей площади. "
+        "Левый край должен непрерывно стыковаться с правым, верхний — с нижним. "
+        "Выведи только сам паттерн во весь кадр, без глубины, перспективы, освещения, рамки и окружения. "
+        "Square seamless tileable 2D pattern, flat full-frame digital image, edge-to-edge, uniform scale. "
+        f"Описание паттерна: {normalized_prompt}"
     )
 
 

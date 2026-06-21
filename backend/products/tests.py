@@ -6,6 +6,7 @@ from django.test import SimpleTestCase, override_settings
 from PIL import Image
 
 from products.services.yandex_art import (
+    build_texture_prompt,
     create_procedural_texture,
     generate_texture_image,
 )
@@ -18,6 +19,15 @@ def make_png_base64():
 
 
 class TextureGenerationRoutingTests(SimpleTestCase):
+    def test_yandex_prompt_describes_only_a_flat_pattern(self):
+        prompt = build_texture_prompt("цветочные обои")
+
+        self.assertIn("бесшовный двумерный паттерн", prompt)
+        self.assertIn("цветочные обои", prompt)
+        self.assertNotIn("sphere", prompt.lower())
+        self.assertNotIn("ball", prompt.lower())
+        self.assertNotIn("3d render", prompt.lower())
+
     def test_known_simple_material_is_generated_locally(self):
         image_bytes = create_procedural_texture("светлое дерево")
 
