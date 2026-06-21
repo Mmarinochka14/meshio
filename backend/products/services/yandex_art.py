@@ -11,6 +11,44 @@ YANDEX_ART_CREATE_URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/im
 YANDEX_ART_OPERATION_URL = "https://operation.api.cloud.yandex.net/operations"
 
 
+# Only these predictable, inexpensive materials are rendered locally. More
+# descriptive prompts must be handled by YandexART; otherwise the procedural
+# fallback turns every unknown request into the same generic colour noise.
+PROCEDURAL_TEXTURE_PRESETS = frozenset(
+    {
+        "розовый",
+        "розовый матовый пластик",
+        "красный",
+        "синий",
+        "фиолетовый",
+        "фиолетовый глянцевый пластик",
+        "черный",
+        "чёрный",
+        "черная матовая резина",
+        "чёрная матовая резина",
+        "белый",
+        "белая керамика",
+        "серый",
+        "серый шлифованный металл",
+        "зеленый",
+        "зелёный",
+        "зеленый окрашенный металл",
+        "зелёный окрашенный металл",
+        "дерево",
+        "натуральное дерево",
+        "светлое дерево",
+        "темное дерево",
+        "тёмное дерево",
+        "металл",
+        "пластик",
+        "ткань",
+        "светлая ткань",
+        "темная ткань",
+        "тёмная ткань",
+    }
+)
+
+
 def encode_png(image: Image.Image) -> bytes:
     output = BytesIO()
     image.save(output, format="PNG")
@@ -158,7 +196,7 @@ def blend_colors(first, second, factor: float):
 def create_procedural_texture(user_prompt: str, output_size: int = 1024) -> bytes | None:
     value = user_prompt.strip().lower()
 
-    if not value:
+    if value not in PROCEDURAL_TEXTURE_PRESETS:
         return None
 
     dark, light = pick_texture_palette(value)
